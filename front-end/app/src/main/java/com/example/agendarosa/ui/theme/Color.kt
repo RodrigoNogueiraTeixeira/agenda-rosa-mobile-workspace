@@ -2,10 +2,23 @@ package com.example.agendarosa.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// =========================================================
+// PALETA DE CORES OFICIAL DO AGENDA ROSA (Extraída do CSS)
+// =========================================================
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Botão e Elementos Principais (#e91e63, #d81b60)
+val RosaBotao = Color(0xFFE91E63)
+val RosaBotaoHover = Color(0xFFD81B60)
+val RosaLink = Color(0xFFE91E63)
+
+// Fundo Gradiente (linear-gradient(135deg, #fff7fa, #f8d6e1))
+val FundoGradienteInicio = Color(0xFFFFF7FA)
+val FundoGradienteFim = Color(0xFFF8D6E1)
+
+// Bordas e Fundo do Card
+val BordaInputPadrao = Color(0xFFDDDDDD)
+val CardBackground = Color(0xFFFFFFFF)
+
+// Textos
+val TextoEscuro = Color(0xFF1F1726)
+val TextoMedio = Color(0xFF666666)
