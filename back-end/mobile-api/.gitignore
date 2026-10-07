@@ -3,9 +3,9 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target
-src/main/resources/application.yml
-src/main/resources/application.yaml
-src/main/resources/application.properties
+# Arquivos locais com senhas nao devem ser commitados
+src/main/resources/application-local.yaml
+src/main/resources/application-local.yml
 
 ### STS ###
 .apt_generated
