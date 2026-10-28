@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /**
  * Configuração central de segurança do Spring Security.
- * Define a política stateless, liberação das rotas de autenticação e injeção do filtro JWT.
+ * Define a política stateless, liberação das rotas de autenticação, home pública e injeção do filtro JWT.
  */
 @Configuration
 @EnableWebSecurity
@@ -36,8 +36,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Regras de autorização por rota
                 .authorizeHttpRequests(auth -> auth
-                        // Rotas públicas de cadastro e login
+                        // Rotas públicas de cadastro, login e recuperação de senha
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        // Rotas públicas de busca e visualização de lojas na Home
+                        .requestMatchers("/api/v1/estabelecimentos/**").permitAll()
                         // Qualquer outra rota exige token JWT válido
                         .anyRequest().authenticated()
                 )
