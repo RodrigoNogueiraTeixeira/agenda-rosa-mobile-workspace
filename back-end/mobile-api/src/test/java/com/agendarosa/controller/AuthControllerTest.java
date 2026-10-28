@@ -2,7 +2,10 @@ package com.agendarosa.controller;
 
 import com.agendarosa.dto.AuthResponseDTO;
 import com.agendarosa.dto.CadastroClienteRequestDTO;
+import com.agendarosa.dto.EsqueciSenhaRequestDTO;
 import com.agendarosa.dto.LoginRequestDTO;
+import com.agendarosa.dto.MensagemResponseDTO;
+import com.agendarosa.dto.RedefinirSenhaRequestDTO;
 import com.agendarosa.exception.GlobalExceptionHandler;
 import com.agendarosa.service.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,7 +75,6 @@ class AuthControllerTest {
     @Test
     @DisplayName("POST /api/v1/auth/cadastro deve retornar 400 Bad Request se campos forem inválidos")
     void deveRetornar400SeCamposInvalidos() throws Exception {
-        // Objeto com e-mail inválido e senha curta
         CadastroClienteRequestDTO requestInvalido = new CadastroClienteRequestDTO(
                 "",
                 "email-invalido",
@@ -104,5 +106,35 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("jwt-token-exemplo"))
                 .andExpect(jsonPath("$.email").value("fernanda@agendarosa.com"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/auth/esqueci-senha deve retornar 200 OK com mensagem de confirmação")
+    void deveRetornar200AoEnviarCodigoRecuperacao() throws Exception {
+        EsqueciSenhaRequestDTO request = new EsqueciSenhaRequestDTO("fernanda@agendarosa.com");
+        MensagemResponseDTO response = new MensagemResponseDTO("Código de recuperação enviado com sucesso para o seu e-mail.");
+
+        when(authService.solicitarRecuperacaoSenha(any(EsqueciSenhaRequestDTO.class))).thenReturn(response);
+
+        mockMvc.perform(post("/api/v1/auth/esqueci-senha")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensagem").value("Código de recuperação enviado com sucesso para o seu e-mail."));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/auth/redefinir-senha deve retornar 200 OK ao redefinir com sucesso")
+    void deveRetornar200AoRedefinirSenha() throws Exception {
+        RedefinirSenhaRequestDTO request = new RedefinirSenhaRequestDTO("fernanda@agendarosa.com", "654321", "novaSenha123");
+        MensagemResponseDTO response = new MensagemResponseDTO("Senha redefinida com sucesso! Você já pode entrar com a nova senha.");
+
+        when(authService.redefinirSenha(any(RedefinirSenhaRequestDTO.class))).thenReturn(response);
+
+        mockMvc.perform(post("/api/v1/auth/redefinir-senha")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensagem").value("Senha redefinida com sucesso! Você já pode entrar com a nova senha."));
     }
 }

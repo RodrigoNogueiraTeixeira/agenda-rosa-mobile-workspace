@@ -2,7 +2,7 @@
 # ARQUIVO DE REFERÊNCIA / EXEMPLO - AGENDA ROSA MOBILE API
 # ==============================================================================
 # Use este modelo para entender as variáveis de ambiente que o sistema precisa
-# para conectar com o PostgreSQL (Neon) e iniciar o servidor.
+# para conectar com o PostgreSQL (Neon), enviar e-mails via Brevo e iniciar o servidor.
 # ==============================================================================
 
 server:
@@ -32,3 +32,12 @@ spring:
       # 'validate' garante que o Hibernate valide o schema existente no Neon sem alterar tabelas
       ddl-auto: validate
     open-in-view: false
+
+# Configuração da API de e-mails transacionais (Brevo)
+brevo:
+  # Chave gerada na Brevo em "SMTP e API" -> "Chaves de API" (começa com xkeysib-...)
+  api-key: ${BREVO_API_KEY:}
+  sender:
+    # E-mail com status Verificado na sua conta da Brevo
+    email: ${BREVO_SENDER_EMAIL:digo22nt@gmail.com}
+    name: ${BREVO_SENDER_NAME:Agenda Rosa}
