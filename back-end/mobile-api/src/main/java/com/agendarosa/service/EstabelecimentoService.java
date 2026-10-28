@@ -36,7 +36,7 @@ public class EstabelecimentoService {
 
     /**
      * Busca os estabelecimentos aplicando os filtros opcionais (cidade, bairro, nome e tipo de serviço).
-     * Utiliza consultas em lote (batching) para evitar o problema de N+1 queries.
+     * Se nenhum filtro for informado, busca todos os estabelecimentos diretamente por ordem alfabética.
      */
     @Transactional(readOnly = true)
     public List<EstabelecimentoCardResponseDTO> buscarLojas(String cidade, String bairro, String nome, String tipoServico) {
@@ -45,9 +45,16 @@ public class EstabelecimentoService {
         String nomeFiltro = normalizar(nome);
         String tipoFiltro = normalizar(tipoServico);
 
-        List<Estabelecimento> estabelecimentos = estabelecimentoRepository.buscarComFiltros(
-                cidadeFiltro, bairroFiltro, nomeFiltro, tipoFiltro
-        );
+        List<Estabelecimento> estabelecimentos;
+
+        // Se nenhum filtro foi passado, faz busca direta e rápida na Home sem WHERE dinâmico
+        if (cidadeFiltro == null && bairroFiltro == null && nomeFiltro == null && tipoFiltro == null) {
+            estabelecimentos = estabelecimentoRepository.findAllByOrderByNomeAsc();
+        } else {
+            estabelecimentos = estabelecimentoRepository.buscarComFiltros(
+                    cidadeFiltro, bairroFiltro, nomeFiltro, tipoFiltro
+            );
+        }
 
         if (estabelecimentos.isEmpty()) {
             return Collections.emptyList();

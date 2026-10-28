@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,6 +71,26 @@ class EstabelecimentoServiceTest {
         assertEquals(1, card.servicosDestaque().size());
         assertEquals("Corte e Escova", card.servicosDestaque().get(0).nome());
         assertEquals(150.0, card.servicosDestaque().get(0).preco());
+    }
+
+    @Test
+    @DisplayName("Deve buscar todas as lojas quando nenhum filtro for informado")
+    void deveBuscarLojasSemFiltros() {
+        Estabelecimento loja = new Estabelecimento(
+                1, "Studio Afrodite", "São Paulo", "Jardins",
+                "Rua Oscar Freire, 100", "01426-000", "/assets/loja1.png",
+                -23.56, -46.66, 1
+        );
+
+        when(estabelecimentoRepository.findAllByOrderByNomeAsc()).thenReturn(List.of(loja));
+        when(estabelecimentoTipoRepository.findByEstabelecimentoIdIn(List.of(1))).thenReturn(Collections.emptyList());
+        when(servicoRepository.findByEstabelecimentoIdInAndStatus(List.of(1), "ativo")).thenReturn(Collections.emptyList());
+
+        List<EstabelecimentoCardResponseDTO> resultado = estabelecimentoService.buscarLojas(null, null, null, null);
+
+        assertNotNull(resultado);
+        assertEquals(1, resultado.size());
+        verify(estabelecimentoRepository).findAllByOrderByNomeAsc();
     }
 
     @Test
