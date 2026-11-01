@@ -14,7 +14,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../../styles/theme';
 import { styles } from './styles';
 
-export default function Login() {
+export default function Login({ onNavigateToEsqueciSenha }) {
   const [emailOrUser, setEmailOrUser] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -111,7 +111,13 @@ export default function Login() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => Alert.alert('Navegação', 'Ir para recuperação de senha')}
+                onPress={() => {
+                  if (onNavigateToEsqueciSenha) {
+                    onNavigateToEsqueciSenha();
+                  } else {
+                    Alert.alert('Navegação', 'Ir para recuperação de senha');
+                  }
+                }}
                 activeOpacity={0.7}
               >
                 <Text style={styles.linkText}>Esqueci minha senha</Text>
