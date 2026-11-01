@@ -9,23 +9,46 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../../styles/theme';
 import { styles } from './styles';
+import { authService } from '../../services/auth-service';
 
-export default function Login({ onNavigateToEsqueciSenha }) {
+export default function Login({ onNavigateToEsqueciSenha, onLoginSuccess }) {
   const [emailOrUser, setEmailOrUser] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  function handleLogin() {
+  async function handleLogin() {
     if (!emailOrUser.trim() || !password.trim()) {
-      Alert.alert('Atenção', 'Por favor, preencha o email/usuário e a senha.');
+      Alert.alert('Atenção', 'Por favor, preencha o email e a senha.');
       return;
     }
-    // Integração futura com o Spring Boot via services/api.js
-    Alert.alert('Sucesso', `Tentando conectar com usuário: ${emailOrUser}`);
+
+    setLoading(true);
+    try {
+      const response = await authService.login(emailOrUser, password);
+      Alert.alert(
+        'Login realizado!',
+        `Bem-vinda(o), ${response.nome || 'Cliente'}!`,
+        [
+          {
+            text: 'Continuar',
+            onPress: () => onLoginSuccess && onLoginSuccess(response),
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert(
+        'Erro ao entrar',
+        error.message || 'Verifique suas credenciais e tente novamente.'
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -64,6 +87,7 @@ export default function Login({ onNavigateToEsqueciSenha }) {
                 onChangeText={setEmailOrUser}
                 autoCapitalize="none"
                 keyboardType="email-address"
+                editable={!loading}
               />
             </View>
 
@@ -79,11 +103,13 @@ export default function Login({ onNavigateToEsqueciSenha }) {
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
+                  editable={!loading}
                 />
                 <TouchableOpacity
                   style={styles.showPasswordButton}
                   onPress={() => setShowPassword(!showPassword)}
                   activeOpacity={0.7}
+                  disabled={loading}
                 >
                   <Text style={styles.showPasswordText}>
                     {showPassword ? 'Ocultar' : 'Mostrar'}
@@ -94,11 +120,16 @@ export default function Login({ onNavigateToEsqueciSenha }) {
 
             {/* Botão Entrar */}
             <TouchableOpacity
-              style={styles.submitButton}
+              style={[styles.submitButton, loading && { opacity: 0.7 }]}
               onPress={handleLogin}
+              disabled={loading}
               activeOpacity={0.8}
             >
-              <Text style={styles.submitButtonText}>Entrar</Text>
+              {loading ? (
+                <ActivityIndicator color={theme.colors.buttonText} />
+              ) : (
+                <Text style={styles.submitButtonText}>Entrar</Text>
+              )}
             </TouchableOpacity>
 
             {/* Links Inferiores */}
@@ -106,6 +137,7 @@ export default function Login({ onNavigateToEsqueciSenha }) {
               <TouchableOpacity
                 onPress={() => Alert.alert('Navegação', 'Ir para tela de cadastro')}
                 activeOpacity={0.7}
+                disabled={loading}
               >
                 <Text style={styles.linkText}>Criar Conta</Text>
               </TouchableOpacity>
@@ -119,6 +151,7 @@ export default function Login({ onNavigateToEsqueciSenha }) {
                   }
                 }}
                 activeOpacity={0.7}
+                disabled={loading}
               >
                 <Text style={styles.linkText}>Esqueci minha senha</Text>
               </TouchableOpacity>

@@ -9,10 +9,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { theme } from '../../styles/theme';
 import { styles } from './styles';
+import { authService } from '../../services/auth-service';
 
 export default function EsqueciSenha({ onVoltarParaLogin }) {
   // Controle da etapa atual (1: Identificação, 2: Código, 3: Nova Senha)
@@ -24,18 +26,54 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Ação da Etapa 1: Enviar Código
-  function handleEnviarCodigo() {
+  // Ação da Etapa 1: Enviar Código via API
+  async function handleEnviarCodigo() {
     if (!email.trim() || !email.includes('@')) {
       Alert.alert('Atenção', 'Por favor, informe um e-mail válido.');
       return;
     }
-    // Simula avanço para a etapa 2 (futura chamada ao POST /api/auth/esqueci-senha)
-    setCurrentStep(2);
+
+    setLoading(true);
+    try {
+      const response = await authService.solicitarRecuperacaoSenha(email);
+      Alert.alert(
+        'Código Enviado!',
+        response.mensagem ||
+          'Verifique a caixa de entrada e spam do seu e-mail para obter o código de 6 dígitos.'
+      );
+      setCurrentStep(2);
+    } catch (error) {
+      Alert.alert(
+        'Erro ao enviar código',
+        error.message || 'Verifique o e-mail informado e tente novamente.'
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // Ação da Etapa 2: Validar Código
+  // Ação de Reenviar Código na Etapa 2
+  async function handleReenviarCodigo() {
+    setLoading(true);
+    try {
+      const response = await authService.solicitarRecuperacaoSenha(email);
+      Alert.alert(
+        'Código Reenviado!',
+        response.mensagem || 'Um novo código de 6 dígitos foi enviado para seu e-mail.'
+      );
+    } catch (error) {
+      Alert.alert(
+        'Erro ao reenviar',
+        error.message || 'Não foi possível reenviar o código. Tente novamente mais tarde.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Ação da Etapa 2: Validar formato do Código localmente e avançar
   function handleValidarCodigo() {
     if (codigo.trim().length !== 6) {
       Alert.alert('Atenção', 'O código deve conter exatamente 6 dígitos.');
@@ -44,8 +82,8 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
     setCurrentStep(3);
   }
 
-  // Ação da Etapa 3: Redefinir Senha
-  function handleRedefinirSenha() {
+  // Ação da Etapa 3: Redefinir Senha via API
+  async function handleRedefinirSenha() {
     if (novaSenha.length < 6) {
       Alert.alert('Atenção', 'A nova senha deve ter no mínimo 6 caracteres.');
       return;
@@ -55,20 +93,33 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
       return;
     }
 
-    Alert.alert(
-      'Senha Redefinida!',
-      'Sua senha foi alterada com sucesso. Você já pode fazer login com a nova senha.',
-      [
-        {
-          text: 'Ir para o Login',
-          onPress: () => onVoltarParaLogin && onVoltarParaLogin(),
-        },
-      ]
-    );
+    setLoading(true);
+    try {
+      const response = await authService.redefinirSenha(email, codigo, novaSenha);
+      Alert.alert(
+        'Senha Redefinida!',
+        response.mensagem ||
+          'Sua senha foi alterada com sucesso. Você já pode fazer login com a nova senha.',
+        [
+          {
+            text: 'Ir para o Login',
+            onPress: () => onVoltarParaLogin && onVoltarParaLogin(),
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert(
+        'Erro ao redefinir',
+        error.message || 'Código inválido ou expirado. Tente solicitar um novo código.'
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   // Ação do botão voltar no topo
   function handleVoltarTopo() {
+    if (loading) return;
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else if (onVoltarParaLogin) {
@@ -92,6 +143,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
               style={styles.iconButton}
               onPress={handleVoltarTopo}
               activeOpacity={0.7}
+              disabled={loading}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
               <Feather name="arrow-left" size={20} color={theme.colors.text} />
@@ -111,10 +163,11 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
               onPress={() =>
                 Alert.alert(
                   'Ajuda',
-                  'Informe o e-mail cadastrado para receber um código de 6 dígitos e recuperar o acesso.'
+                  'Informe o e-mail cadastrado para receber um código de 6 dígitos e recuperar o acesso à sua conta.'
                 )
               }
               activeOpacity={0.7}
+              disabled={loading}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
               <Feather name="help-circle" size={18} color={theme.colors.textSecondary} />
@@ -240,6 +293,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                       onChangeText={setEmail}
                       autoCapitalize="none"
                       keyboardType="email-address"
+                      editable={!loading}
                     />
                   </View>
                 </View>
@@ -250,12 +304,19 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                 </Text>
 
                 <TouchableOpacity
-                  style={styles.submitButton}
+                  style={[styles.submitButton, loading && { opacity: 0.7 }]}
                   onPress={handleEnviarCodigo}
+                  disabled={loading}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.submitButtonText}>Enviar Código</Text>
-                  <Feather name="send" size={16} color="#FFFFFF" />
+                  {loading ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Text style={styles.submitButtonText}>Enviar Código</Text>
+                      <Feather name="send" size={16} color="#FFFFFF" />
+                    </>
+                  )}
                 </TouchableOpacity>
               </>
             )}
@@ -285,6 +346,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                       onChangeText={setCodigo}
                       keyboardType="number-pad"
                       maxLength={6}
+                      editable={!loading}
                     />
                   </View>
                 </View>
@@ -295,8 +357,9 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                 </Text>
 
                 <TouchableOpacity
-                  style={styles.submitButton}
+                  style={[styles.submitButton, loading && { opacity: 0.7 }]}
                   onPress={handleValidarCodigo}
+                  disabled={loading}
                   activeOpacity={0.8}
                 >
                   <Text style={styles.submitButtonText}>Validar Código</Text>
@@ -305,12 +368,17 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
 
                 <TouchableOpacity
                   style={styles.secondaryLink}
-                  onPress={() => Alert.alert('Reenviado', 'Novo código enviado!')}
+                  onPress={handleReenviarCodigo}
+                  disabled={loading}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.secondaryLinkText}>
-                    Não recebeu? Reenviar código
-                  </Text>
+                  {loading ? (
+                    <ActivityIndicator size="small" color={theme.colors.primary} />
+                  ) : (
+                    <Text style={styles.secondaryLinkText}>
+                      Não recebeu? Reenviar código
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </>
             )}
@@ -340,9 +408,11 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                       onChangeText={setNovaSenha}
                       secureTextEntry={!showPassword}
                       autoCapitalize="none"
+                      editable={!loading}
                     />
                     <TouchableOpacity
                       onPress={() => setShowPassword(!showPassword)}
+                      disabled={loading}
                     >
                       <Feather
                         name={showPassword ? 'eye-off' : 'eye'}
@@ -370,17 +440,25 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                       onChangeText={setConfirmarSenha}
                       secureTextEntry={!showPassword}
                       autoCapitalize="none"
+                      editable={!loading}
                     />
                   </View>
                 </View>
 
                 <TouchableOpacity
-                  style={styles.submitButton}
+                  style={[styles.submitButton, loading && { opacity: 0.7 }]}
                   onPress={handleRedefinirSenha}
+                  disabled={loading}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.submitButtonText}>Redefinir Senha</Text>
-                  <Feather name="check" size={16} color="#FFFFFF" />
+                  {loading ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Text style={styles.submitButtonText}>Redefinir Senha</Text>
+                      <Feather name="check" size={16} color="#FFFFFF" />
+                    </>
+                  )}
                 </TouchableOpacity>
               </>
             )}
@@ -391,6 +469,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
             <Text style={styles.footerText}>Lembrou sua senha?</Text>
             <TouchableOpacity
               onPress={onVoltarParaLogin}
+              disabled={loading}
               activeOpacity={0.7}
             >
               <Text style={styles.footerLink}>Voltar para o Login ➔</Text>
