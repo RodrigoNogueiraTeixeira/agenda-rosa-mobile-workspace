@@ -1,10 +1,12 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, StatusBar } from 'react-native';
 import { theme } from '../../styles/theme';
 
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.colors.background,
+    // Garante que no Android respeite a barra de status e os entalhes (câmera frontal / tela infinita)
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 12 : 12,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -20,14 +22,26 @@ export const styles = StyleSheet.create({
     marginBottom: 24,
   },
   iconButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: theme.colors.white,
     borderWidth: 1,
     borderColor: '#E8CBD6',
     alignItems: 'center',
     justifyContent: 'center',
+    // Leve sombra para destacar do fundo e facilitar o clique
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   brandPill: {
     flexDirection: 'row',

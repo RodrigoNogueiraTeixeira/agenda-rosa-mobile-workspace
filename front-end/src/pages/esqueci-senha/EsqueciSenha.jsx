@@ -92,6 +92,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
               style={styles.iconButton}
               onPress={handleVoltarTopo}
               activeOpacity={0.7}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
               <Feather name="arrow-left" size={20} color={theme.colors.text} />
             </TouchableOpacity>
@@ -114,6 +115,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                 )
               }
               activeOpacity={0.7}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
               <Feather name="help-circle" size={18} color={theme.colors.textSecondary} />
             </TouchableOpacity>
