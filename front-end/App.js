@@ -7,29 +7,38 @@ import Cadastro from './src/pages/cadastro';
 import { authService } from './src/services/auth-service';
 import { theme } from './src/styles/theme';
 
+// COMPONENTE RAIZ DA APLICAÇÃO: Controla qual tela é exibida no momento e a sessão do usuário
 export default function App() {
-  // Tela inicial agora é 'login'
+  // Estado que guarda a tela atualmente visível ('login', 'cadastro', 'esqueci-senha' ou 'home')
   const [currentScreen, setCurrentScreen] = useState('login');
+  // Estado que guarda os dados do usuário autenticado após o login
   const [currentUser, setCurrentUser] = useState(null);
 
+  // FUNÇÃO: Encerra a sessão do usuário, limpa o token JWT e retorna para a tela de Login
   async function handleLogout() {
     await authService.logout();
     setCurrentUser(null);
     setCurrentScreen('login');
   }
 
+  // FUNÇÃO: Executada após login ou cadastro com sucesso para salvar o usuário e direcioná-lo para a tela 'home'
   function handleLoginSuccess(user) {
     setCurrentUser(user);
     setCurrentScreen('home');
   }
 
+  // RENDERIZAÇÃO CONDICIONAL DAS TELAS CONFORME O ESTADO `currentScreen`
   return (
     <>
+      {/* Barra de status superior com ícones escuros */}
       <StatusBar style="dark" />
+
+      {/* TELA 1: Esqueci a Senha */}
       {currentScreen === 'esqueci-senha' && (
         <EsqueciSenha onVoltarParaLogin={() => setCurrentScreen('login')} />
       )}
 
+      {/* TELA 2: Cadastro */}
       {currentScreen === 'cadastro' && (
         <Cadastro
           onVoltarParaLogin={() => setCurrentScreen('login')}
@@ -37,6 +46,7 @@ export default function App() {
         />
       )}
 
+      {/* TELA 3: Login */}
       {currentScreen === 'login' && (
         <Login
           onNavigateToEsqueciSenha={() => setCurrentScreen('esqueci-senha')}
@@ -45,6 +55,7 @@ export default function App() {
         />
       )}
 
+      {/* TELA 4: Home (Tela de Boas-Vindas pós-autenticação) */}
       {currentScreen === 'home' && (
         <SafeAreaView style={styles.homeContainer}>
           <View style={styles.card}>
@@ -56,6 +67,7 @@ export default function App() {
               Você está autenticado com token JWT seguro no Agenda Rosa.
             </Text>
 
+            {/* Botão de Sair da Conta */}
             <TouchableOpacity
               style={styles.logoutButton}
               onPress={handleLogout}
@@ -70,6 +82,7 @@ export default function App() {
   );
 }
 
+// Estilos da tela de Boas-Vindas pós-login (Home)
 const styles = StyleSheet.create({
   homeContainer: {
     flex: 1,

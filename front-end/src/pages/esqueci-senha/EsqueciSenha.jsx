@@ -16,26 +16,34 @@ import { theme } from '../../styles/theme';
 import { styles } from './styles';
 import { authService } from '../../services/auth-service';
 
+// COMPONENTE PRINCIPAL: Tela de Recuperação de Senha (Esqueci Minha Senha)
+// Gerencia um fluxo dinâmico em 3 etapas sequenciais (Identificação -> Código -> Nova Senha)
 export default function EsqueciSenha({ onVoltarParaLogin }) {
-  // Controle da etapa atual (1: Identificação, 2: Código, 3: Nova Senha)
+  // CONTROLE DE ETAPA:
+  // 1 = Digitar e-mail
+  // 2 = Digitar código de 6 dígitos recebido por e-mail
+  // 3 = Cadastrar e confirmar a nova senha
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Estados dos formulários
-  const [email, setEmail] = useState('');
-  const [codigo, setCodigo] = useState('');
-  const [novaSenha, setNovaSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // ESTADOS DOS FORMULÁRIOS (Armazenam os dados digitados pelo usuário em memória)
+  const [email, setEmail] = useState('');                   // E-mail informado na Etapa 1
+  const [codigo, setCodigo] = useState('');                 // Código de 6 dígitos informado na Etapa 2
+  const [novaSenha, setNovaSenha] = useState('');           // Nova senha digitada na Etapa 3
+  const [confirmarSenha, setConfirmarSenha] = useState(''); // Confirmação da nova senha na Etapa 3
+  const [showPassword, setShowPassword] = useState(false);   // Alterna entre mostrar/ocultar a senha digitada
+  const [loading, setLoading] = useState(false);             // Indica se há uma requisição HTTP em andamento
 
-  // Ação da Etapa 1: Enviar Código via API
+  // FUNÇÃO: Etapa 1 - Solicitar envio do código para o e-mail
+  // 1. Valida o formato básico do e-mail
+  // 2. Chama a API do Spring Boot (POST /api/auth/esqueci-senha) que envia o código via Brevo
+  // 3. Se sucesso, avança automaticamente para a Etapa 2
   async function handleEnviarCodigo() {
     if (!email.trim() || !email.includes('@')) {
       Alert.alert('Atenção', 'Por favor, informe um e-mail válido.');
       return;
     }
 
-    setLoading(true);
+    setLoading(true); // Exibe spinner de carregamento no botão
     try {
       const response = await authService.solicitarRecuperacaoSenha(email);
       Alert.alert(
@@ -43,18 +51,19 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
         response.mensagem ||
           'Verifique a caixa de entrada e spam do seu e-mail para obter o código de 6 dígitos.'
       );
-      setCurrentStep(2);
+      setCurrentStep(2); // Avança para a tela do código
     } catch (error) {
       Alert.alert(
         'Erro ao enviar código',
         error.message || 'Verifique o e-mail informado e tente novamente.'
       );
     } finally {
-      setLoading(false);
+      setLoading(false); // Remove spinner
     }
   }
 
-  // Ação de Reenviar Código na Etapa 2
+  // FUNÇÃO: Etapa 2 (Ação Secundária) - Reenviar novo código
+  // Permite ao usuário solicitar um novo código caso o anterior tenha demorado ou expirado
   async function handleReenviarCodigo() {
     setLoading(true);
     try {
@@ -73,16 +82,21 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
     }
   }
 
-  // Ação da Etapa 2: Validar formato do Código localmente e avançar
+  // FUNÇÃO: Etapa 2 - Validar formato do código localmente
+  // Garante que o usuário digitou exatamente 6 dígitos antes de avançar para a criação de senha
   function handleValidarCodigo() {
     if (codigo.trim().length !== 6) {
       Alert.alert('Atenção', 'O código deve conter exatamente 6 dígitos.');
       return;
     }
-    setCurrentStep(3);
+    setCurrentStep(3); // Avança para a etapa de redefinição
   }
 
-  // Ação da Etapa 3: Redefinir Senha via API
+  // FUNÇÃO: Etapa 3 - Enviar nova senha para o Back-end
+  // 1. Valida tamanho mínimo de 6 caracteres
+  // 2. Confirma se os dois campos de senha coincidem
+  // 3. Chama a API do Spring Boot (POST /api/auth/redefinir-senha) para persistir a nova senha
+  // 4. Redireciona o usuário de volta para a tela de Login
   async function handleRedefinirSenha() {
     if (novaSenha.length < 6) {
       Alert.alert('Atenção', 'A nova senha deve ter no mínimo 6 caracteres.');
@@ -117,9 +131,11 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
     }
   }
 
-  // Ação do botão voltar no topo
+  // FUNÇÃO: Botão de Voltar no Topo da Tela (Seta)
+  // Se o usuário estiver na Etapa 2 ou 3, retrocede uma etapa.
+  // Se estiver na Etapa 1, volta para a tela de Login.
   function handleVoltarTopo() {
-    if (loading) return;
+    if (loading) return; // Evita voltar durante uma requisição em andamento
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else if (onVoltarParaLogin) {
@@ -127,6 +143,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
     }
   }
 
+  // RENDERIZAÇÃO DA INTERFACE VISUAL (JSX)
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -137,8 +154,9 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
           contentContainerStyle={styles.scrollContainer}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Barra Superior */}
+          {/* BARRA SUPERIOR: Botão Voltar, Selo Agenda Rosa e Botão Ajuda */}
           <View style={styles.headerBar}>
+            {/* Botão de voltar com hitSlop para facilitar clique em telas curvas */}
             <TouchableOpacity
               style={styles.iconButton}
               onPress={handleVoltarTopo}
@@ -149,6 +167,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
               <Feather name="arrow-left" size={20} color={theme.colors.text} />
             </TouchableOpacity>
 
+            {/* Selo central com a flor da marca */}
             <View style={styles.brandPill}>
               <MaterialCommunityIcons
                 name="flower-tulip"
@@ -158,6 +177,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
               <Text style={styles.brandText}>Agenda Rosa</Text>
             </View>
 
+            {/* Botão de ajuda que abre um alerta explicativo */}
             <TouchableOpacity
               style={styles.iconButton}
               onPress={() =>
@@ -174,7 +194,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
             </TouchableOpacity>
           </View>
 
-          {/* Cabeçalho de Título */}
+          {/* CABEÇALHO COM TÍTULOS DA TELA */}
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Recuperar Acesso</Text>
             <Text style={styles.subtitle}>
@@ -182,9 +202,9 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
             </Text>
           </View>
 
-          {/* Stepper das 3 Etapas */}
+          {/* STEPPER: Barra visual indicadora das 3 etapas (1. Identificação -> 2. Código -> 3. Nova Senha) */}
           <View style={styles.stepperContainer}>
-            {/* Etapa 1 */}
+            {/* Indicador Etapa 1 */}
             <View style={[styles.stepItem, currentStep === 1 && styles.stepItemActive]}>
               <View
                 style={[
@@ -211,7 +231,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
               </Text>
             </View>
 
-            {/* Etapa 2 */}
+            {/* Indicador Etapa 2 */}
             <View style={[styles.stepItem, currentStep === 2 && styles.stepItemActive]}>
               <View
                 style={[
@@ -238,7 +258,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
               </Text>
             </View>
 
-            {/* Etapa 3 */}
+            {/* Indicador Etapa 3 */}
             <View style={[styles.stepItem, currentStep === 3 && styles.stepItemActive]}>
               <View
                 style={[
@@ -266,9 +286,9 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
             </View>
           </View>
 
-          {/* Card do Formulário */}
+          {/* CARD PRINCIPAL DO FORMULÁRIO (Muda de conteúdo dinamicamente conforme currentStep) */}
           <View style={styles.card}>
-            {/* ETAPA 1: Identificação (E-mail) */}
+            {/* ETAPA 1: Identificação por E-mail */}
             {currentStep === 1 && (
               <>
                 <View style={styles.cardHeader}>
@@ -321,7 +341,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
               </>
             )}
 
-            {/* ETAPA 2: Validação do Código de 6 dígitos */}
+            {/* ETAPA 2: Validação do Código de 6 dígitos recebido por e-mail */}
             {currentStep === 2 && (
               <>
                 <View style={styles.cardHeader}>
@@ -366,6 +386,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                   <Feather name="arrow-right" size={16} color="#FFFFFF" />
                 </TouchableOpacity>
 
+                {/* Link para reenviar código */}
                 <TouchableOpacity
                   style={styles.secondaryLink}
                   onPress={handleReenviarCodigo}
@@ -383,7 +404,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
               </>
             )}
 
-            {/* ETAPA 3: Redefinir a Senha */}
+            {/* ETAPA 3: Redefinir e Confirmar Nova Senha */}
             {currentStep === 3 && (
               <>
                 <View style={styles.cardHeader}>
@@ -391,6 +412,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                   <Text style={styles.cardTitle}>Crie sua nova senha</Text>
                 </View>
 
+                {/* Campo Nova Senha */}
                 <View style={styles.formGroup}>
                   <Text style={styles.label}>Nova senha</Text>
                   <View style={styles.inputWithIcon}>
@@ -423,6 +445,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                   </View>
                 </View>
 
+                {/* Campo Confirmar Nova Senha */}
                 <View style={styles.formGroup}>
                   <Text style={styles.label}>Confirmar nova senha</Text>
                   <View style={styles.inputWithIcon}>
@@ -445,6 +468,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
                   </View>
                 </View>
 
+                {/* Botão de Concluir Redefinição */}
                 <TouchableOpacity
                   style={[styles.submitButton, loading && { opacity: 0.7 }]}
                   onPress={handleRedefinirSenha}
@@ -464,7 +488,7 @@ export default function EsqueciSenha({ onVoltarParaLogin }) {
             )}
           </View>
 
-          {/* Rodapé: Voltar ao Login */}
+          {/* RODAPÉ: Link de retorno para a tela de Login */}
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Lembrou sua senha?</Text>
             <TouchableOpacity

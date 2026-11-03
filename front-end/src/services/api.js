@@ -20,7 +20,8 @@ export async function request(endpoint, options = {}) {
   };
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), options.timeout || 40000);
+  // 80 segundos de timeout para acomodar o "cold start" (inicialização) do servidor gratuito no Render
+  const timeoutId = setTimeout(() => controller.abort(), options.timeout || 80000);
 
   try {
     const response = await fetch(url, {
@@ -63,11 +64,29 @@ export async function request(endpoint, options = {}) {
     return responseData;
   } catch (err) {
     clearTimeout(timeoutId);
-    if (err.name === 'AbortError') {
-      const timeoutError = new Error('Tempo de requisição esgotado. O servidor pode estar inicializando, tente novamente.');
+
+    const errorMessage = String(err?.message || '');
+    // Detecta cancelamento por timeout ou erro de rede (comum no cold start do Render)
+    if (
+      err.name === 'AbortError' ||
+      errorMessage.toLowerCase().includes('canceled') ||
+      errorMessage.toLowerCase().includes('aborted')
+    ) {
+      const timeoutError = new Error(
+        'Tempo de conexão esgotado. Como a API está no plano gratuito do Render, ela hiberna após inatividade. O servidor já está acordando, por favor tente novamente em alguns instantes.'
+      );
       timeoutError.status = 408;
       throw timeoutError;
     }
+
+    if (errorMessage.toLowerCase().includes('network request failed')) {
+      const netError = new Error(
+        'Falha de conexão com o servidor. Verifique sua conexão com a internet ou tente novamente.'
+      );
+      netError.status = 503;
+      throw netError;
+    }
+
     throw err;
   }
 }
