@@ -16,7 +16,11 @@ import { theme } from '../../styles/theme';
 import { styles } from './styles';
 import { authService } from '../../services/auth-service';
 
-export default function Login({ onNavigateToEsqueciSenha, onLoginSuccess }) {
+export default function Login({
+  onNavigateToEsqueciSenha,
+  onNavigateToCadastro,
+  onLoginSuccess,
+}) {
   const [emailOrUser, setEmailOrUser] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -135,7 +139,13 @@ export default function Login({ onNavigateToEsqueciSenha, onLoginSuccess }) {
             {/* Links Inferiores */}
             <View style={styles.linksRow}>
               <TouchableOpacity
-                onPress={() => Alert.alert('Navegação', 'Ir para tela de cadastro')}
+                onPress={() => {
+                  if (onNavigateToCadastro) {
+                    onNavigateToCadastro();
+                  } else {
+                    Alert.alert('Navegação', 'Ir para tela de cadastro');
+                  }
+                }}
                 activeOpacity={0.7}
                 disabled={loading}
               >
