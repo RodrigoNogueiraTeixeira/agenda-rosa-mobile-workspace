@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Login from './src/pages/login';
 import EsqueciSenha from './src/pages/esqueci-senha';
+import Cadastro from './src/pages/cadastro';
 import { authService } from './src/services/auth-service';
 import { theme } from './src/styles/theme';
 
@@ -29,9 +30,17 @@ export default function App() {
         <EsqueciSenha onVoltarParaLogin={() => setCurrentScreen('login')} />
       )}
 
+      {currentScreen === 'cadastro' && (
+        <Cadastro
+          onVoltarParaLogin={() => setCurrentScreen('login')}
+          onCadastroSuccess={handleLoginSuccess}
+        />
+      )}
+
       {currentScreen === 'login' && (
         <Login
           onNavigateToEsqueciSenha={() => setCurrentScreen('esqueci-senha')}
+          onNavigateToCadastro={() => setCurrentScreen('cadastro')}
           onLoginSuccess={handleLoginSuccess}
         />
       )}

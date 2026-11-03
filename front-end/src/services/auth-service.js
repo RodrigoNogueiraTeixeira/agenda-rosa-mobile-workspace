@@ -1,10 +1,40 @@
 import { request } from './api';
 import { authStorage } from './auth-storage';
+import { somenteNumeros } from '../utils/validators';
 
 /**
- * Serviços de Autenticação e Recuperação de Senha integrados à API Spring Boot.
+ * Serviços de Autenticação, Cadastro e Recuperação de Senha integrados à API Spring Boot.
  */
 export const authService = {
+  /**
+   * Cadastra um novo cliente na API e inicia a sessão com o token JWT retornado.
+   * Retorna { token, tipo, nome, email }
+   */
+  async cadastrar({ nome, email, senha, telefone, cidade = null, bairro = null }) {
+    const telefoneLimpo = somenteNumeros(telefone);
+
+    const data = await request('/auth/cadastro', {
+      method: 'POST',
+      body: JSON.stringify({
+        nome: nome.trim(),
+        email: email.trim().toLowerCase(),
+        senha,
+        telefone: telefoneLimpo || null,
+        cidade,
+        bairro,
+      }),
+    });
+
+    if (data && data.token) {
+      await authStorage.saveSession(data.token, {
+        nome: data.nome,
+        email: data.email,
+      });
+    }
+
+    return data;
+  },
+
   /**
    * Autentica o cliente com e-mail e senha.
    * Retorna { token, tipo, nome, email } e salva na sessão.
