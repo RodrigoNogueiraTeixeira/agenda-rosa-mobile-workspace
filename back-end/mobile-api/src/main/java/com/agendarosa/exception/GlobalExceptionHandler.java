@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +41,21 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Trata erros de parsing de data e horário (ex: formato incorreto ou dia inexistente no mês).
+     * Retorna HTTP 400 Bad Request.
+     */
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<Map<String, Object>> tratarErroDataHora(DateTimeParseException ex) {
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("timestamp", LocalDateTime.now());
+        resposta.put("status", HttpStatus.BAD_REQUEST.value());
+        resposta.put("erro", "Formato de data ou hora inválido");
+        resposta.put("mensagem", "Por favor, utilize formatos válidos (YYYY-MM-DD para data e HH:mm para horário).");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+    }
+
+    /**
      * Trata credenciais de login incorretas (usuário ou senha errados).
      * Retorna HTTP 401 Unauthorized.
      */
@@ -55,11 +71,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Trata regras de negócio como e-mail já cadastrado.
+     * Trata regras de negócio como e-mail já cadastrado ou conflito de horário na agenda.
      * Retorna HTTP 409 Conflict.
      */
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> tratarRegraDeNegocio(IllegalArgumentException ex) {
+    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
+    public ResponseEntity<Map<String, Object>> tratarRegraDeNegocio(RuntimeException ex) {
         Map<String, Object> resposta = new HashMap<>();
         resposta.put("timestamp", LocalDateTime.now());
         resposta.put("status", HttpStatus.CONFLICT.value());
