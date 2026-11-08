@@ -2,7 +2,8 @@
 # ARQUIVO DE REFERÊNCIA / EXEMPLO - AGENDA ROSA MOBILE API
 # ==============================================================================
 # Use este modelo para entender as variáveis de ambiente que o sistema precisa
-# para conectar com o PostgreSQL (Neon), enviar e-mails via Brevo e iniciar o servidor.
+# para conectar com o PostgreSQL (Neon), enviar e-mails via Brevo, conectar
+# com a fila do RabbitMQ (CloudAMQP) e iniciar o servidor.
 # ==============================================================================
 
 server:
@@ -32,6 +33,16 @@ spring:
       # 'validate' garante que o Hibernate valide o schema existente no Neon sem alterar tabelas
       ddl-auto: validate
     open-in-view: false
+
+  rabbitmq:
+    # URL de conexão com a fila do RabbitMQ (CloudAMQP no Render ou localhost)
+    # Exemplo: amqps://usuario:senha@barkeep.rmq.cloudamqp.com/vhost
+    addresses: ${RABBITMQ_URL:}
+    listener:
+      simple:
+        # 1 mensagem por trabalhador, evitando sobreposição e concorrência descontrolada
+        prefetch: 1
+        default-requeue-rejected: false
 
 # Configuração da API de e-mails transacionais (Brevo)
 brevo:

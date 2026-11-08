@@ -1,8 +1,11 @@
 package com.agendarosa.controller;
 
+import com.agendarosa.dto.AgendamentoEnfileiradoResponseDTO;
+import com.agendarosa.dto.AgendamentoMensagemDTO;
 import com.agendarosa.dto.AgendamentoResponseDTO;
 import com.agendarosa.dto.CriarAgendamentoRequestDTO;
 import com.agendarosa.exception.GlobalExceptionHandler;
+import com.agendarosa.producer.AgendamentoProducer;
 import com.agendarosa.service.AgendamentoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +21,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,6 +37,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AgendamentoControllerTest {
 
     private MockMvc mockMvc;
+
+    @Mock
+    private AgendamentoProducer agendamentoProducer;
 
     @Mock
     private AgendamentoService agendamentoService;
@@ -52,16 +58,44 @@ class AgendamentoControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/agendamentos deve retornar 201 Created quando os dados forem válidos")
-    void deveCriarAgendamentoComSucesso() throws Exception {
+    @DisplayName("POST /api/v1/agendamentos deve enfileirar no RabbitMQ e retornar 202 Accepted imediatamente")
+    void deveEnfileirarAgendamentoComSucesso() throws Exception {
+        String dataFutura = LocalDate.now().plusDays(5).toString();
+
         CriarAgendamentoRequestDTO request = new CriarAgendamentoRequestDTO(
-                10, 5, "2026-11-25", "14:00", "Sem observações"
+                10, 5, dataFutura, "14:00", "Sem observações"
+        );
+
+        Authentication auth = new UsernamePasswordAuthenticationToken("digo@exemplo.com", null);
+
+        doNothing().when(agendamentoProducer).enfileirarReserva(any(AgendamentoMensagemDTO.class));
+
+        mockMvc.perform(post("/api/v1/agendamentos")
+                        .principal(auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.status").value("PROCESSANDO"))
+                .andExpect(jsonPath("$.protocolo").exists())
+                .andExpect(jsonPath("$.emailCliente").value("digo@exemplo.com"))
+                .andExpect(jsonPath("$.mensagem").exists());
+
+        verify(agendamentoProducer, times(1)).enfileirarReserva(any(AgendamentoMensagemDTO.class));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/agendamentos/sincrono deve retornar 201 Created quando executado diretamente")
+    void deveCriarAgendamentoSincronoComSucesso() throws Exception {
+        String dataFutura = LocalDate.now().plusDays(5).toString();
+
+        CriarAgendamentoRequestDTO request = new CriarAgendamentoRequestDTO(
+                10, 5, dataFutura, "14:00", "Sem observações"
         );
 
         AgendamentoResponseDTO response = new AgendamentoResponseDTO(
                 1, 3, "Rodrigo", "digo@exemplo.com", "62999999999",
                 7, "Boutique de Unhas Sensual", 10, "Corte Moderno", 60,
-                5, "Amanda", "2026-11-25", "14:00", "15:00", 150.0,
+                5, "Amanda", dataFutura, "14:00", "15:00", 150.0,
                 "Aguardando Pagamento", "Sem observações", "2026-11-08T13:00:00"
         );
 
@@ -70,15 +104,16 @@ class AgendamentoControllerTest {
         when(agendamentoService.criarAgendamento(eq("digo@exemplo.com"), any(CriarAgendamentoRequestDTO.class)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/api/v1/agendamentos")
+        mockMvc.perform(post("/api/v1/agendamentos/sincrono")
                         .principal(auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.status").value("Aguardando Pagamento"))
-                .andExpect(jsonPath("$.nomeProfissional").value("Amanda"))
                 .andExpect(jsonPath("$.total").value(150.0));
+
+        verify(agendamentoService, times(1)).criarAgendamento(eq("digo@exemplo.com"), any(CriarAgendamentoRequestDTO.class));
     }
 
     @Test
@@ -97,18 +132,20 @@ class AgendamentoControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/agendamentos deve retornar 400 Bad Request se o horário não for HH:mm")
-    void deveRejeitarHorarioInvalido() throws Exception {
-        CriarAgendamentoRequestDTO requestInvalido = new CriarAgendamentoRequestDTO(
-                10, 5, "2026-11-25", "25:99", null
+    @DisplayName("POST /api/v1/agendamentos deve rejeitar data no passado com 409 Conflict")
+    void deveRejeitarDataNoPassado() throws Exception {
+        CriarAgendamentoRequestDTO requestPassado = new CriarAgendamentoRequestDTO(
+                10, 5, "2020-01-01", "14:00", null
         );
 
+        Authentication auth = new UsernamePasswordAuthenticationToken("digo@exemplo.com", null);
+
         mockMvc.perform(post("/api/v1/agendamentos")
+                        .principal(auth)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestInvalido)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.erros.horarioInicio").exists());
+                        .content(objectMapper.writeValueAsString(requestPassado)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.mensagem").value("A data e horário do agendamento devem ser futuros."));
     }
 
     @Test

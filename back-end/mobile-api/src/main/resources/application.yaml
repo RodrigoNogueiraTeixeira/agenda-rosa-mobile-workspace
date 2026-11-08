@@ -16,6 +16,13 @@ spring:
       ddl-auto: validate
     open-in-view: false
 
+  rabbitmq:
+    addresses: ${RABBITMQ_URL:}
+    listener:
+      simple:
+        prefetch: 1
+        default-requeue-rejected: false
+
 # Configuração da API de e-mails transacionais (Brevo)
 brevo:
   api-key: ${BREVO_API_KEY:}
