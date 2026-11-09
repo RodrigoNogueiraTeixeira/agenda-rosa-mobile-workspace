@@ -1,0 +1,19 @@
+# IDE
+.idea/
+back-end/.idea/
+*.iml
+.vscode/
+
+# Build and logs
+target/
+back-end/mobile-api/target/
+*.log
+
+# Node
+node_modules/
+front-end/node_modules/
+.expo/
+front-end/.expo/
+
+# Temporary / Exports
+figma-export/
