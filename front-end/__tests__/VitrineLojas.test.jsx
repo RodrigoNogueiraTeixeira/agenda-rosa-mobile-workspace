@@ -66,15 +66,15 @@ describe('Tela VitrineLojas (Home)', () => {
       expect(screen.getByText('Boutique de Unhas Sensacao')).toBeTruthy();
     });
 
-    await fireEvent.changeText(screen.getByPlaceholderText('São Paulo'), 'São Paulo');
-    await fireEvent.changeText(screen.getByPlaceholderText('Moema'), 'Moema');
+    await fireEvent.changeText(screen.getByPlaceholderText('Goiânia'), 'Goiânia');
+    await fireEvent.changeText(screen.getByPlaceholderText('Vila Nova'), 'Vila Nova');
     await fireEvent.press(screen.getByText('Unhas'));
     await fireEvent.press(screen.getByText('Buscar Estabelecimentos'));
 
     await waitFor(() => {
       expect(estabelecimentoService.buscarEstabelecimentos).toHaveBeenLastCalledWith({
-        cidade: 'São Paulo',
-        bairro: 'Moema',
+        cidade: 'Goiânia',
+        bairro: 'Vila Nova',
         nome: '',
         tipoServico: 'Unhas',
       });
