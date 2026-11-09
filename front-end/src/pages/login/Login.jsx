@@ -21,6 +21,7 @@ import { authService } from '../../services/auth-service';
 export default function Login({
   onNavigateToEsqueciSenha, // Função para abrir a tela de Esqueci a Senha
   onNavigateToCadastro,     // Função para abrir a tela de Cadastro
+  onVoltarParaHome,         // Função para voltar para a vitrine principal sem logar
   onLoginSuccess,           // Função chamada quando o usuário faz login com sucesso
 }) {
   // ESTADOS DA TELA (Variáveis reativas que guardam os dados digitados e controlam a interface)
@@ -186,6 +187,19 @@ export default function Login({
                 <Text style={styles.linkText}>Esqueci minha senha</Text>
               </TouchableOpacity>
             </View>
+
+            {onVoltarParaHome && (
+              <TouchableOpacity
+                style={{ alignSelf: 'center', marginTop: 18 }}
+                onPress={onVoltarParaHome}
+                disabled={loading}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.linkText, { color: theme.colors.textSecondary }]}>
+                  ← Voltar para os estabelecimentos
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Rodapé institucional com copyright */}
