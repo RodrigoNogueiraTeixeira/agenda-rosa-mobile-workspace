@@ -332,7 +332,7 @@ export default function VitrineLojas({
                 />
                 <TextInput
                   style={styles.textInput}
-                  placeholder="São Paulo"
+                  placeholder="Goiânia"
                   placeholderTextColor={theme.colors.placeholder}
                   value={cidade}
                   onChangeText={setCidade}
@@ -355,7 +355,7 @@ export default function VitrineLojas({
                 />
                 <TextInput
                   style={styles.textInput}
-                  placeholder="Moema"
+                  placeholder="Vila Nova"
                   placeholderTextColor={theme.colors.placeholder}
                   value={bairro}
                   onChangeText={setBairro}
