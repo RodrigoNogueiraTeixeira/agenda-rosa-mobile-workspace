@@ -285,7 +285,7 @@ export default function VitrineLojas({
             <View style={styles.heroTextColumn}>
               <View style={styles.greetingPill}>
                 <MaterialCommunityIcons
-                  name="sparkles"
+                  name="star-four-points"
                   size={13}
                   color={theme.colors.primary}
                 />
@@ -322,7 +322,7 @@ export default function VitrineLojas({
 
             {/* Campo Cidade */}
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Cidade (opcional)</Text>
+              <Text style={styles.fieldLabel}>Cidade</Text>
               <View style={styles.inputRow}>
                 <MaterialCommunityIcons
                   name="office-building-outline"
@@ -345,7 +345,7 @@ export default function VitrineLojas({
 
             {/* Campo Bairro */}
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Bairro (opcional)</Text>
+              <Text style={styles.fieldLabel}>Bairro</Text>
               <View style={styles.inputRow}>
                 <Feather
                   name="navigation"
@@ -389,7 +389,7 @@ export default function VitrineLojas({
 
             {/* Campo Nome do Local */}
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Nome do local (opcional)</Text>
+              <Text style={styles.fieldLabel}>Nome do local</Text>
               <View style={styles.inputRow}>
                 <MaterialCommunityIcons
                   name="storefront-outline"
