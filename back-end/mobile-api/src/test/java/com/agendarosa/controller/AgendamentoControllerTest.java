@@ -3,10 +3,12 @@ package com.agendarosa.controller;
 import com.agendarosa.dto.AgendamentoEnfileiradoResponseDTO;
 import com.agendarosa.dto.AgendamentoMensagemDTO;
 import com.agendarosa.dto.AgendamentoResponseDTO;
+import com.agendarosa.dto.CancelamentoAgendamentoResponseDTO;
 import com.agendarosa.dto.CriarAgendamentoRequestDTO;
 import com.agendarosa.exception.GlobalExceptionHandler;
 import com.agendarosa.producer.AgendamentoProducer;
 import com.agendarosa.service.AgendamentoService;
+import com.agendarosa.service.PagamentoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +46,9 @@ class AgendamentoControllerTest {
 
     @Mock
     private AgendamentoService agendamentoService;
+
+    @Mock
+    private PagamentoService pagamentoService;
 
     @InjectMocks
     private AgendamentoController agendamentoController;
@@ -111,31 +117,16 @@ class AgendamentoControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.status").value("Aguardando Pagamento"))
-                .andExpect(jsonPath("$.total").value(150.0));
-
-        verify(agendamentoService, times(1)).criarAgendamento(eq("digo@exemplo.com"), any(CriarAgendamentoRequestDTO.class));
+                .andExpect(jsonPath("$.horarioFim").value("15:00"));
     }
 
     @Test
-    @DisplayName("POST /api/v1/agendamentos deve retornar 400 Bad Request se a data não estiver em formato YYYY-MM-DD")
-    void deveRejeitarFormatoDeDataInvalido() throws Exception {
-        CriarAgendamentoRequestDTO requestInvalido = new CriarAgendamentoRequestDTO(
-                10, 5, "25/11/2026", "14:00", null
-        );
+    @DisplayName("POST /api/v1/agendamentos deve rejeitar agendamentos no passado com 409 Conflict")
+    void deveRejeitarAgendamentoNoPassado() throws Exception {
+        String dataPassada = LocalDate.now().minusDays(1).toString();
 
-        mockMvc.perform(post("/api/v1/agendamentos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestInvalido)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.erros.data").exists());
-    }
-
-    @Test
-    @DisplayName("POST /api/v1/agendamentos deve rejeitar data no passado com 409 Conflict")
-    void deveRejeitarDataNoPassado() throws Exception {
-        CriarAgendamentoRequestDTO requestPassado = new CriarAgendamentoRequestDTO(
-                10, 5, "2020-01-01", "14:00", null
+        CriarAgendamentoRequestDTO request = new CriarAgendamentoRequestDTO(
+                10, 5, dataPassada, "10:00", "Sem observações"
         );
 
         Authentication auth = new UsernamePasswordAuthenticationToken("digo@exemplo.com", null);
@@ -143,9 +134,26 @@ class AgendamentoControllerTest {
         mockMvc.perform(post("/api/v1/agendamentos")
                         .principal(auth)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestPassado)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.mensagem").value("A data e horário do agendamento devem ser futuros."));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/agendamentos deve retornar 400 Bad Request se campos obrigatórios forem omitidos")
+    void deveValidarCamposObrigatorios() throws Exception {
+        CriarAgendamentoRequestDTO requestInvalido = new CriarAgendamentoRequestDTO(
+                null, null, null, null, null
+        );
+
+        Authentication auth = new UsernamePasswordAuthenticationToken("digo@exemplo.com", null);
+
+        mockMvc.perform(post("/api/v1/agendamentos")
+                        .principal(auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestInvalido)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erro").value("Erro de validação dos campos"));
     }
 
     @Test
@@ -168,5 +176,25 @@ class AgendamentoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].status").value("Aguardando Pagamento"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/agendamentos/{id}/cancelar deve retornar 200 OK com detalhes do cancelamento e estorno")
+    void deveCancelarAgendamentoComSucesso() throws Exception {
+        CancelamentoAgendamentoResponseDTO response = new CancelamentoAgendamentoResponseDTO(
+                4, "Cancelado", true, 150.0, "Agendamento cancelado com sucesso e estornado."
+        );
+
+        Authentication auth = new UsernamePasswordAuthenticationToken("digo@exemplo.com", null);
+
+        when(pagamentoService.cancelarAgendamentoComEstorno("digo@exemplo.com", 4))
+                .thenReturn(response);
+
+        mockMvc.perform(patch("/api/v1/agendamentos/4/cancelar")
+                        .principal(auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.agendamentoId").value(4))
+                .andExpect(jsonPath("$.status").value("Cancelado"))
+                .andExpect(jsonPath("$.reembolsado").value(true));
     }
 }

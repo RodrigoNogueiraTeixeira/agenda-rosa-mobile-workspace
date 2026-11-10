@@ -52,3 +52,11 @@ brevo:
     # E-mail com status Verificado na sua conta da Brevo
     email: ${BREVO_SENDER_EMAIL:digo22nt@gmail.com}
     name: ${BREVO_SENDER_NAME:Agenda Rosa}
+
+
+# Configuração do Mercado Pago (Pix e Webhook)
+mercadopago:
+  # Token de produção ou de teste gerado no Mercado Pago Developers (começa com APP_USR-... ou TEST-...)
+  access-token: ${MERCADO_PAGO_ACCESS_TOKEN:}
+  # URL pública onde o Mercado Pago enviará as notificações de pagamento aprovado
+  notification-url: ${MERCADO_PAGO_NOTIFICATION_URL:https://agenda-rosa-mobile-workspace.onrender.com/api/v1/pagamentos/webhook}

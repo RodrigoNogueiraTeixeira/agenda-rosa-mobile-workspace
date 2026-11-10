@@ -3,9 +3,11 @@ package com.agendarosa.controller;
 import com.agendarosa.dto.AgendamentoEnfileiradoResponseDTO;
 import com.agendarosa.dto.AgendamentoMensagemDTO;
 import com.agendarosa.dto.AgendamentoResponseDTO;
+import com.agendarosa.dto.CancelamentoAgendamentoResponseDTO;
 import com.agendarosa.dto.CriarAgendamentoRequestDTO;
 import com.agendarosa.producer.AgendamentoProducer;
 import com.agendarosa.service.AgendamentoService;
+import com.agendarosa.service.PagamentoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +32,18 @@ public class AgendamentoController {
 
     private final AgendamentoProducer agendamentoProducer;
     private final AgendamentoService agendamentoService;
+    private final PagamentoService pagamentoService;
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
-    public AgendamentoController(AgendamentoProducer agendamentoProducer, AgendamentoService agendamentoService) {
+    public AgendamentoController(
+            AgendamentoProducer agendamentoProducer,
+            AgendamentoService agendamentoService,
+            PagamentoService pagamentoService
+    ) {
         this.agendamentoProducer = agendamentoProducer;
         this.agendamentoService = agendamentoService;
+        this.pagamentoService = pagamentoService;
     }
 
     /**
@@ -60,7 +68,7 @@ public class AgendamentoController {
         }
 
         String protocolo = UUID.randomUUID().toString();
-        String agora = LocalDateTime.now().toString();
+        String agora = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
         AgendamentoMensagemDTO mensagem = new AgendamentoMensagemDTO(
                 protocolo,
@@ -69,7 +77,6 @@ public class AgendamentoController {
                 agora
         );
 
-        // Despacha para a fila do RabbitMQ
         agendamentoProducer.enfileirarReserva(mensagem);
 
         AgendamentoEnfileiradoResponseDTO resposta = new AgendamentoEnfileiradoResponseDTO(
@@ -110,5 +117,20 @@ public class AgendamentoController {
         String emailCliente = authentication.getName();
         List<AgendamentoResponseDTO> agendamentos = agendamentoService.listarAgendamentosDoCliente(emailCliente);
         return ResponseEntity.ok(agendamentos);
+    }
+
+    /**
+     * Endpoint para cancelar um agendamento.
+     * Caso o agendamento já estivesse confirmado e pago, aciona estorno automático no Mercado Pago.
+     * Retorna HTTP 200 OK.
+     */
+    @RequestMapping(value = "/{id}/cancelar", method = {RequestMethod.PATCH, RequestMethod.POST})
+    public ResponseEntity<CancelamentoAgendamentoResponseDTO> cancelarAgendamento(
+            Authentication authentication,
+            @PathVariable Integer id
+    ) {
+        String emailCliente = authentication.getName();
+        CancelamentoAgendamentoResponseDTO response = pagamentoService.cancelarAgendamentoComEstorno(emailCliente, id);
+        return ResponseEntity.ok(response);
     }
 }
