@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /**
  * Configuração central de segurança do Spring Security.
- * Define a política stateless, liberação das rotas de autenticação, home pública e injeção do filtro JWT.
+ * Define a política stateless, liberação das rotas públicas e injeção do filtro JWT.
  */
 @Configuration
 @EnableWebSecurity
@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/estabelecimentos/**").permitAll()
                         // Rotas públicas de consulta de avaliações e reputação de lojas
                         .requestMatchers(HttpMethod.GET, "/api/v1/avaliacoes/estabelecimento/**").permitAll()
+                        // Webhook do Mercado Pago (chamado pelos servidores do MP sem token de usuário)
+                        .requestMatchers("/api/v1/pagamentos/webhook").permitAll()
                         // Qualquer outra rota exige token JWT válido
                         .anyRequest().authenticated()
                 )
