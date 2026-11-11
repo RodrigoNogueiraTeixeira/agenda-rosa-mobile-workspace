@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -51,11 +52,39 @@ public class MercadoPagoClient {
     }
 
     /**
+     * Normaliza o Access Token removendo espaços acidentais ou prefixo "Bearer ".
+     */
+    private String obterTokenNormalizado() {
+        if (accessToken == null) {
+            return "";
+        }
+        String token = accessToken.trim();
+        if (token.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            token = token.substring(7).trim();
+        }
+        return token;
+    }
+
+    private RuntimeException tratarErroMercadoPago(String operacao, Exception ex) {
+        if (ex instanceof RestClientResponseException mpEx) {
+            String body = mpEx.getResponseBodyAsString();
+            log.error("❌ [Mercado Pago] Erro HTTP {} ao {}: {}", mpEx.getStatusCode().value(), operacao, body, mpEx);
+            return new RuntimeException(
+                    "Falha ao " + operacao + " no Mercado Pago (HTTP " + mpEx.getStatusCode().value() + "): " + body,
+                    mpEx
+            );
+        }
+        log.error("❌ [Mercado Pago] Erro ao {}: {}", operacao, ex.getMessage(), ex);
+        return new RuntimeException("Falha ao " + operacao + " no Mercado Pago: " + ex.getMessage(), ex);
+    }
+
+    /**
      * Cria uma cobrança Pix imediata no Mercado Pago.
      * Retorna o ID da transação, o código Pix Copia e Cola e a imagem do QR Code em Base64.
      */
     public MercadoPagoPixResultado criarPix(Double valor, String descricao, String emailCliente, String nomeCliente, String externalReference) {
-        if (accessToken == null || accessToken.isBlank()) {
+        String token = obterTokenNormalizado();
+        if (token.isBlank()) {
             log.warn("⚠️ MERCADO_PAGO_ACCESS_TOKEN não configurado. Gerando mock de Pix para desenvolvimento.");
             String mockId = "mock-mp-" + UUID.randomUUID().toString().substring(0, 8);
             String mockPixCopiaECola = "00020101021226830014BR.GOV.BCB.PIX2561agenda-rosa-mock-pix520400005303986540" + valor + "5802BR5909AgendaRosa6009SaoPaulo62070503***6304MOCK";
@@ -94,7 +123,7 @@ public class MercadoPagoClient {
 
             String responseJson = restClient.post()
                     .uri("/v1/payments")
-                    .header("Authorization", "Bearer " + accessToken)
+                    .header("Authorization", "Bearer " + token)
                     .header("X-Idempotency-Key", idempotencyKey)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(body)
@@ -125,8 +154,7 @@ public class MercadoPagoClient {
             );
 
         } catch (Exception ex) {
-            log.error("❌ [Mercado Pago] Erro ao criar cobrança Pix: {}", ex.getMessage(), ex);
-            throw new RuntimeException("Falha ao comunicar com o Mercado Pago para gerar o Pix: " + ex.getMessage(), ex);
+            throw tratarErroMercadoPago("criar cobrança Pix", ex);
         }
     }
 
@@ -134,7 +162,8 @@ public class MercadoPagoClient {
      * Consulta os dados e o status de um pagamento pelo seu identificador no Mercado Pago.
      */
     public MercadoPagoConsultaResultado consultarPagamento(String paymentId) {
-        if (accessToken == null || accessToken.isBlank()) {
+        String token = obterTokenNormalizado();
+        if (token.isBlank()) {
             log.warn("⚠️ MERCADO_PAGO_ACCESS_TOKEN não configurado. Retornando status simulado de aprovado.");
             return new MercadoPagoConsultaResultado(paymentId, "approved", "accredited", "agenda-rosa-mock", 100.0);
         }
@@ -144,7 +173,7 @@ public class MercadoPagoClient {
 
             String responseJson = restClient.get()
                     .uri("/v1/payments/{id}", paymentId)
-                    .header("Authorization", "Bearer " + accessToken)
+                    .header("Authorization", "Bearer " + token)
                     .retrieve()
                     .body(String.class);
 
@@ -161,8 +190,7 @@ public class MercadoPagoClient {
             return new MercadoPagoConsultaResultado(mpPaymentId, status, statusDetalhe, externalReference, valor);
 
         } catch (Exception ex) {
-            log.error("❌ [Mercado Pago] Erro ao consultar pagamento [{}]: {}", paymentId, ex.getMessage(), ex);
-            throw new RuntimeException("Falha ao consultar pagamento no Mercado Pago: " + ex.getMessage(), ex);
+            throw tratarErroMercadoPago("consultar pagamento [" + paymentId + "]", ex);
         }
     }
 
@@ -170,7 +198,8 @@ public class MercadoPagoClient {
      * Realiza o estorno/reembolso total de um pagamento aprovado.
      */
     public boolean estornarPagamento(String paymentId) {
-        if (accessToken == null || accessToken.isBlank()) {
+        String token = obterTokenNormalizado();
+        if (token.isBlank()) {
             log.warn("⚠️ MERCADO_PAGO_ACCESS_TOKEN não configurado. Simulando estorno com sucesso para ID: {}", paymentId);
             return true;
         }
@@ -182,7 +211,7 @@ public class MercadoPagoClient {
 
             String responseJson = restClient.post()
                     .uri("/v1/payments/{id}/refunds", paymentId)
-                    .header("Authorization", "Bearer " + accessToken)
+                    .header("Authorization", "Bearer " + token)
                     .header("X-Idempotency-Key", idempotencyKey)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body("{}")
@@ -196,8 +225,7 @@ public class MercadoPagoClient {
             return "approved".equalsIgnoreCase(status) || root.has("id");
 
         } catch (Exception ex) {
-            log.error("❌ [Mercado Pago] Erro ao solicitar estorno para pagamento [{}]: {}", paymentId, ex.getMessage(), ex);
-            throw new RuntimeException("Não foi possível realizar o estorno no Mercado Pago: " + ex.getMessage(), ex);
+            throw tratarErroMercadoPago("solicitar estorno do pagamento [" + paymentId + "]", ex);
         }
     }
 }

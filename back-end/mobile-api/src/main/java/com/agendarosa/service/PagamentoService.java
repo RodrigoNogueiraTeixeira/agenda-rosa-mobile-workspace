@@ -105,6 +105,7 @@ public class PagamentoService {
 
         // 5. Persiste ou atualiza o registro na tabela 'pagamentos'
         String agora = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String ticketUrl = resultado.ticketUrl() != null ? resultado.ticketUrl() : "";
         Pagamento pagamento = pagamentoExistenteOpt.orElseGet(Pagamento::new);
 
         pagamento.setAgendamentoId(agendamento.getId());
@@ -112,10 +113,11 @@ public class PagamentoService {
         pagamento.setValorTotal(valorTotal);
         pagamento.setDescricao(descricao);
         pagamento.setStatus("pendente");
+        pagamento.setPreferenceId("pix-" + resultado.mpPaymentId());
         pagamento.setMpPaymentId(resultado.mpPaymentId());
         pagamento.setStatusDetalhe(resultado.statusDetalhe());
-        pagamento.setInitPoint(resultado.ticketUrl());
-        pagamento.setSandboxInitPoint(resultado.ticketUrl());
+        pagamento.setInitPoint(ticketUrl);
+        pagamento.setSandboxInitPoint(ticketUrl);
         pagamento.setExternalReference(externalReference);
         pagamento.setQrCode(resultado.qrCode());
         pagamento.setQrCodeBase64(resultado.qrCodeBase64());

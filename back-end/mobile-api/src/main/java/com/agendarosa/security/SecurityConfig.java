@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/avaliacoes/estabelecimento/**").permitAll()
                         // Webhook do Mercado Pago (chamado pelos servidores do MP sem token de usuário)
                         .requestMatchers("/api/v1/pagamentos/webhook").permitAll()
+                        // Permite despachos internos de erro para que exceções não sejam mascaradas como 403
+                        .requestMatchers("/error").permitAll()
                         // Qualquer outra rota exige token JWT válido
                         .anyRequest().authenticated()
                 )
