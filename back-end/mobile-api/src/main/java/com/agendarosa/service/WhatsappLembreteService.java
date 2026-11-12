@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Serviço responsável pelo monitoramento proativo e disparo de lembretes via WhatsApp:
  * 1) Lembrete de Véspera (1 dia antes): lembra a cliente do agendamento marcado para o dia seguinte;
  * 2) Lembrete de Pré-atendimento (1h30 antes): avisa a proximidade do horário no dia do atendimento.
+ * Inclui o nome da cliente, estabelecimento, serviço contratado e link direto para rota no GPS (Google Maps / Waze).
  * Utiliza a API Oficial Meta WhatsApp Cloud API com fallback e simulação segura.
  */
 @Service
@@ -283,7 +285,7 @@ public class WhatsappLembreteService {
                     "to", telefoneFormatado,
                     "type", "text",
                     "text", Map.of(
-                            "preview_url", false,
+                            "preview_url", true,
                             "body", preview.mensagemFormatada()
                     )
             );
@@ -305,6 +307,7 @@ public class WhatsappLembreteService {
                     telefoneFormatado,
                     preview.estabelecimentoNome(),
                     preview.enderecoEstabelecimento(),
+                    preview.linkGps(),
                     preview.nomeServico(),
                     preview.profissional(),
                     preview.dataAgendamento(),
@@ -325,6 +328,7 @@ public class WhatsappLembreteService {
                     telefoneFormatado,
                     preview.estabelecimentoNome(),
                     preview.enderecoEstabelecimento(),
+                    preview.linkGps(),
                     preview.nomeServico(),
                     preview.profissional(),
                     preview.dataAgendamento(),
@@ -348,9 +352,12 @@ public class WhatsappLembreteService {
                 .map(Servico::getNome)
                 .orElse("Procedimento de Beleza");
 
-        String enderecoEstabelecimento = estabelecimentoRepository.findById(agendamento.getEstabelecimentoId())
+        Optional<Estabelecimento> estabelecimentoOpt = estabelecimentoRepository.findById(agendamento.getEstabelecimentoId());
+        String enderecoEstabelecimento = estabelecimentoOpt
                 .map(this::formatarEnderecoCompleto)
                 .orElse("Consulte o endereço no aplicativo Agenda Rosa");
+
+        String linkGps = gerarLinkGps(estabelecimentoOpt.orElse(null), enderecoEstabelecimento);
 
         String nomeCliente = (agendamento.getNomeCliente() != null && !agendamento.getNomeCliente().isBlank())
                 ? agendamento.getNomeCliente()
@@ -369,8 +376,8 @@ public class WhatsappLembreteService {
         String telefone = agendamento.getTelefoneCliente() != null ? agendamento.getTelefoneCliente() : "";
 
         String mensagemProfissional = tipoLembrete.equals(TIPO_VESPERA_1_DIA)
-                ? montarTextoMensagemVespera(nomeCliente, nomeEstabelecimento, nomeServico, nomeProfissional, data, horario, enderecoEstabelecimento)
-                : montarTextoMensagemUmaHoraEMeia(nomeCliente, nomeEstabelecimento, nomeServico, nomeProfissional, data, horario, enderecoEstabelecimento);
+                ? montarTextoMensagemVespera(nomeCliente, nomeEstabelecimento, nomeServico, nomeProfissional, data, horario, enderecoEstabelecimento, linkGps)
+                : montarTextoMensagemUmaHoraEMeia(nomeCliente, nomeEstabelecimento, nomeServico, nomeProfissional, data, horario, enderecoEstabelecimento, linkGps);
 
         String telefoneE164 = formatarTelefoneParaE164(telefone);
         String textoCodificado = URLEncoder.encode(mensagemProfissional, StandardCharsets.UTF_8);
@@ -384,6 +391,7 @@ public class WhatsappLembreteService {
                 telefone,
                 nomeEstabelecimento,
                 enderecoEstabelecimento,
+                linkGps,
                 nomeServico,
                 nomeProfissional,
                 data,
@@ -398,7 +406,24 @@ public class WhatsappLembreteService {
     }
 
     /**
-     * MENSAGEM 1: Lembrete de Véspera (1 dia antes, para o dia seguinte).
+     * Gera o link direto de GPS para navegação (Google Maps / Waze).
+     * Se houver latitude e longitude cadastradas, utiliza as coordenadas exatas;
+     * caso contrário, codifica o endereço completo para busca na rota do Google Maps.
+     */
+    public String gerarLinkGps(Estabelecimento e, String enderecoCompleto) {
+        if (e != null && e.getLatitude() != null && e.getLongitude() != null) {
+            return "https://www.google.com/maps/search/?api=1&query=" + e.getLatitude() + "," + e.getLongitude();
+        }
+        if (enderecoCompleto != null && !enderecoCompleto.isBlank()
+                && !enderecoCompleto.toLowerCase().contains("consulte no aplicativo")) {
+            return "https://www.google.com/maps/search/?api=1&query="
+                    + URLEncoder.encode(enderecoCompleto, StandardCharsets.UTF_8);
+        }
+        return "https://www.google.com/maps";
+    }
+
+    /**
+     * MENSAGEM 1: Lembrete de Véspera (1 dia antes, para o dia seguinte) com Link de GPS.
      */
     public String montarTextoMensagemVespera(
             String nomeCliente,
@@ -407,8 +432,13 @@ public class WhatsappLembreteService {
             String nomeProfissional,
             String data,
             String horarioInicio,
-            String enderecoEstabelecimento
+            String enderecoEstabelecimento,
+            String linkGps
     ) {
+        String gpsLinha = (linkGps != null && !linkGps.isBlank())
+                ? "\n📍 *Como chegar (GPS):* " + linkGps
+                : "";
+
         return """
                 🌸 *Agenda Rosa — Lembrete de Agendamento para Amanhã*
                 
@@ -421,7 +451,7 @@ public class WhatsappLembreteService {
                 • *Profissional:* %s
                 • *Data:* Amanhã (%s)
                 • *Horário:* às *%s*
-                • *Localização:* %s
+                • *Endereço:* %s%s
                 
                 ⏰ Também enviaremos um lembrete rápido *1 hora e 30 minutos antes* do seu horário amanhã para que você possa se programar com tranquilidade.
                 
@@ -433,12 +463,13 @@ public class WhatsappLembreteService {
                 nomeProfissional,
                 formatarDataBr(data),
                 horarioInicio != null ? horarioInicio : "--:--",
-                enderecoEstabelecimento
+                enderecoEstabelecimento,
+                gpsLinha
         ).trim();
     }
 
     /**
-     * MENSAGEM 2: Lembrete de Pré-atendimento (1h30 antes do horário).
+     * MENSAGEM 2: Lembrete de Pré-atendimento (1h30 antes do horário) com Link de GPS.
      */
     public String montarTextoMensagemUmaHoraEMeia(
             String nomeCliente,
@@ -447,8 +478,13 @@ public class WhatsappLembreteService {
             String nomeProfissional,
             String data,
             String horarioInicio,
-            String enderecoEstabelecimento
+            String enderecoEstabelecimento,
+            String linkGps
     ) {
+        String gpsLinha = (linkGps != null && !linkGps.isBlank())
+                ? "\n📍 *Como chegar (GPS):* " + linkGps
+                : "";
+
         return """
                 🌸 *Agenda Rosa — Lembrete de Atendimento*
                 
@@ -460,7 +496,7 @@ public class WhatsappLembreteService {
                 • *Serviço:* %s
                 • *Profissional:* %s
                 • *Data e Horário:* %s às *%s*
-                • *Localização:* %s
+                • *Endereço:* %s%s
                 
                 Recomendamos chegar com 5 a 10 minutos de antecedência para realizar seu check-in com tranquilidade. Desejamos um excelente atendimento! 💖
                 """.formatted(
@@ -470,7 +506,8 @@ public class WhatsappLembreteService {
                 nomeProfissional,
                 formatarDataBr(data),
                 horarioInicio != null ? horarioInicio : "--:--",
-                enderecoEstabelecimento
+                enderecoEstabelecimento,
+                gpsLinha
         ).trim();
     }
 

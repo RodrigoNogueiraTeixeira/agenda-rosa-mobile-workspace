@@ -4,7 +4,21 @@ export const TIPO_LEMBRETE_VESPERA = 'VESPERA_1_DIA';
 export const TIPO_LEMBRETE_1H30 = 'PRE_ATENDIMENTO_1H30';
 
 /**
+ * Gera o link direto de GPS para navegação no Google Maps / Waze.
+ */
+export function gerarLinkGps(endereco = '', latitude = null, longitude = null) {
+  if (latitude && longitude) {
+    return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+  }
+  if (endereco && !endereco.toLowerCase().includes('consulte no aplicativo')) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(endereco)}`;
+  }
+  return 'https://www.google.com/maps';
+}
+
+/**
  * MENSAGEM 1: Lembrete de Véspera (1 dia antes, avisando sobre o agendamento de amanhã).
+ * Informa: Nome da cliente, estabelecimento, serviço contratado e link direto de GPS.
  */
 export function montarMensagemLembreteVespera({
   nomeCliente = 'Cliente',
@@ -14,7 +28,12 @@ export function montarMensagemLembreteVespera({
   dataAgendamento = 'Amanhã',
   horarioInicio = '10:00',
   enderecoEstabelecimento = 'Consulte no aplicativo Agenda Rosa',
+  latitude = null,
+  longitude = null,
+  linkGps = null,
 }) {
+  const link = linkGps || gerarLinkGps(enderecoEstabelecimento, latitude, longitude);
+
   return [
     '🌸 *Agenda Rosa — Lembrete de Agendamento para Amanhã*',
     '',
@@ -27,7 +46,8 @@ export function montarMensagemLembreteVespera({
     `• *Profissional:* ${profissional}`,
     `• *Data:* Amanhã (${dataAgendamento})`,
     `• *Horário:* às *${horarioInicio}*`,
-    `• *Localização:* ${enderecoEstabelecimento}`,
+    `• *Endereço:* ${enderecoEstabelecimento}`,
+    `📍 *Como chegar (GPS):* ${link}`,
     '',
     '⏰ Também enviaremos um lembrete rápido *1 hora e 30 minutos antes* do seu horário amanhã para que você possa se programar com tranquilidade.',
     '',
@@ -37,6 +57,7 @@ export function montarMensagemLembreteVespera({
 
 /**
  * MENSAGEM 2: Lembrete de Pré-atendimento (1 hora e 30 minutos antes do início).
+ * Informa: Nome da cliente, estabelecimento, serviço contratado e link direto de GPS.
  */
 export function montarMensagemLembreteUmaHoraEMeia({
   nomeCliente = 'Cliente',
@@ -46,7 +67,12 @@ export function montarMensagemLembreteUmaHoraEMeia({
   dataAgendamento = 'Hoje',
   horarioInicio = '14:30',
   enderecoEstabelecimento = 'Consulte no aplicativo Agenda Rosa',
+  latitude = null,
+  longitude = null,
+  linkGps = null,
 }) {
+  const link = linkGps || gerarLinkGps(enderecoEstabelecimento, latitude, longitude);
+
   return [
     '🌸 *Agenda Rosa — Lembrete de Atendimento*',
     '',
@@ -58,14 +84,15 @@ export function montarMensagemLembreteUmaHoraEMeia({
     `• *Serviço:* ${nomeServico}`,
     `• *Profissional:* ${profissional}`,
     `• *Data e Horário:* ${dataAgendamento} às *${horarioInicio}*`,
-    `• *Localização:* ${enderecoEstabelecimento}`,
+    `• *Endereço:* ${enderecoEstabelecimento}`,
+    `📍 *Como chegar (GPS):* ${link}`,
     '',
     'Recomendamos chegar com 5 a 10 minutos de antecedência para realizar seu check-in com tranquilidade. Desejamos um excelente atendimento! 💖',
   ].join('\n');
 }
 
 /**
- * Mantém compatibilidade padrão (1h30).
+ * Mantém compatibilidade padrão.
  */
 export function montarMensagemLembreteWhatsapp(dados = {}) {
   if (dados.tipoLembrete === TIPO_LEMBRETE_VESPERA || dados.tipo === 'VESPERA') {
@@ -113,15 +140,22 @@ export const whatsappService = {
     }
 
     const tipoFinal = tipo === 'VESPERA' ? TIPO_LEMBRETE_VESPERA : TIPO_LEMBRETE_1H30;
+    const linkGps = dadosFallback.linkGps || gerarLinkGps(
+      dadosFallback.enderecoEstabelecimento,
+      dadosFallback.latitude,
+      dadosFallback.longitude
+    );
+
+    const dadosComGps = { ...dadosFallback, linkGps };
     const mensagemFormatada = tipoFinal === TIPO_LEMBRETE_VESPERA
-      ? montarMensagemLembreteVespera(dadosFallback)
-      : montarMensagemLembreteUmaHoraEMeia(dadosFallback);
+      ? montarMensagemLembreteVespera(dadosComGps)
+      : montarMensagemLembreteUmaHoraEMeia(dadosComGps);
 
     const whatsappUrl = gerarLinkWhatsapp(dadosFallback.telefoneCliente, mensagemFormatada);
 
     return {
       agendamentoId: agendamentoId || 1,
-      ...dadosFallback,
+      ...dadosComGps,
       tipoLembrete: tipoFinal,
       minutosRestantes: tipoFinal === TIPO_LEMBRETE_VESPERA ? 1440 : 90,
       mensagemFormatada,
