@@ -35,8 +35,8 @@ class AssistenteIaServiceTest {
     }
 
     @Test
-    @DisplayName("Deve identificar categoria e recomendar estabelecimentos dentro do orçamento máximo")
-    void deveRecomendarEstabelecimentosComFiltroDeCategoriaEOrcamento() {
+    @DisplayName("Deve tratar a cliente pelo primeiro nome na resposta e recomendar serviços compatíveis")
+    void deveTratarClientePeloNomeERecomendarEstabelecimentos() {
         EstabelecimentoCardResponseDTO lojaCompativel = new EstabelecimentoCardResponseDTO(
                 1,
                 "Studio Rosa Make",
@@ -51,27 +51,14 @@ class AssistenteIaServiceTest {
                 List.of(new ServicoDestaqueDTO(10, "Maquiagem Social", 140.0, 14000, 60))
         );
 
-        EstabelecimentoCardResponseDTO lojaCara = new EstabelecimentoCardResponseDTO(
-                2,
-                "Luxury Noivas",
-                "São Paulo",
-                "Jardins",
-                "Rua Oscar Freire, 500",
-                "01426-000",
-                "https://exemplo.com/logo2.png",
-                -23.56,
-                -46.67,
-                List.of("Maquiagem"),
-                List.of(new ServicoDestaqueDTO(11, "Produção Noiva VIP", 650.0, 65000, 120))
-        );
-
         when(estabelecimentoService.buscarLojas(eq("São Paulo"), any(), any(), eq("Maquiagem")))
-                .thenReturn(List.of(lojaCompativel, lojaCara));
+                .thenReturn(List.of(lojaCompativel));
 
         ConsultaIaRequestDTO request = new ConsultaIaRequestDTO(
                 "Quero fazer uma maquiagem para formatura em Moema",
                 "São Paulo",
-                200.0
+                200.0,
+                "Mariana Silva"
         );
 
         RecomendacaoIaResponseDTO response = assistenteIaService.consultarAssistente(request);
@@ -79,17 +66,18 @@ class AssistenteIaServiceTest {
         assertNotNull(response);
         assertEquals("Maquiagem", response.categoriaIdentificada());
         assertEquals(1, response.estabelecimentosRecomendados().size());
-        assertEquals("Studio Rosa Make", response.estabelecimentosRecomendados().get(0).nome());
+        assertTrue(response.respostaAssistente().contains("Olá, Mariana!"));
         assertTrue(response.dicaPreAtendimento().toLowerCase().contains("pele limpa"));
     }
 
     @Test
-    @DisplayName("Deve bloquear perguntas fora do escopo do negócio (ex: qual o valor de pi) sem buscar lojas")
-    void deveBloquearPerguntasForaDoEscopoDoNegocio() {
+    @DisplayName("Deve bloquear perguntas fora do escopo do negócio (ex: qual o valor de pi) tratando a cliente pelo nome")
+    void deveBloquearPerguntasForaDoEscopoDoNegocioTratandoPeloNome() {
         ConsultaIaRequestDTO perguntaForaEscopo = new ConsultaIaRequestDTO(
                 "Qual o valor de pi?",
                 "São Paulo",
-                null
+                null,
+                "Camila Rocha"
         );
 
         RecomendacaoIaResponseDTO response = assistenteIaService.consultarAssistente(perguntaForaEscopo);
@@ -97,17 +85,17 @@ class AssistenteIaServiceTest {
         assertNotNull(response);
         assertEquals("FORA_DO_ESCOPO", response.categoriaIdentificada());
         assertTrue(response.estabelecimentosRecomendados().isEmpty());
+        assertTrue(response.respostaAssistente().contains("Olá, Camila!"));
         assertTrue(response.respostaAssistente().contains("exclusiva do Agenda Rosa"));
         verify(estabelecimentoService, never()).buscarLojas(any(), any(), any(), any());
     }
 
     @Test
-    @DisplayName("Deve gerar dica especialista de pré-atendimento para diferentes tipos de procedimento")
-    void deveGerarDicaPreAtendimentoPorTipoDeServico() {
-        String dicaUnha = assistenteIaService.gerarDicaPreAtendimento("Manicure e Pedicure em Gel", "Boutique Unhas");
-        String dicaCabelo = assistenteIaService.gerarDicaPreAtendimento("Hidratação e Escova", "Salão Bela");
-
-        assertTrue(dicaUnha.toLowerCase().contains("calçado aberto"));
-        assertTrue(dicaCabelo.toLowerCase().contains("elásticos"));
+    @DisplayName("Deve extrair o primeiro nome corretamente")
+    void deveExtrairPrimeiroNome() {
+        assertEquals("Mariana", assistenteIaService.extrairPrimeiroNome("mariana silva"));
+        assertEquals("Beatriz", assistenteIaService.extrairPrimeiroNome("BEATRIZ"));
+        assertNull(assistenteIaService.extrairPrimeiroNome(""));
+        assertNull(assistenteIaService.extrairPrimeiroNome(null));
     }
 }

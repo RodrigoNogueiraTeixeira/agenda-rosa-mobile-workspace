@@ -47,16 +47,17 @@ class AssistenteIaControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/estabelecimentos/ia/consultar deve retornar 200 OK com recomendação da IA")
+    @DisplayName("POST /api/v1/estabelecimentos/ia/consultar deve retornar 200 OK com recomendação da IA tratando cliente pelo nome")
     void deveConsultarAssistenteIaComSucesso() throws Exception {
         ConsultaIaRequestDTO request = new ConsultaIaRequestDTO(
                 "Quero fazer hidratação capilar",
                 "São Paulo",
-                180.0
+                180.0,
+                "Mariana Silva"
         );
 
         RecomendacaoIaResponseDTO response = new RecomendacaoIaResponseDTO(
-                "Olá! Sou a Assistente Rosa. Selecionei ótimas opções para você.",
+                "Olá, Mariana! Sou a Assistente Rosa. Selecionei ótimas opções para você.",
                 "Evite prender os fios com força antes do procedimento.",
                 "Cabelo",
                 List.of(),
@@ -70,7 +71,7 @@ class AssistenteIaControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.categoriaIdentificada").value("Cabelo"))
-                .andExpect(jsonPath("$.respostaAssistente").exists())
+                .andExpect(jsonPath("$.respostaAssistente").value("Olá, Mariana! Sou a Assistente Rosa. Selecionei ótimas opções para você."))
                 .andExpect(jsonPath("$.dicaPreAtendimento").exists());
     }
 }

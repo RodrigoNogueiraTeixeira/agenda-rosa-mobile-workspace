@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 
 /**
  * DTO de entrada para consultas em linguagem natural à Assistente Rosa (IA).
+ * Permite informar opcionalmente o nome do cliente para atendimento personalizado.
  */
 public record ConsultaIaRequestDTO(
         @NotBlank(message = "Digite o que você procura ou sua dúvida para a Assistente Rosa.")
@@ -13,6 +14,11 @@ public record ConsultaIaRequestDTO(
 
         String cidade,
 
-        Double orcamentoMaximo
+        Double orcamentoMaximo,
+
+        String nomeCliente
 ) {
+    public ConsultaIaRequestDTO(String pergunta, String cidade, Double orcamentoMaximo) {
+        this(pergunta, cidade, orcamentoMaximo, null);
+    }
 }

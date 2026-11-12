@@ -4,6 +4,7 @@ import BuscaIA from '../src/pages/busca-ia';
 import {
   iaService,
   isPerguntaDentroDoEscopoNegocio,
+  extrairPrimeiroNome,
   MENSAGEM_FORA_DO_ESCOPO_NEGOCIO,
 } from '../src/services/ia-service';
 
@@ -22,9 +23,15 @@ jest.mock('../src/services/ia-service', () => {
   };
 });
 
-describe('Tela BuscaIA — Assistente Rosa restrita ao negócio (SCRUM-29)', () => {
+describe('Tela BuscaIA — Assistente Rosa restrita ao negócio e com atendimento pelo nome (SCRUM-29)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('extrai o primeiro nome da cliente corretamente', () => {
+    expect(extrairPrimeiroNome('Mariana Silva')).toBe('Mariana');
+    expect(extrairPrimeiroNome('ana')).toBe('Ana');
+    expect(extrairPrimeiroNome('')).toBe(null);
   });
 
   it('bloqueia perguntas fora do escopo do negócio (ex: qual o valor de pi) e permite apenas temas do Agenda Rosa', () => {
@@ -36,6 +43,11 @@ describe('Tela BuscaIA — Assistente Rosa restrita ao negócio (SCRUM-29)', () 
     expect(
       isPerguntaDentroDoEscopoNegocio('Qual o valor de uma limpeza de pele?')
     ).toBe(true);
+  });
+
+  it('exibe saudação personalizada com o nome da cliente logada', () => {
+    render(<BuscaIA currentUser={{ nome: 'Mariana Silva' }} />);
+    expect(screen.getByText('Olá, Mariana! ✨')).toBeTruthy();
   });
 
   it('exibe mensagem de recusa educada se o usuário perguntar assunto fora do negócio', async () => {
@@ -64,10 +76,10 @@ describe('Tela BuscaIA — Assistente Rosa restrita ao negócio (SCRUM-29)', () 
     });
   });
 
-  it('consulta e exibe recomendações de estabelecimentos para perguntas válidas de beleza', async () => {
+  it('consulta e exibe recomendações de estabelecimentos tratando a cliente pelo nome', async () => {
     iaService.consultarAssistente.mockResolvedValueOnce({
       respostaAssistente:
-        'Olá! Sou a Assistente Rosa. Selecionei o Studio Bella para sua maquiagem.',
+        'Olá, Mariana! Sou a Assistente Rosa. Selecionei o Studio Bella para sua maquiagem.',
       dicaPreAtendimento: 'Compareça com a pele limpa para melhor fixação.',
       estabelecimentosRecomendados: [
         {
@@ -80,7 +92,7 @@ describe('Tela BuscaIA — Assistente Rosa restrita ao negócio (SCRUM-29)', () 
       ],
     });
 
-    render(<BuscaIA />);
+    render(<BuscaIA currentUser={{ nome: 'Mariana Silva' }} />);
 
     fireEvent.changeText(
       screen.getByPlaceholderText(
@@ -92,9 +104,14 @@ describe('Tela BuscaIA — Assistente Rosa restrita ao negócio (SCRUM-29)', () 
     fireEvent.press(screen.getByText('Consultar Assistente Rosa'));
 
     await waitFor(() => {
+      expect(iaService.consultarAssistente).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nomeCliente: 'Mariana Silva',
+        })
+      );
       expect(
         screen.getByText(
-          'Olá! Sou a Assistente Rosa. Selecionei o Studio Bella para sua maquiagem.'
+          'Olá, Mariana! Sou a Assistente Rosa. Selecionei o Studio Bella para sua maquiagem.'
         )
       ).toBeTruthy();
       expect(screen.getByText('Studio Bella Make')).toBeTruthy();

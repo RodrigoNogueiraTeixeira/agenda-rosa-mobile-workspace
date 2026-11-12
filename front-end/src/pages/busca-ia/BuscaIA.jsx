@@ -14,6 +14,7 @@ import { styles } from './styles';
 import { iaService } from '../../services/ia-service';
 
 export default function BuscaIA({
+  currentUser,
   onVoltar,
   onSelecionarEstabelecimento,
 }) {
@@ -23,6 +24,10 @@ export default function BuscaIA({
   const [consultandoIa, setConsultandoIa] = useState(false);
   const [resultadoIa, setResultadoIa] = useState(null);
   const [erroIa, setErroIa] = useState(null);
+
+  const primeiroNomeCliente = currentUser?.nome
+    ? currentUser.nome.trim().split(/\s+/)[0]
+    : null;
 
   async function handleConsultarAssistenteIa() {
     if (!perguntaIa.trim()) {
@@ -38,6 +43,7 @@ export default function BuscaIA({
         pergunta: perguntaIa,
         cidade: cidadeFiltro,
         orcamentoMaximo: orcamentoMaximo ? Number(orcamentoMaximo) : null,
+        nomeCliente: currentUser?.nome || null,
       });
       setResultadoIa(resposta);
     } catch (error) {
@@ -83,7 +89,9 @@ export default function BuscaIA({
             <Text style={styles.badgeText}>IA EXCLUSIVA DO NEGÓCIO</Text>
           </View>
           <Text style={styles.heroTitle}>
-            Consultora Virtual Assistente Rosa
+            {primeiroNomeCliente
+              ? `Olá, ${primeiroNomeCliente}! ✨`
+              : 'Consultora Virtual Assistente Rosa'}
           </Text>
           <Text style={styles.heroSubtitle}>
             Tire dúvidas sobre procedimentos de beleza e estética, receba dicas de

@@ -41,6 +41,16 @@ function normalizarTexto(valor = '') {
 }
 
 /**
+ * Extrai o primeiro nome da cliente de forma elegante (ex: "Mariana Silva" -> "Mariana").
+ */
+export function extrairPrimeiroNome(nomeCompleto = '') {
+  if (!nomeCompleto || typeof nomeCompleto !== 'string') return null;
+  const limpo = nomeCompleto.trim().split(/\s+/)[0];
+  if (!limpo) return null;
+  return limpo.charAt(0).toUpperCase() + limpo.slice(1).toLowerCase();
+}
+
+/**
  * Verifica se a pergunta feita pelo cliente pertence estritamente ao negócio do Agenda Rosa.
  * Bloqueia perguntas aleatórias (como "qual o valor de pi", política, futebol, programação, etc.).
  */
@@ -97,12 +107,21 @@ export function obterDicaPreAtendimentoPorServico(nomeServico = '') {
 
 export const iaService = {
   /**
-   * Consulta a Assistente Rosa (IA) aplicando bloqueio estrito para perguntas fora do escopo do negócio.
+   * Consulta a Assistente Rosa (IA) tratando o cliente pelo nome próprio
+   * e aplicando bloqueio estrito para perguntas fora do escopo do negócio.
    */
-  async consultarAssistente({ pergunta, cidade = '', orcamentoMaximo = null }) {
+  async consultarAssistente({ pergunta, cidade = '', orcamentoMaximo = null, nomeCliente = null }) {
+    const primeiroNome = extrairPrimeiroNome(nomeCliente);
+
     if (!isPerguntaDentroDoEscopoNegocio(pergunta)) {
+      const saudacao = primeiroNome ? `Olá, ${primeiroNome}! ` : 'Olá! ';
       return {
-        respostaAssistente: MENSAGEM_FORA_DO_ESCOPO_NEGOCIO,
+        respostaAssistente:
+          `${saudacao}Sou a Assistente Rosa 🌸, consultora virtual exclusiva do Agenda Rosa. ` +
+          'Posso responder apenas dúvidas voltadas ao nosso negócio: serviços de beleza e estética ' +
+          '(cabelo, unhas, maquiagem, sobrancelhas, cuidados com a pele), recomendações de salões parceiros ' +
+          'e informações sobre seus agendamentos. ' +
+          'Como posso ajudar você a encontrar o procedimento ideal hoje?',
         dicaPreAtendimento:
           'Dica: Pergunte sobre procedimentos como maquiagem, corte, hidratação, unhas, sobrancelhas ou limpeza de pele!',
         categoriaIdentificada: 'FORA_DO_ESCOPO',
@@ -118,6 +137,7 @@ export const iaService = {
           pergunta,
           cidade: cidade ? cidade.trim() : null,
           orcamentoMaximo: orcamentoMaximo ? Number(orcamentoMaximo) : null,
+          nomeCliente: primeiroNome,
         }),
       });
     } catch (error) {
@@ -126,9 +146,13 @@ export const iaService = {
         .catch(() => []);
 
       const dica = obterDicaPreAtendimentoPorServico(pergunta);
+      const saudacao = primeiroNome
+        ? `Olá, ${primeiroNome}! Sou a Assistente Rosa 🌸. Que prazer atender você! `
+        : 'Olá! Sou a Assistente Rosa 🌸. ';
+
       return {
         respostaAssistente:
-          `Olá! Sou a Assistente Rosa 🌸. Analisei o seu pedido ("${pergunta}") e selecionei opções especiais disponíveis na plataforma para o seu atendimento!`,
+          `${saudacao}Analisei o seu pedido ("${pergunta}") e selecionei opções especiais disponíveis na plataforma para o seu atendimento!`,
         dicaPreAtendimento: dica,
         categoriaIdentificada: 'Recomendação Personalizada',
         estabelecimentosRecomendados: lojas.slice(0, 4),

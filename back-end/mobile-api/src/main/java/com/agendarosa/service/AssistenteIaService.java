@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 /**
  * Serviço de Inteligência Artificial (Assistente Rosa) integrado à API gratuita do Google Gemini.
+ * Atende o cliente pelo nome próprio de forma acolhedora e personalizada.
  * Possui Guardrail de Escopo de Negócio: responde exclusivamente sobre serviços de beleza,
  * estética, estabelecimentos parceiros e agendamentos da plataforma Agenda Rosa.
  */
@@ -96,17 +97,25 @@ public class AssistenteIaService {
     }
 
     /**
-     * Consulta a Assistente Rosa aplicando primeiramente o Guardrail de Escopo de Negócio.
-     * Perguntas fora do contexto do Agenda Rosa são recusadas educadamente sem acionar buscas desnecessárias.
+     * Consulta a Assistente Rosa tratando a cliente pelo nome e aplicando o Guardrail de Escopo.
      */
     public RecomendacaoIaResponseDTO consultarAssistente(ConsultaIaRequestDTO dto) {
         String pergunta = dto.pergunta() != null ? dto.pergunta().trim() : "";
+        String primeiroNome = extrairPrimeiroNome(dto.nomeCliente());
 
-        // GUARDRAIL DE ESCOPO: Bloqueia qualquer pergunta que não seja voltada ao negócio do Agenda Rosa
+        // GUARDRAIL DE ESCOPO: Bloqueia qualquer pergunta fora do escopo do negócio
         if (!isPerguntaDentroDoEscopoDoNegocio(pergunta)) {
             log.info("🛡️ [Guardrail IA] Pergunta fora do escopo do negócio bloqueada: '{}'", pergunta);
+            String mensagemRecusa = (primeiroNome != null)
+                    ? "Olá, " + primeiroNome + "! Sou a Assistente Rosa 🌸, consultora virtual exclusiva do Agenda Rosa. "
+                    + "Posso responder apenas dúvidas voltadas ao nosso negócio: serviços de beleza e estética "
+                    + "(cabelo, unhas, maquiagem, sobrancelhas, cuidados com a pele), recomendações de salões parceiros "
+                    + "e informações sobre seus agendamentos. "
+                    + "Como posso ajudar você a encontrar o procedimento ideal hoje?"
+                    : MENSAGEM_FORA_DO_ESCOPO;
+
             return new RecomendacaoIaResponseDTO(
-                    MENSAGEM_FORA_DO_ESCOPO,
+                    mensagemRecusa,
                     "Dica: Pergunte sobre procedimentos como maquiagem, corte, hidratação, unhas, sobrancelhas ou limpeza de pele!",
                     "FORA_DO_ESCOPO",
                     Collections.emptyList(),
@@ -125,7 +134,6 @@ public class AssistenteIaService {
                 categoriaDetectada
         );
 
-        // Se o filtro por categoria não retornou nada, busca o catálogo geral da cidade
         if (catalogo.isEmpty()) {
             catalogo = estabelecimentoService.buscarLojas(dto.cidade(), null, null, null);
         }
@@ -141,7 +149,7 @@ public class AssistenteIaService {
         // 3. Tenta enriquecer a resposta com Google Gemini API se a chave estiver configurada
         if (geminiApiKey != null && !geminiApiKey.isBlank()) {
             try {
-                String prompt = montarPromptRecomendacao(pergunta, dto.cidade(), dto.orcamentoMaximo(), recomendados);
+                String prompt = montarPromptRecomendacao(primeiroNome, pergunta, dto.cidade(), dto.orcamentoMaximo(), recomendados);
                 String respostaGemini = chamarGeminiTexto(prompt);
                 if (respostaGemini != null && !respostaGemini.isBlank()) {
                     return new RecomendacaoIaResponseDTO(
@@ -157,8 +165,9 @@ public class AssistenteIaService {
             }
         }
 
-        // 4. Resposta consultiva estruturada pelo motor inteligente local (Fallback Seguro Gratuito)
+        // 4. Resposta consultiva personalizada tratando a cliente pelo nome
         String respostaLocal = construirRespostaConsultivaLocal(
+                primeiroNome,
                 pergunta,
                 categoriaDetectada,
                 dto.cidade(),
@@ -176,8 +185,21 @@ public class AssistenteIaService {
     }
 
     /**
-     * Valida se a mensagem enviada pela cliente pertence estritamente ao domínio de negócio do Agenda Rosa
-     * (beleza, estética, autocuidado, salões parceiros, agendamentos e preços).
+     * Extrai de forma segura o primeiro nome da cliente (ex: "Mariana Silva" -> "Mariana").
+     */
+    public String extrairPrimeiroNome(String nomeCompleto) {
+        if (nomeCompleto == null || nomeCompleto.isBlank()) {
+            return null;
+        }
+        String limpo = nomeCompleto.trim().split("\\s+")[0];
+        if (limpo.isBlank()) {
+            return null;
+        }
+        return limpo.substring(0, 1).toUpperCase(Locale.ROOT) + limpo.substring(1).toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Valida se a mensagem enviada pertence estritamente ao domínio de negócio do Agenda Rosa.
      */
     public boolean isPerguntaDentroDoEscopoDoNegocio(String pergunta) {
         String normalizada = normalizarTexto(pergunta);
@@ -185,14 +207,12 @@ public class AssistenteIaService {
             return false;
         }
 
-        // 1. Verifica bloqueios explícitos (ex: "qual o valor de pi", matemática, código, prompt injection)
         for (String termoBloqueado : TERMOS_BLOQUEADOS_FORA_ESCOPO) {
             if (normalizada.contains(termoBloqueado)) {
                 return false;
             }
         }
 
-        // Bloqueia se a palavra isolada "pi" ou matérias acadêmicas aparecerem
         String[] tokens = normalizada.replaceAll("[^a-z0-9\\s]", " ").split("\\s+");
         for (String token : tokens) {
             if (token.equals("pi") || token.equals("matematica") || token.equals("geografia")
@@ -201,7 +221,6 @@ public class AssistenteIaService {
             }
         }
 
-        // 2. Verifica se possui pelo menos um termo ou radical do negócio de beleza/agendamento
         for (String token : tokens) {
             if (TERMOS_DOMINIO_NEGOCIO.contains(token)) {
                 return true;
@@ -364,6 +383,7 @@ public class AssistenteIaService {
     }
 
     private String construirRespostaConsultivaLocal(
+            String primeiroNome,
             String pergunta,
             String categoriaDetectada,
             String cidade,
@@ -371,7 +391,12 @@ public class AssistenteIaService {
             List<EstabelecimentoCardResponseDTO> recomendados
     ) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Olá! Sou a Assistente Rosa 🌸. Analisei o seu pedido");
+
+        if (primeiroNome != null && !primeiroNome.isBlank()) {
+            sb.append("Olá, ").append(primeiroNome).append("! Sou a Assistente Rosa 🌸. Que prazer atender você! Analisei o seu pedido");
+        } else {
+            sb.append("Olá! Sou a Assistente Rosa 🌸. Analisei o seu pedido");
+        }
 
         if (categoriaDetectada != null) {
             sb.append(" para a categoria de ").append(categoriaDetectada);
@@ -401,6 +426,7 @@ public class AssistenteIaService {
     }
 
     private String montarPromptRecomendacao(
+            String primeiroNome,
             String pergunta,
             String cidade,
             Double orcamentoMaximo,
@@ -415,8 +441,13 @@ public class AssistenteIaService {
                 })
                 .collect(Collectors.joining("\n"));
 
+        String instrucaoNome = (primeiroNome != null && !primeiroNome.isBlank())
+                ? "A cliente se chama " + primeiroNome + ". É OBRIGATÓRIO chamá-la pelo primeiro nome de forma calorosa, amigável e profissional logo no início da sua resposta (ex: 'Olá, " + primeiroNome + "!')."
+                : "Seja acolhedora, amigável e profissional com a cliente.";
+
         return """
                 Você é a Assistente Rosa, consultora virtual exclusiva do aplicativo mobile Agenda Rosa.
+                REGRA DE PERSONALIZAÇÃO: %s
                 REGRA INVIOLÁVEL DE ESCOPO: Você é estritamente proibida de responder perguntas sobre matemática (como valor de pi), história, programação, política, esportes ou qualquer assunto fora de beleza, estética, autocuidado e agendamentos no Agenda Rosa. Se a pergunta fugir do escopo do negócio, recuse educadamente e oriente a cliente a perguntar sobre procedimentos de beleza.
                 Responda em português do Brasil, de forma elegante, simpática e objetiva (máximo de 4 frases).
                 Pedido da cliente: "%s"
@@ -424,6 +455,7 @@ public class AssistenteIaService {
                 Estabelecimentos disponíveis encontrados no banco de dados:
                 %s
                 """.formatted(
+                instrucaoNome,
                 pergunta,
                 cidade != null ? cidade : "Todas",
                 orcamentoMaximo != null ? "R$ " + orcamentoMaximo : "Sem limite",
