@@ -229,3 +229,4 @@ export const styles = StyleSheet.create({
     backgroundColor: '#E8CBD6',
   },
 });
+

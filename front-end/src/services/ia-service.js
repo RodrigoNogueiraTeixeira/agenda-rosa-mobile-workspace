@@ -23,6 +23,10 @@ const TERMOS_DOMINIO_NEGOCIO = [
   'marcar', 'reserva', 'cancelar', 'preco', 'precos', 'valor', 'orcamento', 'pagamento',
   'pix', 'avaliacao', 'recomendar', 'recomendacao', 'whatsapp', 'lembrete', 'notificacao',
   'agenda', 'rosa', 'procedimento', 'servico', 'servicos',
+  // Termos de auxilio, menus, abas e guia de uso do app
+  'menu', 'menus', 'guia', 'guiar', 'tutorial', 'passo', 'ajuda', 'ajudar', 'como funciona',
+  'navegar', 'navegacao', 'aba', 'abas', 'tela', 'telas', 'inicio', 'perfil', 'historico',
+  'aplicativo', 'app',
 ];
 
 const TERMOS_BLOQUEADOS = [
@@ -147,14 +151,32 @@ export const iaService = {
 
       const dica = obterDicaPreAtendimentoPorServico(pergunta);
       const saudacao = primeiroNome
-        ? `Olá, ${primeiroNome}! Sou a Assistente Rosa 🌸. Que prazer atender você! `
+        ? `Olá, ${primeiroNome}! Sou a Assistente Rosa 🌸. `
         : 'Olá! Sou a Assistente Rosa 🌸. ';
 
+      const perguntaNorm = normalizarTexto(pergunta);
+      const isAjudaNavegacao =
+        perguntaNorm.includes('como agendar') ||
+        perguntaNorm.includes('como marcar') ||
+        perguntaNorm.includes('fazer agendamento') ||
+        perguntaNorm.includes('passo a passo') ||
+        perguntaNorm.includes('como funciona') ||
+        perguntaNorm.includes('menu') ||
+        perguntaNorm.includes('navegar') ||
+        perguntaNorm.includes('guia') ||
+        perguntaNorm.includes('como uso') ||
+        perguntaNorm.includes('como usar') ||
+        perguntaNorm.includes('onde clico') ||
+        perguntaNorm.includes('aba');
+
+      const textoResposta = isAjudaNavegacao
+        ? `${saudacao}Te guio com todo carinho! Para agendar: 1) Na aba "Início", escolha um salão parceiro ou selecione uma categoria; 2) Toque no estabelecimento e escolha o serviço, o profissional e o horário disponível; 3) Confirme o agendamento! Na aba "Agendamentos" você acompanha todos os seus horários e nós enviamos lembretes com rota GPS no seu WhatsApp na véspera e 1h30 antes.`
+        : `${saudacao}Que prazer atender você! Analisei o seu pedido ("${pergunta}") e selecionei opções especiais disponíveis na plataforma para o seu atendimento!`;
+
       return {
-        respostaAssistente:
-          `${saudacao}Analisei o seu pedido ("${pergunta}") e selecionei opções especiais disponíveis na plataforma para o seu atendimento!`,
+        respostaAssistente: textoResposta,
         dicaPreAtendimento: dica,
-        categoriaIdentificada: 'Recomendação Personalizada',
+        categoriaIdentificada: isAjudaNavegacao ? 'Guia e Navegação' : 'Recomendação Personalizada',
         estabelecimentosRecomendados: lojas.slice(0, 4),
         motorUtilizado: 'Assistente Rosa IA',
       };

@@ -91,6 +91,26 @@ class AssistenteIaServiceTest {
     }
 
     @Test
+    @DisplayName("Deve orientar a cliente com o passo a passo de agendamento e menus do aplicativo")
+    void deveOrientarClienteComPassoAPassoDeAgendamentoEMenus() {
+        ConsultaIaRequestDTO perguntaAjuda = new ConsultaIaRequestDTO(
+                "Como faço para agendar pelo aplicativo? Quais os menus?",
+                null,
+                null,
+                "Mariana Silva"
+        );
+
+        RecomendacaoIaResponseDTO response = assistenteIaService.consultarAssistente(perguntaAjuda);
+
+        assertNotNull(response);
+        assertNotEquals("FORA_DO_ESCOPO", response.categoriaIdentificada());
+        assertTrue(response.respostaAssistente().contains("Olá, Mariana!"));
+        assertTrue(response.respostaAssistente().contains("Início"));
+        assertTrue(response.respostaAssistente().contains("Agendamentos"));
+        assertTrue(response.respostaAssistente().contains("GPS"));
+    }
+
+    @Test
     @DisplayName("Deve extrair o primeiro nome corretamente")
     void deveExtrairPrimeiroNome() {
         assertEquals("Mariana", assistenteIaService.extrairPrimeiroNome("mariana silva"));

@@ -62,7 +62,11 @@ public class AssistenteIaService {
             "preco", "precos", "valor", "valores", "custo", "orcamento", "barato", "promocao",
             "pagamento", "pix", "avaliacao", "nota", "indicacao", "indicar", "recomendar", "recomendacao",
             "procuro", "busco", "quero", "preciso", "onde", "bairro", "cidade",
-            "whatsapp", "lembrete", "notificacao", "aviso", "agenda", "rosa", "procedimento", "servico", "servicos"
+            "whatsapp", "lembrete", "notificacao", "aviso", "agenda", "rosa", "procedimento", "servico", "servicos",
+            // Termos de auxilio ao cliente, menus, abas e navegacao no app
+            "menu", "menus", "guia", "guiar", "tutorial", "passo", "ajuda", "ajudar", "como funciona",
+            "navegar", "navegacao", "aba", "abas", "tela", "telas", "inicio", "perfil", "historico",
+            "aplicativo", "app"
     );
 
     /**
@@ -392,6 +396,33 @@ public class AssistenteIaService {
     ) {
         StringBuilder sb = new StringBuilder();
 
+        String perguntaNorm = normalizarTexto(pergunta);
+        boolean isDuvidaNavegacaoOuAgendamento = perguntaNorm.contains("como agendar")
+                || perguntaNorm.contains("como marcar")
+                || perguntaNorm.contains("fazer agendamento")
+                || perguntaNorm.contains("passo a passo")
+                || perguntaNorm.contains("como funciona")
+                || perguntaNorm.contains("menu")
+                || perguntaNorm.contains("navegar")
+                || perguntaNorm.contains("guia")
+                || perguntaNorm.contains("como uso")
+                || perguntaNorm.contains("como usar")
+                || perguntaNorm.contains("onde clico")
+                || perguntaNorm.contains("aba");
+
+        if (isDuvidaNavegacaoOuAgendamento) {
+            if (primeiroNome != null && !primeiroNome.isBlank()) {
+                sb.append("Olá, ").append(primeiroNome).append("! Sou a Assistente Rosa 🌸 e te guio com todo carinho! ");
+            } else {
+                sb.append("Olá! Sou a Assistente Rosa 🌸 e te guio com todo carinho! ");
+            }
+            sb.append("Para agendar é bem simples: ")
+              .append("1) Na aba 'Início', escolha um salão parceiro ou selecione uma categoria (Cabelo, Unhas, Estética, Sobrancelha, Maquiagem); ")
+              .append("2) Toque no estabelecimento e escolha o serviço, o profissional e o horário disponível; ")
+              .append("3) Confirme o seu agendamento! Na aba 'Agendamentos' você acompanha todos os seus horários e nós enviamos lembretes com rota GPS no seu WhatsApp na véspera e 1h30 antes.");
+            return sb.toString();
+        }
+
         if (primeiroNome != null && !primeiroNome.isBlank()) {
             sb.append("Olá, ").append(primeiroNome).append("! Sou a Assistente Rosa 🌸. Que prazer atender você! Analisei o seu pedido");
         } else {
@@ -449,6 +480,15 @@ public class AssistenteIaService {
                 Você é a Assistente Rosa, consultora virtual exclusiva do aplicativo mobile Agenda Rosa.
                 REGRA DE PERSONALIZAÇÃO: %s
                 REGRA INVIOLÁVEL DE ESCOPO: Você é estritamente proibida de responder perguntas sobre matemática (como valor de pi), história, programação, política, esportes ou qualquer assunto fora de beleza, estética, autocuidado e agendamentos no Agenda Rosa. Se a pergunta fugir do escopo do negócio, recuse educadamente e oriente a cliente a perguntar sobre procedimentos de beleza.
+                
+                CONHECIMENTO DE MENUS E NAVEGAÇÃO DO AGENDA ROSA:
+                - Aba "Início": Vitrine principal com salões e clínicas parceiras, busca por filtros (cidade, bairro) e categorias (Cabelo, Unhas, Estética, Sobrancelha, Maquiagem).
+                - Fluxo de Agendamento: 1. Na aba Início, toque no estabelecimento desejado; 2. Escolha o serviço/procedimento; 3. Escolha o profissional e o horário disponível; 4. Confirme o agendamento.
+                - Aba "Agendamentos": Histórico onde a cliente acompanha todos os seus agendamentos marcados.
+                - Aba "Perfil": Dados cadastrais da cliente e configurações de conta.
+                - Lembretes no WhatsApp: O aplicativo envia notificações automáticas 1 dia antes e 1h30 antes com link da rota no GPS (Google Maps/Waze).
+                - Se a cliente pedir ajuda sobre como agendar, onde clicar, menus ou como usar o app, oriente-a passo a passo com simpatia e clareza.
+
                 Responda em português do Brasil, de forma elegante, simpática e objetiva (máximo de 4 frases).
                 Pedido da cliente: "%s"
                 Cidade filtro: %s | Orçamento máximo: %s

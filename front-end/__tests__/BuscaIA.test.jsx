@@ -56,6 +56,12 @@ describe('Tela BuscaIA & Balãozinho Flutuante da Rosa (SCRUM-29)', () => {
     expect(
       isPerguntaDentroDoEscopoNegocio('Qual o valor de uma limpeza de pele?')
     ).toBe(true);
+    expect(
+      isPerguntaDentroDoEscopoNegocio('Como faço para agendar pelo aplicativo?')
+    ).toBe(true);
+    expect(
+      isPerguntaDentroDoEscopoNegocio('Quais são os menus e como funciona?')
+    ).toBe(true);
   });
 
   it('exibe saudação personalizada com o nome da cliente logada na tela cheia', () => {
