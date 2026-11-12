@@ -32,12 +32,16 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Serviço responsável pelo monitoramento proativo de agendamentos e disparo de lembretes
- * via WhatsApp quando faltam 1 hora e 30 minutos (90 minutos) para o atendimento do cliente.
- * Utiliza a API Oficial Meta WhatsApp Cloud API (gratuita em modo sandbox/teste) com fallback seguro.
+ * Serviço responsável pelo monitoramento proativo e disparo de lembretes via WhatsApp:
+ * 1) Lembrete de Véspera (1 dia antes): lembra a cliente do agendamento marcado para o dia seguinte;
+ * 2) Lembrete de Pré-atendimento (1h30 antes): avisa a proximidade do horário no dia do atendimento.
+ * Utiliza a API Oficial Meta WhatsApp Cloud API com fallback e simulação segura.
  */
 @Service
 public class WhatsappLembreteService {
+
+    public static final String TIPO_VESPERA_1_DIA = "VESPERA_1_DIA";
+    public static final String TIPO_PRE_ATENDIMENTO_1H30 = "PRE_ATENDIMENTO_1H30";
 
     private static final Logger log = LoggerFactory.getLogger(WhatsappLembreteService.class);
     private static final String WHATSAPP_CLOUD_API_URL = "https://graph.facebook.com/v21.0";
@@ -62,10 +66,11 @@ public class WhatsappLembreteService {
     private final RestClient restClient;
 
     /**
-     * Controle em memória de agendamentos já notificados na janela de 1h30,
-     * garantindo idempotência sem necessitar alterar o schema do banco Neon (ddl-auto: validate).
+     * Controle em memória dos agendamentos já notificados para cada gatilho,
+     * garantindo idempotência estrita sem alterar as tabelas existentes no banco Neon (ddl-auto: validate).
      */
-    private final Set<Integer> agendamentosNotificados = ConcurrentHashMap.newKeySet();
+    private final Set<Integer> agendamentosNotificadosVespera = ConcurrentHashMap.newKeySet();
+    private final Set<Integer> agendamentosNotificadosUmaHoraEMeia = ConcurrentHashMap.newKeySet();
 
     @Autowired
     public WhatsappLembreteService(
@@ -98,16 +103,61 @@ public class WhatsappLembreteService {
     }
 
     /**
-     * Verifica todos os agendamentos ativos do dia e dispara o lembrete via WhatsApp
-     * para aqueles cujo horário de início esteja a 1 hora e 30 minutos (90 minutos) de distância.
+     * Executa a verificação completa de lembretes:
+     * 1) Agendamentos de amanhã (lembrete de véspera / 1 dia antes);
+     * 2) Agendamentos de hoje na janela de 1h30 (90 minutos).
      */
     @Transactional(readOnly = true)
-    public List<LembreteWhatsappResponseDTO> verificarEDispararLembretesAutomaticos() {
-        return verificarEDispararLembretesAutomaticos(LocalDateTime.now());
+    public List<LembreteWhatsappResponseDTO> verificarEDispararTodosLembretesAutomaticos() {
+        return verificarEDispararTodosLembretesAutomaticos(LocalDateTime.now());
     }
 
     @Transactional(readOnly = true)
-    public List<LembreteWhatsappResponseDTO> verificarEDispararLembretesAutomaticos(LocalDateTime instanteReferencia) {
+    public List<LembreteWhatsappResponseDTO> verificarEDispararTodosLembretesAutomaticos(LocalDateTime instanteReferencia) {
+        List<LembreteWhatsappResponseDTO> todosDisparados = new ArrayList<>();
+        todosDisparados.addAll(verificarEDispararLembretesVespera(instanteReferencia.toLocalDate()));
+        todosDisparados.addAll(verificarEDispararLembretesUmaHoraEMeia(instanteReferencia));
+        return todosDisparados;
+    }
+
+    /**
+     * LEMBRETE 1 DIA ANTES: Notifica clientes com agendamentos marcados para o dia seguinte.
+     */
+    @Transactional(readOnly = true)
+    public List<LembreteWhatsappResponseDTO> verificarEDispararLembretesVespera(LocalDate dataHoje) {
+        String dataAmanha = dataHoje.plusDays(1).toString();
+        List<Agendamento> agendamentos = agendamentoRepository.findAll();
+        List<LembreteWhatsappResponseDTO> disparados = new ArrayList<>();
+
+        for (Agendamento agendamento : agendamentos) {
+            if (!isAgendamentoAtivoElegivel(agendamento, dataAmanha)) {
+                continue;
+            }
+
+            if (agendamento.getId() != null && agendamentosNotificadosVespera.contains(agendamento.getId())) {
+                continue;
+            }
+
+            LembreteWhatsappResponseDTO lembrete = enviarLembreteWhatsapp(
+                    agendamento,
+                    1440L, // ~24 horas restantes
+                    TIPO_VESPERA_1_DIA
+            );
+
+            if (agendamento.getId() != null) {
+                agendamentosNotificadosVespera.add(agendamento.getId());
+            }
+            disparados.add(lembrete);
+        }
+
+        return disparados;
+    }
+
+    /**
+     * LEMBRETE 1H30 ANTES: Notifica clientes quando faltar 1 hora e 30 minutos para o agendamento de hoje.
+     */
+    @Transactional(readOnly = true)
+    public List<LembreteWhatsappResponseDTO> verificarEDispararLembretesUmaHoraEMeia(LocalDateTime instanteReferencia) {
         String dataHoje = instanteReferencia.toLocalDate().toString();
         List<Agendamento> todosAgendamentos = agendamentoRepository.findAll();
         List<LembreteWhatsappResponseDTO> disparados = new ArrayList<>();
@@ -120,7 +170,7 @@ public class WhatsappLembreteService {
                 continue;
             }
 
-            if (agendamento.getId() != null && agendamentosNotificados.contains(agendamento.getId())) {
+            if (agendamento.getId() != null && agendamentosNotificadosUmaHoraEMeia.contains(agendamento.getId())) {
                 continue;
             }
 
@@ -132,9 +182,13 @@ public class WhatsappLembreteService {
             long minutosRestantes = Duration.between(instanteReferencia, dataHoraInicio).toMinutes();
 
             if (minutosRestantes >= limiteInferior && minutosRestantes <= limiteSuperior) {
-                LembreteWhatsappResponseDTO lembrete = enviarLembreteWhatsapp(agendamento, minutosRestantes);
+                LembreteWhatsappResponseDTO lembrete = enviarLembreteWhatsapp(
+                        agendamento,
+                        minutosRestantes,
+                        TIPO_PRE_ATENDIMENTO_1H30
+                );
                 if (agendamento.getId() != null) {
-                    agendamentosNotificados.add(agendamento.getId());
+                    agendamentosNotificadosUmaHoraEMeia.add(agendamento.getId());
                 }
                 disparados.add(lembrete);
             }
@@ -144,29 +198,44 @@ public class WhatsappLembreteService {
     }
 
     /**
-     * Dispara imediatamente o lembrete profissional de 1h30 para um agendamento específico.
+     * Disparo manual de teste/demonstração para um agendamento com escolha de tipo.
      */
     @Transactional(readOnly = true)
-    public LembreteWhatsappResponseDTO dispararLembreteManual(Integer agendamentoId) {
+    public LembreteWhatsappResponseDTO dispararLembreteManual(Integer agendamentoId, String tipoLembrete) {
         Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
                 .orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado com o ID: " + agendamentoId));
 
+        String tipoFinal = (tipoLembrete != null && tipoLembrete.equalsIgnoreCase("VESPERA"))
+                ? TIPO_VESPERA_1_DIA
+                : TIPO_PRE_ATENDIMENTO_1H30;
+
         LocalDateTime dataHoraInicio = extrairDataHoraAgendamento(agendamento);
-        long minutosRestantes = 90L;
+        long minutosRestantes = tipoFinal.equals(TIPO_VESPERA_1_DIA) ? 1440L : 90L;
         if (dataHoraInicio != null) {
             long calculado = Duration.between(LocalDateTime.now(), dataHoraInicio).toMinutes();
-            minutosRestantes = calculado > 0 ? calculado : 90L;
+            if (calculado > 0) {
+                minutosRestantes = calculado;
+            }
         }
 
-        LembreteWhatsappResponseDTO resposta = enviarLembreteWhatsapp(agendamento, minutosRestantes);
+        LembreteWhatsappResponseDTO resposta = enviarLembreteWhatsapp(agendamento, minutosRestantes, tipoFinal);
         if (agendamento.getId() != null) {
-            agendamentosNotificados.add(agendamento.getId());
+            if (tipoFinal.equals(TIPO_VESPERA_1_DIA)) {
+                agendamentosNotificadosVespera.add(agendamento.getId());
+            } else {
+                agendamentosNotificadosUmaHoraEMeia.add(agendamento.getId());
+            }
         }
         return resposta;
     }
 
+    @Transactional(readOnly = true)
+    public LembreteWhatsappResponseDTO dispararLembreteManual(Integer agendamentoId) {
+        return dispararLembreteManual(agendamentoId, TIPO_PRE_ATENDIMENTO_1H30);
+    }
+
     /**
-     * Lista os lembretes estruturados de 1h30 para os agendamentos ativos do cliente autenticado.
+     * Lista os lembretes estruturados para os agendamentos ativos do cliente autenticado.
      */
     @Transactional(readOnly = true)
     public List<LembreteWhatsappResponseDTO> listarLembretesDoCliente(String emailCliente) {
@@ -181,21 +250,29 @@ public class WhatsappLembreteService {
                         && !a.getStatus().equalsIgnoreCase("cancelado")
                         && !a.getStatus().equalsIgnoreCase("recusado"))
                 .limit(5)
-                .map(a -> construirPreviewLembrete(a, calcularMinutosRestantesOuPadrao(a)))
+                .map(a -> {
+                    long minutos = calcularMinutosRestantesOuPadrao(a);
+                    String tipo = minutos > 720 ? TIPO_VESPERA_1_DIA : TIPO_PRE_ATENDIMENTO_1H30;
+                    return construirPreviewLembrete(a, minutos, tipo);
+                })
                 .toList();
     }
 
     /**
-     * Monta a mensagem profissional e realiza o envio via WhatsApp Cloud API (ou modo seguro).
+     * Monta e despacha a mensagem via Meta WhatsApp Cloud API ou registra no log com link oficial wa.me.
      */
-    public LembreteWhatsappResponseDTO enviarLembreteWhatsapp(Agendamento agendamento, long minutosRestantes) {
-        LembreteWhatsappResponseDTO preview = construirPreviewLembrete(agendamento, minutosRestantes);
+    public LembreteWhatsappResponseDTO enviarLembreteWhatsapp(
+            Agendamento agendamento,
+            long minutosRestantes,
+            String tipoLembrete
+    ) {
+        LembreteWhatsappResponseDTO preview = construirPreviewLembrete(agendamento, minutosRestantes, tipoLembrete);
         String telefoneFormatado = formatarTelefoneParaE164(preview.telefoneCliente());
 
         if (whatsappAccessToken == null || whatsappAccessToken.isBlank()
                 || whatsappPhoneNumberId == null || whatsappPhoneNumberId.isBlank()) {
-            log.info("📲 [WhatsApp Lembrete 1h30 - Modo Seguro] Agendamento #{}: Lembrete preparado para {} ({}). Link direto: {}",
-                    preview.agendamentoId(), preview.nomeCliente(), telefoneFormatado, preview.whatsappUrl());
+            log.info("📲 [WhatsApp {} - Modo Seguro] Agendamento #{}: Lembrete para {} ({}). Link: {}",
+                    tipoLembrete, preview.agendamentoId(), preview.nomeCliente(), telefoneFormatado, preview.whatsappUrl());
             return preview;
         }
 
@@ -219,8 +296,8 @@ public class WhatsappLembreteService {
                     .retrieve()
                     .toBodilessEntity();
 
-            log.info("✅ [WhatsApp Cloud API] Lembrete de 1h30 enviado com sucesso para {} ({}) - Agendamento #{}",
-                    preview.nomeCliente(), telefoneFormatado, preview.agendamentoId());
+            log.info("✅ [WhatsApp Cloud API] Lembrete ({}) enviado com sucesso para {} ({}) - Agendamento #{}",
+                    tipoLembrete, preview.nomeCliente(), telefoneFormatado, preview.agendamentoId());
 
             return new LembreteWhatsappResponseDTO(
                     preview.agendamentoId(),
@@ -233,14 +310,15 @@ public class WhatsappLembreteService {
                     preview.dataAgendamento(),
                     preview.horarioInicio(),
                     preview.minutosRestantes(),
+                    tipoLembrete,
                     preview.mensagemFormatada(),
                     preview.whatsappUrl(),
                     "ENVIADO_WHATSAPP_API",
                     LocalDateTime.now().toString()
             );
         } catch (Exception ex) {
-            log.error("❌ Falha ao disparar WhatsApp Cloud API para Agendamento #{}: {}",
-                    preview.agendamentoId(), ex.getMessage());
+            log.error("❌ Falha ao disparar WhatsApp Cloud API ({}) para Agendamento #{}: {}",
+                    tipoLembrete, preview.agendamentoId(), ex.getMessage());
             return new LembreteWhatsappResponseDTO(
                     preview.agendamentoId(),
                     preview.nomeCliente(),
@@ -252,6 +330,7 @@ public class WhatsappLembreteService {
                     preview.dataAgendamento(),
                     preview.horarioInicio(),
                     preview.minutosRestantes(),
+                    tipoLembrete,
                     preview.mensagemFormatada(),
                     preview.whatsappUrl(),
                     "FALLBACK_LINK_DIRETO",
@@ -260,7 +339,11 @@ public class WhatsappLembreteService {
         }
     }
 
-    private LembreteWhatsappResponseDTO construirPreviewLembrete(Agendamento agendamento, long minutosRestantes) {
+    private LembreteWhatsappResponseDTO construirPreviewLembrete(
+            Agendamento agendamento,
+            long minutosRestantes,
+            String tipoLembrete
+    ) {
         String nomeServico = servicoRepository.findById(agendamento.getServicoId())
                 .map(Servico::getNome)
                 .orElse("Procedimento de Beleza");
@@ -285,15 +368,9 @@ public class WhatsappLembreteService {
         String horario = agendamento.getHorarioInicio() != null ? agendamento.getHorarioInicio() : agendamento.getHorario();
         String telefone = agendamento.getTelefoneCliente() != null ? agendamento.getTelefoneCliente() : "";
 
-        String mensagemProfissional = montarTextoMensagemProfissional(
-                nomeCliente,
-                nomeEstabelecimento,
-                nomeServico,
-                nomeProfissional,
-                data,
-                horario,
-                enderecoEstabelecimento
-        );
+        String mensagemProfissional = tipoLembrete.equals(TIPO_VESPERA_1_DIA)
+                ? montarTextoMensagemVespera(nomeCliente, nomeEstabelecimento, nomeServico, nomeProfissional, data, horario, enderecoEstabelecimento)
+                : montarTextoMensagemUmaHoraEMeia(nomeCliente, nomeEstabelecimento, nomeServico, nomeProfissional, data, horario, enderecoEstabelecimento);
 
         String telefoneE164 = formatarTelefoneParaE164(telefone);
         String textoCodificado = URLEncoder.encode(mensagemProfissional, StandardCharsets.UTF_8);
@@ -312,6 +389,7 @@ public class WhatsappLembreteService {
                 data,
                 horario,
                 minutosRestantes,
+                tipoLembrete,
                 mensagemProfissional,
                 whatsappUrl,
                 "PRONTO_PARA_ENVIO",
@@ -319,7 +397,50 @@ public class WhatsappLembreteService {
         );
     }
 
-    public String montarTextoMensagemProfissional(
+    /**
+     * MENSAGEM 1: Lembrete de Véspera (1 dia antes, para o dia seguinte).
+     */
+    public String montarTextoMensagemVespera(
+            String nomeCliente,
+            String nomeEstabelecimento,
+            String nomeServico,
+            String nomeProfissional,
+            String data,
+            String horarioInicio,
+            String enderecoEstabelecimento
+    ) {
+        return """
+                🌸 *Agenda Rosa — Lembrete de Agendamento para Amanhã*
+                
+                Olá, *%s*! Tudo bem? ✨
+                Passando para lembrar que você tem um horário de autocuidado agendado para *amanhã*!
+                
+                📋 *Detalhes do seu Agendamento para Amanhã:*
+                • *Estabelecimento:* %s
+                • *Serviço:* %s
+                • *Profissional:* %s
+                • *Data:* Amanhã (%s)
+                • *Horário:* às *%s*
+                • *Localização:* %s
+                
+                ⏰ Também enviaremos um lembrete rápido *1 hora e 30 minutos antes* do seu horário amanhã para que você possa se programar com tranquilidade.
+                
+                Caso precise de qualquer informação ou ajuste de horário prévio, entre em contato pelo aplicativo. Até amanhã! 💖
+                """.formatted(
+                nomeCliente,
+                nomeEstabelecimento,
+                nomeServico,
+                nomeProfissional,
+                formatarDataBr(data),
+                horarioInicio != null ? horarioInicio : "--:--",
+                enderecoEstabelecimento
+        ).trim();
+    }
+
+    /**
+     * MENSAGEM 2: Lembrete de Pré-atendimento (1h30 antes do horário).
+     */
+    public String montarTextoMensagemUmaHoraEMeia(
             String nomeCliente,
             String nomeEstabelecimento,
             String nomeServico,
@@ -393,7 +514,7 @@ public class WhatsappLembreteService {
         return partes.isEmpty() ? "Consulte no aplicativo Agenda Rosa" : String.join(" - ", partes);
     }
 
-    private boolean isAgendamentoAtivoElegivel(Agendamento agendamento, String dataHoje) {
+    private boolean isAgendamentoAtivoElegivel(Agendamento agendamento, String dataAlvo) {
         if (agendamento.getCanceladoEm() != null) {
             return false;
         }
@@ -402,7 +523,7 @@ public class WhatsappLembreteService {
             return false;
         }
         String data = agendamento.getDataAgendamento() != null ? agendamento.getDataAgendamento() : agendamento.getData();
-        return dataHoje.equals(data);
+        return dataAlvo.equals(data);
     }
 
     private LocalDateTime extrairDataHoraAgendamento(Agendamento agendamento) {

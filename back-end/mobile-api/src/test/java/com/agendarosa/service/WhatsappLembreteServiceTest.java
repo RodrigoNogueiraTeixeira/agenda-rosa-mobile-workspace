@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Testes Unitários do WhatsappLembreteService (Janela de 1h30 antes)")
+@DisplayName("Testes Unitários do WhatsappLembreteService (1 dia antes e 1h30 antes)")
 class WhatsappLembreteServiceTest {
 
     @Mock
@@ -51,7 +52,56 @@ class WhatsappLembreteServiceTest {
     }
 
     @Test
-    @DisplayName("Deve disparar lembrete automaticamente quando faltar 1 hora e 30 minutos (90 min) para o agendamento")
+    @DisplayName("Deve disparar lembrete de véspera (1 dia antes) para agendamentos marcados para o dia seguinte")
+    void deveDispararLembreteDeVesperaParaAgendamentoDoDiaSeguinte() {
+        LocalDate hoje = LocalDate.of(2026, 11, 12);
+        String dataAmanha = "2026-11-13";
+
+        Agendamento agendamentoAmanha = new Agendamento();
+        agendamentoAmanha.setId(80);
+        agendamentoAmanha.setClienteId(1);
+        agendamentoAmanha.setEstabelecimentoId(10);
+        agendamentoAmanha.setServicoId(20);
+        agendamentoAmanha.setNomeCliente("Juliana Costa");
+        agendamentoAmanha.setTelefoneCliente("(11) 97777-6666");
+        agendamentoAmanha.setEstabelecimentoNome("Studio Glamour");
+        agendamentoAmanha.setProfissional("Renata");
+        agendamentoAmanha.setDataAgendamento(dataAmanha);
+        agendamentoAmanha.setHorarioInicio("10:00");
+        agendamentoAmanha.setStatus("Confirmado");
+
+        Agendamento agendamentoHoje = new Agendamento();
+        agendamentoHoje.setId(81);
+        agendamentoHoje.setDataAgendamento("2026-11-12");
+        agendamentoHoje.setStatus("Confirmado");
+
+        when(agendamentoRepository.findAll()).thenReturn(List.of(agendamentoAmanha, agendamentoHoje));
+        when(servicoRepository.findById(20)).thenReturn(Optional.of(
+                new Servico(20, 10, "Design de Sobrancelhas", 90.0, 9000, "Sobrancelha", 45, "Facial", "ativo")
+        ));
+        when(estabelecimentoRepository.findById(10)).thenReturn(Optional.of(
+                new Estabelecimento(10, "Studio Glamour", "São Paulo", "Pinheiros", "Rua dos Pinheiros, 300", "05422-000", null, null, null, 1)
+        ));
+
+        List<LembreteWhatsappResponseDTO> disparados = whatsappLembreteService.verificarEDispararLembretesVespera(hoje);
+
+        assertEquals(1, disparados.size());
+        LembreteWhatsappResponseDTO lembrete = disparados.get(0);
+        assertEquals(80, lembrete.agendamentoId());
+        assertEquals(WhatsappLembreteService.TIPO_VESPERA_1_DIA, lembrete.tipoLembrete());
+        assertTrue(lembrete.mensagemFormatada().contains("Lembrete de Agendamento para Amanhã"));
+        assertTrue(lembrete.mensagemFormatada().contains("Juliana Costa"));
+        assertTrue(lembrete.mensagemFormatada().contains("Design de Sobrancelhas"));
+        assertTrue(lembrete.mensagemFormatada().contains("10:00"));
+        assertTrue(lembrete.whatsappUrl().startsWith("https://wa.me/5511977776666?text="));
+
+        // Idempotência: não reenvia se chamado novamente
+        List<LembreteWhatsappResponseDTO> reexecucao = whatsappLembreteService.verificarEDispararLembretesVespera(hoje);
+        assertTrue(reexecucao.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Deve disparar lembrete de 1h30 antes quando faltar 90 minutos para o agendamento de hoje")
     void deveDispararLembreteQuandoFaltarUmaHoraEMeia() {
         LocalDateTime instanteReferencia = LocalDateTime.of(2026, 11, 12, 13, 0);
 
@@ -71,7 +121,7 @@ class WhatsappLembreteServiceTest {
         Agendamento agendamentoDistante = new Agendamento();
         agendamentoDistante.setId(51);
         agendamentoDistante.setDataAgendamento("2026-11-12");
-        agendamentoDistante.setHorarioInicio("18:00"); // 5 horas depois, não deve disparar agora
+        agendamentoDistante.setHorarioInicio("18:00");
         agendamentoDistante.setStatus("Confirmado");
 
         when(agendamentoRepository.findAll()).thenReturn(List.of(agendamentoEm90Min, agendamentoDistante));
@@ -83,20 +133,21 @@ class WhatsappLembreteServiceTest {
         ));
 
         List<LembreteWhatsappResponseDTO> disparados = whatsappLembreteService
-                .verificarEDispararLembretesAutomaticos(instanteReferencia);
+                .verificarEDispararLembretesUmaHoraEMeia(instanteReferencia);
 
         assertEquals(1, disparados.size());
         LembreteWhatsappResponseDTO lembrete = disparados.get(0);
         assertEquals(50, lembrete.agendamentoId());
+        assertEquals(WhatsappLembreteService.TIPO_PRE_ATENDIMENTO_1H30, lembrete.tipoLembrete());
         assertEquals(90L, lembrete.minutosRestantes());
         assertTrue(lembrete.mensagemFormatada().contains("1 hora e 30 minutos"));
         assertTrue(lembrete.mensagemFormatada().contains("Mariana Silva"));
         assertTrue(lembrete.mensagemFormatada().contains("Limpeza de Pele Profunda"));
         assertTrue(lembrete.whatsappUrl().startsWith("https://wa.me/5511988887777?text="));
 
-        // Garante idempotência: se rodar novamente no minuto seguinte, não envia duplicado para o mesmo agendamento
+        // Idempotência
         List<LembreteWhatsappResponseDTO> segundaExecucao = whatsappLembreteService
-                .verificarEDispararLembretesAutomaticos(instanteReferencia.plusMinutes(1));
+                .verificarEDispararLembretesUmaHoraEMeia(instanteReferencia.plusMinutes(1));
         assertTrue(segundaExecucao.isEmpty());
     }
 }

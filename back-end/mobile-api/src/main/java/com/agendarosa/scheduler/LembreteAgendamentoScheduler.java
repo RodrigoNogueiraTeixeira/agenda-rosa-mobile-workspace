@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Worker agendado (@Scheduled) que monitora a cada 1 minuto os agendamentos do dia
- * e dispara automaticamente a notificação no WhatsApp do cliente quando faltar
- * 1 hora e 30 minutos (90 minutos) para o horário agendado.
+ * Worker agendado (@Scheduled) que monitora periodicamente os agendamentos:
+ * 1) Lembrete de Véspera: dispara lembrete via WhatsApp 1 dia antes para o dia seguinte;
+ * 2) Lembrete de 1h30: dispara notificação 1 hora e 30 minutos antes do atendimento.
  */
 @Component
 public class LembreteAgendamentoScheduler {
@@ -26,17 +26,17 @@ public class LembreteAgendamentoScheduler {
     }
 
     /**
-     * Executa periodicamente a cada 60 segundos verificando a janela de 1h30 antes do atendimento.
+     * Executa periodicamente a cada 60 segundos verificando lembretes de véspera e da janela de 1h30.
      */
     @Scheduled(fixedRateString = "${whatsapp.lembrete.intervalo-ms:60000}")
-    public void monitorarJanelaDeUmaHoraEMeia() {
+    public void monitorarLembretesWhatsApp() {
         try {
-            List<LembreteWhatsappResponseDTO> disparados = whatsappLembreteService.verificarEDispararLembretesAutomaticos();
+            List<LembreteWhatsappResponseDTO> disparados = whatsappLembreteService.verificarEDispararTodosLembretesAutomaticos();
             if (!disparados.isEmpty()) {
-                log.info("⏰ [Scheduler 1h30] {} lembrete(s) de agendamento enviado(s) via WhatsApp.", disparados.size());
+                log.info("⏰ [Scheduler WhatsApp] {} lembrete(s) disparado(s) via WhatsApp.", disparados.size());
             }
         } catch (Exception ex) {
-            log.error("❌ [Scheduler 1h30] Erro ao processar verificação periódica de lembretes WhatsApp: {}", ex.getMessage());
+            log.error("❌ [Scheduler WhatsApp] Erro ao processar monitoramento de lembretes: {}", ex.getMessage());
         }
     }
 }

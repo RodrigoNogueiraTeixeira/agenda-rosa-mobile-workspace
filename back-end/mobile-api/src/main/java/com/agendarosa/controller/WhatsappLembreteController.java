@@ -6,11 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Controller REST responsável pelo gerenciamento e disparo de lembretes proativos
- * via WhatsApp quando faltam 1 hora e 30 minutos (90 minutos) para o agendamento.
+ * Controller REST responsável pelo gerenciamento e disparo de lembretes via WhatsApp:
+ * 1) Lembrete de Véspera (1 dia antes, para o dia seguinte);
+ * 2) Lembrete de Pré-atendimento (1 hora e 30 minutos antes).
  */
 @RestController
 @RequestMapping({"/api/v1/estabelecimentos/whatsapp", "/api/v1/whatsapp"})
@@ -24,29 +26,40 @@ public class WhatsappLembreteController {
     }
 
     /**
-     * Dispara imediatamente o lembrete profissional de 1h30 antes para um agendamento específico.
-     * Rota: POST /api/v1/estabelecimentos/whatsapp/lembrete/{agendamentoId}/disparar
+     * Dispara imediatamente um lembrete específico (VESPERA ou PRE_ATENDIMENTO_1H30).
+     * Rota: POST /api/v1/estabelecimentos/whatsapp/lembrete/{agendamentoId}/disparar?tipo=VESPERA
      */
     @PostMapping("/lembrete/{agendamentoId}/disparar")
     public ResponseEntity<LembreteWhatsappResponseDTO> dispararLembretePorAgendamento(
-            @PathVariable Integer agendamentoId
+            @PathVariable Integer agendamentoId,
+            @RequestParam(required = false, defaultValue = "PRE_ATENDIMENTO") String tipo
     ) {
-        LembreteWhatsappResponseDTO resposta = whatsappLembreteService.dispararLembreteManual(agendamentoId);
+        LembreteWhatsappResponseDTO resposta = whatsappLembreteService.dispararLembreteManual(agendamentoId, tipo);
         return ResponseEntity.ok(resposta);
     }
 
     /**
-     * Força a verificação imediata da janela de 1h30 (90 minutos) em todos os agendamentos de hoje.
-     * Rota: POST /api/v1/estabelecimentos/whatsapp/lembrete/verificar-janela
+     * Força a verificação imediata dos lembretes de véspera (agendamentos de amanhã).
+     * Rota: POST /api/v1/estabelecimentos/whatsapp/lembrete/verificar-vespera
      */
-    @PostMapping("/lembrete/verificar-janela")
-    public ResponseEntity<List<LembreteWhatsappResponseDTO>> verificarJanelaDeUmaHoraEMeia() {
-        List<LembreteWhatsappResponseDTO> disparados = whatsappLembreteService.verificarEDispararLembretesAutomaticos();
+    @PostMapping("/lembrete/verificar-vespera")
+    public ResponseEntity<List<LembreteWhatsappResponseDTO>> verificarLembretesVespera() {
+        List<LembreteWhatsappResponseDTO> disparados = whatsappLembreteService.verificarEDispararLembretesVespera(LocalDate.now());
         return ResponseEntity.ok(disparados);
     }
 
     /**
-     * Lista os lembretes de 1h30 configurados para os agendamentos ativos do cliente autenticado.
+     * Força a verificação imediata da janela de 1h30 em todos os agendamentos de hoje.
+     * Rota: POST /api/v1/estabelecimentos/whatsapp/lembrete/verificar-janela
+     */
+    @PostMapping("/lembrete/verificar-janela")
+    public ResponseEntity<List<LembreteWhatsappResponseDTO>> verificarJanelaDeUmaHoraEMeia() {
+        List<LembreteWhatsappResponseDTO> disparados = whatsappLembreteService.verificarEDispararTodosLembretesAutomaticos();
+        return ResponseEntity.ok(disparados);
+    }
+
+    /**
+     * Lista os lembretes configurados para os agendamentos ativos do cliente autenticado.
      * Rota: GET /api/v1/estabelecimentos/whatsapp/lembretes/meus
      */
     @GetMapping("/lembretes/meus")
