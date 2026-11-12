@@ -72,7 +72,7 @@ public class AssistenteIaService {
             "aplicativo", "app",
             // Termos de apoio ao empresario, dono do salao, gestao e negocios
             "empresario", "empresa", "dono", "gerente", "gestao", "negocio", "faturamento", "cadastrar",
-            "parceria", "parceiro", "lotar agenda", "atrair clientes", "falta", "faltas", "no-show",
+            "parceria", "lotar agenda", "atrair clientes", "falta", "faltas", "no-show",
             "comissao", "beneficio", "vantagem"
     );
 
