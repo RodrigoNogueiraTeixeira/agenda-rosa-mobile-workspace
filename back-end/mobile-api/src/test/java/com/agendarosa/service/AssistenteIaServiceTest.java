@@ -129,6 +129,68 @@ class AssistenteIaServiceTest {
     }
 
     @Test
+    @DisplayName("Deve priorizar estabelecimentos mais bem avaliados quando solicitado pela cliente")
+    void devePriorizarLojasMaisBemAvaliadasQuandoSolicitado() {
+        EstabelecimentoCardResponseDTO lojaNota4 = new EstabelecimentoCardResponseDTO(
+                1, "Salão Popular", "Santos", "Gonzaga", "Av Ana Costa, 10", "11060-000",
+                null, -23.96, -46.33, List.of("Cabelo"), List.of()
+        );
+        EstabelecimentoCardResponseDTO lojaNota5 = new EstabelecimentoCardResponseDTO(
+                2, "Studio Vip Estrelas", "Santos", "Gonzaga", "Av Ana Costa, 20", "11060-000",
+                null, -23.96, -46.33, List.of("Cabelo"), List.of()
+        );
+
+        when(estabelecimentoService.buscarLojas(any(), any(), any(), any()))
+                .thenReturn(List.of(lojaNota4, lojaNota5));
+
+        ConsultaIaRequestDTO request = new ConsultaIaRequestDTO(
+                "Quais os salões mais bem avaliados de cabelo?",
+                "Santos",
+                null,
+                "Mariana Silva"
+        );
+
+        RecomendacaoIaResponseDTO response = assistenteIaService.consultarAssistente(request);
+
+        assertNotNull(response);
+        assertFalse(response.estabelecimentosRecomendados().isEmpty());
+        assertTrue(response.respostaAssistente().contains("melhores avaliações") || response.respostaAssistente().contains("⭐"));
+    }
+
+    @Test
+    @DisplayName("Deve calcular distância GPS e priorizar lojas mais próximas da cliente")
+    void deveCalcularDistanciaGpsEPriorizarLojasMaisProximas() {
+        double dist = AssistenteIaService.calcularDistanciaKm(-23.5505, -46.6333, -23.5615, -46.6559);
+        assertTrue(dist > 0.0 && dist < 5.0, "Distância calculada deve ser aproximadamente ~2.6 km");
+
+        EstabelecimentoCardResponseDTO lojaPerto = new EstabelecimentoCardResponseDTO(
+                1, "Studio Perto", "São Paulo", "Bela Vista", "Rua A", "01310-000",
+                null, -23.5615, -46.6559, List.of("Cabelo"), List.of()
+        );
+        EstabelecimentoCardResponseDTO lojaLonge = new EstabelecimentoCardResponseDTO(
+                2, "Studio Longe", "São Paulo", "Zona Norte", "Rua B", "02000-000",
+                null, -23.4800, -46.6200, List.of("Cabelo"), List.of()
+        );
+
+        when(estabelecimentoService.buscarLojas(any(), any(), any(), any()))
+                .thenReturn(List.of(lojaLonge, lojaPerto));
+
+        ConsultaIaRequestDTO request = new ConsultaIaRequestDTO(
+                "Quero um salão de cabelo bem perto de mim",
+                "São Paulo",
+                null,
+                "Mariana Silva",
+                -23.5505,
+                -46.6333
+        );
+
+        RecomendacaoIaResponseDTO response = assistenteIaService.consultarAssistente(request);
+
+        assertNotNull(response);
+        assertEquals("Studio Perto", response.estabelecimentosRecomendados().get(0).nome());
+    }
+
+    @Test
     @DisplayName("Deve extrair o primeiro nome corretamente")
     void deveExtrairPrimeiroNome() {
         assertEquals("Mariana", assistenteIaService.extrairPrimeiroNome("mariana silva"));

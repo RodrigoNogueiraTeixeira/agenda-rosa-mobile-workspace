@@ -127,7 +127,14 @@ export const iaService = {
    * Consulta a Assistente Rosa (IA) tratando o cliente pelo nome próprio
    * e aplicando bloqueio estrito para perguntas fora do escopo do negócio.
    */
-  async consultarAssistente({ pergunta, cidade = '', orcamentoMaximo = null, nomeCliente = null }) {
+  async consultarAssistente({
+    pergunta,
+    cidade = '',
+    orcamentoMaximo = null,
+    nomeCliente = null,
+    latitude = null,
+    longitude = null,
+  }) {
     const primeiroNome = extrairPrimeiroNome(nomeCliente);
 
     if (!isPerguntaDentroDoEscopoNegocio(pergunta)) {
@@ -155,6 +162,8 @@ export const iaService = {
           cidade: cidade ? cidade.trim() : null,
           orcamentoMaximo: orcamentoMaximo ? Number(orcamentoMaximo) : null,
           nomeCliente: primeiroNome,
+          latitudeCliente: latitude != null ? Number(latitude) : null,
+          longitudeCliente: longitude != null ? Number(longitude) : null,
         }),
       });
     } catch (error) {
@@ -182,14 +191,42 @@ export const iaService = {
         perguntaNorm.includes('onde clico') ||
         perguntaNorm.includes('aba');
 
-      const textoResposta = isAjudaNavegacao
-        ? `${saudacao}Te guio com todo carinho! Para agendar: 1) Na aba "Início", escolha um salão parceiro ou selecione uma categoria; 2) Toque no estabelecimento e escolha o serviço, o profissional e o horário disponível; 3) Confirme o agendamento! Na aba "Agendamentos" você acompanha todos os seus horários e nós enviamos lembretes com rota GPS no seu WhatsApp na véspera e 1h30 antes.`
-        : `${saudacao}Que prazer atender você! Analisei o seu pedido ("${pergunta}") e selecionei opções especiais disponíveis na plataforma para o seu atendimento!`;
+      const querMaisBemAvaliados =
+        perguntaNorm.includes('bem avaliad') ||
+        perguntaNorm.includes('melhor avaliad') ||
+        perguntaNorm.includes('melhores avaliad') ||
+        perguntaNorm.includes('melhor nota') ||
+        perguntaNorm.includes('estrelas') ||
+        perguntaNorm.includes('top');
+
+      const querMaisProximos =
+        perguntaNorm.includes('perto') ||
+        perguntaNorm.includes('proxim') ||
+        perguntaNorm.includes('distancia') ||
+        perguntaNorm.includes('aqui') ||
+        perguntaNorm.includes('regiao');
+
+      let textoResposta;
+      if (isAjudaNavegacao) {
+        textoResposta = `${saudacao}Te guio com todo carinho! Para agendar: 1) Na aba "Início", escolha um salão parceiro ou selecione uma categoria; 2) Toque no estabelecimento e escolha o serviço, o profissional e o horário disponível; 3) Confirme o agendamento! Na aba "Agendamentos" você acompanha todos os seus horários e nós enviamos lembretes com rota GPS no seu WhatsApp na véspera e 1h30 antes.`;
+      } else if (querMaisBemAvaliados && querMaisProximos) {
+        textoResposta = `${saudacao}Selecionei os salões parceiros mais bem avaliados e mais próximos de você com excelentes notas de clientes ⭐!`;
+      } else if (querMaisBemAvaliados) {
+        textoResposta = `${saudacao}Priorizei para você os salões com as melhores avaliações e maiores notas (estrelas ⭐) na plataforma!`;
+      } else if (querMaisProximos) {
+        textoResposta = `${saudacao}Priorizei para você os salões parceiros mais próximos da sua localização!`;
+      } else {
+        textoResposta = `${saudacao}Que prazer atender você! Analisei o seu pedido ("${pergunta}") e selecionei opções especiais disponíveis na plataforma para o seu atendimento!`;
+      }
 
       return {
         respostaAssistente: textoResposta,
         dicaPreAtendimento: dica,
-        categoriaIdentificada: isAjudaNavegacao ? 'Guia e Navegação' : 'Recomendação Personalizada',
+        categoriaIdentificada: isAjudaNavegacao
+          ? 'Guia e Navegação'
+          : querMaisBemAvaliados
+          ? 'Mais Bem Avaliados'
+          : 'Recomendação Personalizada',
         estabelecimentosRecomendados: lojas.slice(0, 4),
         motorUtilizado: 'Assistente Rosa IA',
       };

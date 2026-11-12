@@ -63,6 +63,12 @@ describe('Tela BuscaIA & Balãozinho Flutuante da Rosa (SCRUM-29)', () => {
       isPerguntaDentroDoEscopoNegocio('Quais são os menus e como funciona?')
     ).toBe(true);
     expect(
+      isPerguntaDentroDoEscopoNegocio('Quais são os salões mais bem avaliados?')
+    ).toBe(true);
+    expect(
+      isPerguntaDentroDoEscopoNegocio('Tem algum salão de beleza perto de mim?')
+    ).toBe(true);
+    expect(
       isPerguntaDentroDoEscopoNegocio('Qual a senha do banco de dados ou api key?')
     ).toBe(false);
     expect(

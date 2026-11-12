@@ -16,9 +16,17 @@ public record ConsultaIaRequestDTO(
 
         Double orcamentoMaximo,
 
-        String nomeCliente
+        String nomeCliente,
+
+        Double latitudeCliente,
+
+        Double longitudeCliente
 ) {
     public ConsultaIaRequestDTO(String pergunta, String cidade, Double orcamentoMaximo) {
-        this(pergunta, cidade, orcamentoMaximo, null);
+        this(pergunta, cidade, orcamentoMaximo, null, null, null);
+    }
+
+    public ConsultaIaRequestDTO(String pergunta, String cidade, Double orcamentoMaximo, String nomeCliente) {
+        this(pergunta, cidade, orcamentoMaximo, nomeCliente, null, null);
     }
 }
