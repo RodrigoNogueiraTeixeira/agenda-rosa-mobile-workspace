@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import BuscaIA from '../src/pages/busca-ia';
+import AssistenteRosaFAB from '../src/components/assistente-rosa-fab';
 import {
   iaService,
   isPerguntaDentroDoEscopoNegocio,
@@ -23,7 +24,7 @@ jest.mock('../src/services/ia-service', () => {
   };
 });
 
-describe('Tela BuscaIA — Assistente Rosa restrita ao negócio e com atendimento pelo nome (SCRUM-29)', () => {
+describe('Tela BuscaIA & Balãozinho Flutuante da Rosa (SCRUM-29)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -32,6 +33,18 @@ describe('Tela BuscaIA — Assistente Rosa restrita ao negócio e com atendiment
     expect(extrairPrimeiroNome('Mariana Silva')).toBe('Mariana');
     expect(extrairPrimeiroNome('ana')).toBe('Ana');
     expect(extrairPrimeiroNome('')).toBe(null);
+  });
+
+  it('renderiza o balãozinho flutuante da Rosa com seu avatar e nome', () => {
+    render(<AssistenteRosaFAB currentUser={{ nome: 'Mariana Silva' }} />);
+    expect(screen.getByText('Oi, Mariana! Fala comigo 🌸')).toBeTruthy();
+    expect(screen.getByText('ROSA')).toBeTruthy();
+  });
+
+  it('abre o modal de chat interativo da Rosa ao tocar no balãozinho flutuante', () => {
+    render(<AssistenteRosaFAB currentUser={{ nome: 'Mariana Silva' }} />);
+    fireEvent.press(screen.getByLabelText('Conversar com a Assistente Virtual Rosa'));
+    expect(screen.getByText('● Online agora • Consultora IA')).toBeTruthy();
   });
 
   it('bloqueia perguntas fora do escopo do negócio (ex: qual o valor de pi) e permite apenas temas do Agenda Rosa', () => {
@@ -45,7 +58,7 @@ describe('Tela BuscaIA — Assistente Rosa restrita ao negócio e com atendiment
     ).toBe(true);
   });
 
-  it('exibe saudação personalizada com o nome da cliente logada', () => {
+  it('exibe saudação personalizada com o nome da cliente logada na tela cheia', () => {
     render(<BuscaIA currentUser={{ nome: 'Mariana Silva' }} />);
     expect(screen.getByText('Olá, Mariana! ✨')).toBeTruthy();
   });
@@ -67,7 +80,7 @@ describe('Tela BuscaIA — Assistente Rosa restrita ao negócio e com atendiment
       'Qual o valor de pi?'
     );
 
-    fireEvent.press(screen.getByText('Consultar Assistente Rosa'));
+    fireEvent.press(screen.getByText('Perguntar para a Rosa'));
 
     await waitFor(() => {
       expect(
@@ -79,7 +92,7 @@ describe('Tela BuscaIA — Assistente Rosa restrita ao negócio e com atendiment
   it('consulta e exibe recomendações de estabelecimentos tratando a cliente pelo nome', async () => {
     iaService.consultarAssistente.mockResolvedValueOnce({
       respostaAssistente:
-        'Olá, Mariana! Sou a Assistente Rosa. Selecionei o Studio Bella para sua maquiagem.',
+        'Olá, Mariana! Sou a Rosa. Selecionei o Studio Bella para sua maquiagem.',
       dicaPreAtendimento: 'Compareça com a pele limpa para melhor fixação.',
       estabelecimentosRecomendados: [
         {
@@ -101,7 +114,7 @@ describe('Tela BuscaIA — Assistente Rosa restrita ao negócio e com atendiment
       'Quero fazer maquiagem'
     );
 
-    fireEvent.press(screen.getByText('Consultar Assistente Rosa'));
+    fireEvent.press(screen.getByText('Perguntar para a Rosa'));
 
     await waitFor(() => {
       expect(iaService.consultarAssistente).toHaveBeenCalledWith(
@@ -111,7 +124,7 @@ describe('Tela BuscaIA — Assistente Rosa restrita ao negócio e com atendiment
       );
       expect(
         screen.getByText(
-          'Olá, Mariana! Sou a Assistente Rosa. Selecionei o Studio Bella para sua maquiagem.'
+          'Olá, Mariana! Sou a Rosa. Selecionei o Studio Bella para sua maquiagem.'
         )
       ).toBeTruthy();
       expect(screen.getByText('Studio Bella Make')).toBeTruthy();

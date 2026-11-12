@@ -7,11 +7,14 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../../styles/theme';
 import { styles } from './styles';
 import { iaService } from '../../services/ia-service';
+
+const AVATAR_ROSA_URL = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80';
 
 export default function BuscaIA({
   currentUser,
@@ -24,6 +27,7 @@ export default function BuscaIA({
   const [consultandoIa, setConsultandoIa] = useState(false);
   const [resultadoIa, setResultadoIa] = useState(null);
   const [erroIa, setErroIa] = useState(null);
+  const [imagemErro, setImagemErro] = useState(false);
 
   const primeiroNomeCliente = currentUser?.nome
     ? currentUser.nome.trim().split(/\s+/)[0]
@@ -31,7 +35,7 @@ export default function BuscaIA({
 
   async function handleConsultarAssistenteIa() {
     if (!perguntaIa.trim()) {
-      setErroIa('Digite o procedimento ou dúvida para consultar a Assistente Rosa.');
+      setErroIa('Digite o procedimento ou dúvida para consultar a Rosa.');
       return;
     }
 
@@ -48,7 +52,7 @@ export default function BuscaIA({
       setResultadoIa(resposta);
     } catch (error) {
       setErroIa(
-        error.message || 'Não foi possível consultar a Assistente Rosa no momento.'
+        error.message || 'Não foi possível consultar a Rosa no momento.'
       );
     } finally {
       setConsultandoIa(false);
@@ -64,7 +68,7 @@ export default function BuscaIA({
             size={20}
             color={theme.colors.primary}
           />
-          <Text style={styles.headerTitle}>Assistente Rosa (Busca com IA)</Text>
+          <Text style={styles.headerTitle}>Rosa (Assistente com IA)</Text>
         </View>
 
         {onVoltar && (
@@ -83,20 +87,73 @@ export default function BuscaIA({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Banner com a Mulherzinha (Rosa) em destaque */}
         <View style={styles.heroCard}>
-          <View style={styles.badgeRow}>
-            <Feather name="shield" size={12} color={theme.colors.primary} />
-            <Text style={styles.badgeText}>IA EXCLUSIVA DO NEGÓCIO</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+            <View style={{ position: 'relative' }}>
+              {!imagemErro ? (
+                <Image
+                  source={{ uri: AVATAR_ROSA_URL }}
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 30,
+                    borderWidth: 2,
+                    borderColor: theme.colors.primary,
+                  }}
+                  onError={() => setImagemErro(true)}
+                />
+              ) : (
+                <View
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 30,
+                    backgroundColor: '#FDECF1',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="face-woman-shimmer"
+                    size={34}
+                    color={theme.colors.primary}
+                  />
+                </View>
+              )}
+              {/* Ponto verde Online */}
+              <View
+                style={{
+                  position: 'absolute',
+                  bottom: 2,
+                  right: 2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: 7,
+                  backgroundColor: '#10B981',
+                  borderWidth: 2,
+                  borderColor: theme.colors.white,
+                }}
+              />
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <View style={styles.badgeRow}>
+                <Feather name="shield" size={11} color={theme.colors.primary} />
+                <Text style={styles.badgeText}>CONSULTORA VIRTUAL</Text>
+              </View>
+              <Text style={styles.heroTitle}>
+                {primeiroNomeCliente
+                  ? `Olá, ${primeiroNomeCliente}! ✨`
+                  : 'Fale com a Rosa'}
+              </Text>
+            </View>
           </View>
-          <Text style={styles.heroTitle}>
-            {primeiroNomeCliente
-              ? `Olá, ${primeiroNomeCliente}! ✨`
-              : 'Consultora Virtual Assistente Rosa'}
-          </Text>
-          <Text style={styles.heroSubtitle}>
-            Tire dúvidas sobre procedimentos de beleza e estética, receba dicas de
-            preparo pré-atendimento e encontre os estabelecimentos ideais no
-            Agenda Rosa.
+
+          <Text style={[styles.heroSubtitle, { marginTop: 10 }]}>
+            Sou a Rosa, sua consultora de beleza e estética no Agenda Rosa.
+            Tire dúvidas sobre procedimentos, receba dicas de preparo e encontre
+            os salões ideais para você.
           </Text>
         </View>
 
@@ -105,11 +162,11 @@ export default function BuscaIA({
             O que você deseja agendar ou cuidar hoje?
           </Text>
           <Text style={styles.sectionDescription}>
-            A Assistente Rosa responde exclusivamente sobre serviços de beleza,
-            estética, salões parceiros e agendamentos da plataforma.
+            A Rosa responde exclusivamente sobre serviços de beleza, estética,
+            salões parceiros e agendamentos da plataforma.
           </Text>
 
-          <Text style={styles.fieldLabel}>Sua pergunta sobre beleza ou agendamento</Text>
+          <Text style={styles.fieldLabel}>Sua pergunta para a Rosa</Text>
           <TextInput
             style={styles.input}
             placeholder="Ex: Quero fazer maquiagem e cabelo para formatura"
@@ -150,7 +207,7 @@ export default function BuscaIA({
               <>
                 <Feather name="search" size={16} color={theme.colors.white} />
                 <Text style={styles.primaryButtonText}>
-                  Consultar Assistente Rosa
+                  Perguntar para a Rosa
                 </Text>
               </>
             )}
@@ -166,7 +223,7 @@ export default function BuscaIA({
         {resultadoIa && (
           <View style={styles.aiResponseCard}>
             <Text style={styles.aiResponseTitle}>
-              🌸 Resposta da Assistente Rosa
+              🌸 Resposta da Rosa
             </Text>
             <Text style={styles.aiResponseText}>
               {resultadoIa.respostaAssistente}
@@ -175,7 +232,7 @@ export default function BuscaIA({
             {resultadoIa.dicaPreAtendimento && (
               <View style={styles.aiTipBox}>
                 <Text style={styles.aiTipLabel}>
-                  💡 Dica Especialista de Preparo:
+                  💡 Dica Especialista da Rosa:
                 </Text>
                 <Text style={styles.aiTipText}>
                   {resultadoIa.dicaPreAtendimento}
