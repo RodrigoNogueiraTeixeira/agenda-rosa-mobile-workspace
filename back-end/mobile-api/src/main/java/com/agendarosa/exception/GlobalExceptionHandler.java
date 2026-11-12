@@ -1,5 +1,7 @@
 package com.agendarosa.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -8,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -19,6 +22,8 @@ import java.util.Map;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * Trata erros de validação (@Valid) como campos vazios, e-mail inválido ou tamanho de senha.
@@ -98,5 +103,76 @@ public class GlobalExceptionHandler {
         resposta.put("mensagem", ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
+    }
+
+    /**
+     * Trata falhas HTTP retornadas por integrações externas (como a API do Mercado Pago).
+     * Retorna HTTP 502 Bad Gateway expondo o status e corpo original do provedor.
+     */
+    @ExceptionHandler(RestClientResponseException.class)
+    public ResponseEntity<Map<String, Object>> tratarErroIntegracaoExterna(RestClientResponseException ex) {
+        return construirRespostaErroMercadoPago(ex, ex.getMessage());
+    }
+
+    /**
+     * Fallback global para exceções não tratadas especificamente (como falhas de integração ou persistência),
+     * evitando que o Spring encaminhe para /error e mascare a falha real.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> tratarErroInterno(Exception ex) {
+        RestClientResponseException mpEx = encontrarCausa(ex, RestClientResponseException.class);
+        if (mpEx != null) {
+            return construirRespostaErroMercadoPago(mpEx, ex.getMessage());
+        }
+
+        log.error("❌ Erro interno não tratado na API: {}", ex.getMessage(), ex);
+
+        Throwable causaRaiz = ex;
+        while (causaRaiz.getCause() != null && causaRaiz.getCause() != causaRaiz) {
+            causaRaiz = causaRaiz.getCause();
+        }
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("timestamp", LocalDateTime.now());
+        resposta.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        resposta.put("erro", "Erro interno do servidor");
+        resposta.put("mensagem", ex.getMessage());
+        if (causaRaiz != ex && causaRaiz.getMessage() != null) {
+            resposta.put("detalhe", causaRaiz.getMessage());
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resposta);
+    }
+
+    private ResponseEntity<Map<String, Object>> construirRespostaErroMercadoPago(
+            RestClientResponseException mpEx, String mensagemPrincipal) {
+        String corpoResposta = mpEx.getResponseBodyAsString();
+        log.error("❌ Erro HTTP {} do Mercado Pago: {}", mpEx.getStatusCode().value(), corpoResposta, mpEx);
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("timestamp", LocalDateTime.now());
+        resposta.put("status", HttpStatus.BAD_GATEWAY.value());
+        resposta.put("erro", "Erro na comunicação com o Mercado Pago");
+        resposta.put("statusMercadoPago", mpEx.getStatusCode().value());
+        resposta.put("mensagem", mensagemPrincipal);
+        if (corpoResposta != null && !corpoResposta.isBlank()) {
+            resposta.put("detalheMercadoPago", corpoResposta);
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(resposta);
+    }
+
+    private <T extends Throwable> T encontrarCausa(Throwable ex, Class<T> tipoEsperado) {
+        Throwable atual = ex;
+        while (atual != null) {
+            if (tipoEsperado.isInstance(atual)) {
+                return tipoEsperado.cast(atual);
+            }
+            if (atual.getCause() == atual) {
+                break;
+            }
+            atual = atual.getCause();
+        }
+        return null;
     }
 }
