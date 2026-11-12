@@ -1,9 +1,44 @@
 import { request } from './api';
 
+export const TIPO_LEMBRETE_VESPERA = 'VESPERA_1_DIA';
+export const TIPO_LEMBRETE_1H30 = 'PRE_ATENDIMENTO_1H30';
+
 /**
- * Monta o texto profissional do lembrete enviado via WhatsApp 1 hora e 30 minutos antes do agendamento.
+ * MENSAGEM 1: Lembrete de Véspera (1 dia antes, avisando sobre o agendamento de amanhã).
  */
-export function montarMensagemLembreteWhatsapp({
+export function montarMensagemLembreteVespera({
+  nomeCliente = 'Cliente',
+  estabelecimentoNome = 'Estabelecimento Parceiro',
+  nomeServico = 'Procedimento de Beleza',
+  profissional = 'Especialista',
+  dataAgendamento = 'Amanhã',
+  horarioInicio = '10:00',
+  enderecoEstabelecimento = 'Consulte no aplicativo Agenda Rosa',
+}) {
+  return [
+    '🌸 *Agenda Rosa — Lembrete de Agendamento para Amanhã*',
+    '',
+    `Olá, *${nomeCliente}*! Tudo bem? ✨`,
+    'Passando para lembrar que você tem um horário de autocuidado agendado para *amanhã*!',
+    '',
+    '📋 *Detalhes do seu Agendamento para Amanhã:*',
+    `• *Estabelecimento:* ${estabelecimentoNome}`,
+    `• *Serviço:* ${nomeServico}`,
+    `• *Profissional:* ${profissional}`,
+    `• *Data:* Amanhã (${dataAgendamento})`,
+    `• *Horário:* às *${horarioInicio}*`,
+    `• *Localização:* ${enderecoEstabelecimento}`,
+    '',
+    '⏰ Também enviaremos um lembrete rápido *1 hora e 30 minutos antes* do seu horário amanhã para que você possa se programar com tranquilidade.',
+    '',
+    'Caso precise de qualquer informação ou ajuste de horário prévio, entre em contato pelo aplicativo. Até amanhã! 💖',
+  ].join('\n');
+}
+
+/**
+ * MENSAGEM 2: Lembrete de Pré-atendimento (1 hora e 30 minutos antes do início).
+ */
+export function montarMensagemLembreteUmaHoraEMeia({
   nomeCliente = 'Cliente',
   estabelecimentoNome = 'Estabelecimento Parceiro',
   nomeServico = 'Procedimento de Beleza',
@@ -30,6 +65,16 @@ export function montarMensagemLembreteWhatsapp({
 }
 
 /**
+ * Mantém compatibilidade padrão (1h30).
+ */
+export function montarMensagemLembreteWhatsapp(dados = {}) {
+  if (dados.tipoLembrete === TIPO_LEMBRETE_VESPERA || dados.tipo === 'VESPERA') {
+    return montarMensagemLembreteVespera(dados);
+  }
+  return montarMensagemLembreteUmaHoraEMeia(dados);
+}
+
+/**
  * Formata telefone brasileiro para padrão internacional E.164 (55 + DDD + Número).
  */
 export function formatarTelefoneWhatsapp(telefone = '') {
@@ -42,7 +87,7 @@ export function formatarTelefoneWhatsapp(telefone = '') {
 }
 
 /**
- * Gera a URL oficial wa.me do WhatsApp com a mensagem de lembrete de 1h30 codificada.
+ * Gera a URL oficial wa.me do WhatsApp com a mensagem codificada.
  */
 export function gerarLinkWhatsapp(telefone, mensagem) {
   const numeroE164 = formatarTelefoneWhatsapp(telefone);
@@ -54,12 +99,12 @@ export function gerarLinkWhatsapp(telefone, mensagem) {
 
 export const whatsappService = {
   /**
-   * Dispara na API o lembrete de 1 hora e 30 minutos antes para um agendamento específico.
+   * Dispara na API o lembrete (VESPERA ou PRE_ATENDIMENTO).
    */
-  async dispararLembreteWhatsapp(agendamentoId, dadosFallback = {}) {
+  async dispararLembreteWhatsapp(agendamentoId, dadosFallback = {}, tipo = 'PRE_ATENDIMENTO') {
     try {
       if (agendamentoId) {
-        return await request(`/estabelecimentos/whatsapp/lembrete/${agendamentoId}/disparar`, {
+        return await request(`/estabelecimentos/whatsapp/lembrete/${agendamentoId}/disparar?tipo=${tipo}`, {
           method: 'POST',
         });
       }
@@ -67,13 +112,18 @@ export const whatsappService = {
       // Fallback seguro local
     }
 
-    const mensagemFormatada = montarMensagemLembreteWhatsapp(dadosFallback);
+    const tipoFinal = tipo === 'VESPERA' ? TIPO_LEMBRETE_VESPERA : TIPO_LEMBRETE_1H30;
+    const mensagemFormatada = tipoFinal === TIPO_LEMBRETE_VESPERA
+      ? montarMensagemLembreteVespera(dadosFallback)
+      : montarMensagemLembreteUmaHoraEMeia(dadosFallback);
+
     const whatsappUrl = gerarLinkWhatsapp(dadosFallback.telefoneCliente, mensagemFormatada);
 
     return {
       agendamentoId: agendamentoId || 1,
       ...dadosFallback,
-      minutosRestantes: 90,
+      tipoLembrete: tipoFinal,
+      minutosRestantes: tipoFinal === TIPO_LEMBRETE_VESPERA ? 1440 : 90,
       mensagemFormatada,
       whatsappUrl,
       statusEnvio: 'PRONTO_PARA_ENVIO',
@@ -81,7 +131,7 @@ export const whatsappService = {
   },
 
   /**
-   * Lista os lembretes de 1h30 dos agendamentos ativos do cliente autenticado.
+   * Lista os lembretes configurados dos agendamentos ativos do cliente autenticado.
    */
   async listarMeusLembretes(email = '') {
     const query = email ? `?email=${encodeURIComponent(email)}` : '';
