@@ -34,3 +34,9 @@ brevo:
 mercadopago:
   access-token: ${MERCADO_PAGO_ACCESS_TOKEN:}
   notification-url: ${MERCADO_PAGO_NOTIFICATION_URL:https://agenda-rosa-mobile-workspace.onrender.com/api/v1/pagamentos/webhook}
+
+# Configuração do Google Gemini (Assistente Rosa IA - SCRUM-29)
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-2.5-flash}
+

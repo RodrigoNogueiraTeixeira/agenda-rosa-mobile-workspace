@@ -703,9 +703,19 @@ public class AssistenteIaService {
                 )
         );
 
-        Map<String, Object> response = restClient.post()
-                .uri("/models/{model}:generateContent?key={key}", geminiModel, geminiApiKey)
-                .contentType(MediaType.APPLICATION_JSON)
+        String apiKeyLimpa = geminiApiKey != null ? geminiApiKey.trim() : "";
+
+        // Suporta tanto o formato novo de chaves de autorização (AQ.) via header x-goog-api-key
+        // quanto o formato legado (AIza) via query param
+        var requestSpec = restClient.post()
+                .uri("/models/{model}:generateContent", geminiModel)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        if (!apiKeyLimpa.isBlank()) {
+            requestSpec.header("x-goog-api-key", apiKeyLimpa);
+        }
+
+        Map<String, Object> response = requestSpec
                 .body(requestBody)
                 .retrieve()
                 .body(Map.class);
