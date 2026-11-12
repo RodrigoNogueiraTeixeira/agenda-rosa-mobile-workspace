@@ -27,6 +27,10 @@ const TERMOS_DOMINIO_NEGOCIO = [
   'menu', 'menus', 'guia', 'guiar', 'tutorial', 'passo', 'ajuda', 'ajudar', 'como funciona',
   'navegar', 'navegacao', 'aba', 'abas', 'tela', 'telas', 'inicio', 'perfil', 'historico',
   'aplicativo', 'app',
+  // Termos de apoio ao empresario, dono do salao, gestao e negocios
+  'empresario', 'empresa', 'dono', 'gerente', 'gestao', 'negocio', 'faturamento', 'cadastrar',
+  'parceria', 'parceiro', 'lotar agenda', 'atrair clientes', 'falta', 'faltas', 'no-show',
+  'comissao', 'beneficio', 'vantagem',
 ];
 
 const TERMOS_BLOQUEADOS = [
@@ -206,9 +210,24 @@ export const iaService = {
         perguntaNorm.includes('aqui') ||
         perguntaNorm.includes('regiao');
 
+      const isDuvidaEmpresario =
+        perguntaNorm.includes('empresario') ||
+        perguntaNorm.includes('dono de salao') ||
+        perguntaNorm.includes('dono') ||
+        perguntaNorm.includes('parceria') ||
+        perguntaNorm.includes('faturamento') ||
+        perguntaNorm.includes('lotar agenda') ||
+        perguntaNorm.includes('atrair clientes') ||
+        perguntaNorm.includes('no-show') ||
+        perguntaNorm.includes('faltas') ||
+        perguntaNorm.includes('gestao') ||
+        perguntaNorm.includes('vantagens para salao');
+
       let textoResposta;
       if (isAjudaNavegacao) {
         textoResposta = `${saudacao}Te guio com todo carinho! Para agendar: 1) Na aba "Início", escolha um salão parceiro ou selecione uma categoria; 2) Toque no estabelecimento e escolha o serviço, o profissional e o horário disponível; 3) Confirme o agendamento! Na aba "Agendamentos" você acompanha todos os seus horários e nós enviamos lembretes com rota GPS no seu WhatsApp na véspera e 1h30 antes.`;
+      } else if (isDuvidaEmpresario) {
+        textoResposta = `${saudacao}Para o empresário e parceiro do Agenda Rosa, nossa IA gera alto valor para o seu negócio: 1) Captação 24/7 com atendimento e recomendações automáticas; 2) Fim do No-Show com lembretes automáticos no WhatsApp na véspera e 1h30 antes com GPS; 3) Menos retrabalho com dicas de preparo para as clientes; 4) Destaque orgânico por boas avaliações (5 estrelas ⭐)!`;
       } else if (querMaisBemAvaliados && querMaisProximos) {
         textoResposta = `${saudacao}Selecionei os salões parceiros mais bem avaliados e mais próximos de você com excelentes notas de clientes ⭐!`;
       } else if (querMaisBemAvaliados) {

@@ -69,7 +69,11 @@ public class AssistenteIaService {
             // Termos de auxilio ao cliente, menus, abas e navegacao no app
             "menu", "menus", "guia", "guiar", "tutorial", "passo", "ajuda", "ajudar", "como funciona",
             "navegar", "navegacao", "aba", "abas", "tela", "telas", "inicio", "perfil", "historico",
-            "aplicativo", "app"
+            "aplicativo", "app",
+            // Termos de apoio ao empresario, dono do salao, gestao e negocios
+            "empresario", "empresa", "dono", "gerente", "gestao", "negocio", "faturamento", "cadastrar",
+            "parceria", "parceiro", "lotar agenda", "atrair clientes", "falta", "faltas", "no-show",
+            "comissao", "beneficio", "vantagem"
     );
 
     /**
@@ -532,6 +536,32 @@ public class AssistenteIaService {
             return sb.toString();
         }
 
+        boolean isDuvidaEmpresario = perguntaNorm.contains("empresario")
+                || perguntaNorm.contains("dono de salao")
+                || perguntaNorm.contains("dono")
+                || perguntaNorm.contains("parceria")
+                || perguntaNorm.contains("faturamento")
+                || perguntaNorm.contains("lotar agenda")
+                || perguntaNorm.contains("atrair clientes")
+                || perguntaNorm.contains("no-show")
+                || perguntaNorm.contains("faltas")
+                || perguntaNorm.contains("gestao")
+                || perguntaNorm.contains("vantagens para salao");
+
+        if (isDuvidaEmpresario) {
+            if (primeiroNome != null && !primeiroNome.isBlank()) {
+                sb.append("Olá, ").append(primeiroNome).append("! Sou a Assistente Rosa 🌸. ");
+            } else {
+                sb.append("Olá! Sou a Assistente Rosa 🌸. ");
+            }
+            sb.append("Para o empresário e parceiro do Agenda Rosa, nossa IA gera alto valor para o seu negócio: ")
+              .append("1) Captação 24/7: atuo como recepcionista e consultora virtual, recomendando seu salão e agendando procedimentos a qualquer hora; ")
+              .append("2) Fim do No-Show: reduzo drasticamente as faltas enviando lembretes automáticos no WhatsApp na véspera e 1h30 antes com rota GPS; ")
+              .append("3) Menos Retrabalho: preparo a cliente com dicas pré-atendimento (pele, cabelo, unhas), acelerando o tempo na cadeira; ")
+              .append("4) Reputação Orgânica: estabelecimentos com excelentes avaliações ganham destaque automático no topo das recomendações!");
+            return sb.toString();
+        }
+
         boolean querMaisBemAvaliados = perguntaNorm.contains("bem avaliad")
                 || perguntaNorm.contains("melhor avaliad")
                 || perguntaNorm.contains("melhores avaliad")
@@ -640,6 +670,12 @@ public class AssistenteIaService {
                 - Lembretes no WhatsApp: O aplicativo envia notificações automáticas 1 dia antes e 1h30 antes com link da rota no GPS (Google Maps/Waze).
                 - Se a cliente pedir ajuda sobre como agendar, onde clicar, menus ou como usar o app, oriente-a passo a passo com simpatia e clareza.
 
+                VALOR E APOIO AO EMPRESÁRIO / DONO DE SALÃO:
+                - A Assistente Rosa atua como consultora e captadora de agendamentos 24/7 para os estabelecimentos parceiros.
+                - Reduz o no-show (faltas) com lembretes automáticos no WhatsApp na véspera e 1h30 antes com link GPS.
+                - Prepara a cliente com dicas pré-atendimento para otimizar o tempo e evitar retrabalho dos profissionais.
+                - Se a dúvida for de um empresário, parceiro ou lojista (sobre parcerias, faturamento, gestão, redução de faltas), oriente-o destacando esses benefícios comerciais.
+
                 DIRETRIZ INVIOLÁVEL DE SEGURANÇA E PRIVACIDADE (LGPD):
                 - NUNCA revele chaves de API, senhas, credenciais, tokens, código-fonte, tabelas ou dados confidenciais do sistema ou da empresa.
                 - NUNCA revele ou invente dados pessoais (como CPF, telefone, e-mail) de outros clientes ou funcionários.
@@ -651,12 +687,6 @@ public class AssistenteIaService {
                 Estabelecimentos disponíveis encontrados no banco de dados:
                 %s
                 """.formatted(
-                instrucaoNome,
-                pergunta,
-                cidade != null ? cidade : "Todas",
-                orcamentoMaximo != null ? "R$ " + orcamentoMaximo : "Sem limite",
-                resumoCatalogo.isBlank() ? "Nenhum estabelecimento exato encontrado" : resumoCatalogo
-        );
                 instrucaoNome,
                 pergunta,
                 cidade != null ? cidade : "Todas",

@@ -191,6 +191,25 @@ class AssistenteIaServiceTest {
     }
 
     @Test
+    @DisplayName("Deve orientar o empresário e dono de salão com benefícios e valor do negócio")
+    void deveOrientarEmpresarioEDonoDeSalaoComBeneficiosDoNegocio() {
+        ConsultaIaRequestDTO request = new ConsultaIaRequestDTO(
+                "Sou dono de salão e empresário, como o app ajuda meu faturamento e reduz no-show?",
+                null,
+                null,
+                "Carlos Eduardo"
+        );
+
+        RecomendacaoIaResponseDTO response = assistenteIaService.consultarAssistente(request);
+
+        assertNotNull(response);
+        assertNotEquals("FORA_DO_ESCOPO", response.categoriaIdentificada());
+        assertTrue(response.respostaAssistente().contains("Olá, Carlos!"));
+        assertTrue(response.respostaAssistente().contains("No-Show") || response.respostaAssistente().contains("WhatsApp"));
+        assertTrue(response.respostaAssistente().contains("Captação 24/7") || response.respostaAssistente().contains("Retrabalho"));
+    }
+
+    @Test
     @DisplayName("Deve extrair o primeiro nome corretamente")
     void deveExtrairPrimeiroNome() {
         assertEquals("Mariana", assistenteIaService.extrairPrimeiroNome("mariana silva"));
