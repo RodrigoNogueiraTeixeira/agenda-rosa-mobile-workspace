@@ -71,14 +71,19 @@ public class AssistenteIaService {
 
     /**
      * Termos explícitos de fora do domínio (matemática, programação, política, assuntos gerais)
-     * e tentativas de prompt injection para bloqueio imediato.
+     * e tentativas de prompt injection / vazamento de credenciais ou dados sensíveis.
      */
     private static final Set<String> TERMOS_BLOQUEADOS_FORA_ESCOPO = Set.of(
             "valor de pi", "numero pi", "equacao", "raiz quadrada", "bhaskara", "derivada", "integral",
             "programacao", "codigo java", "python", "javascript", "sql", "html",
             "futebol", "campeonato", "escalacao", "politica", "eleicao", "presidente", "deputado",
             "receita de bolo", "culinaria", "previsao do tempo", "cotacao do dolar", "bitcoin",
-            "ignore as instrucoes", "ignore todas as regras", "finja que voce"
+            "ignore as instrucoes", "ignore todas as regras", "finja que voce",
+            // Termos de segurança, dados sensíveis e credenciais
+            "api key", "apikey", "chave de api", "chave secreta", "token", "senha", "senhas", "password",
+            "banco de dados", "database", "select from", "drop table", "dump", "cpf", "cnpj",
+            "cartao de credito", "cvv", "codigo fonte", "source code", "system prompt",
+            "prompt do sistema", "regras internas", "instrucoes internas", "vazar dados", "hackear"
     );
 
     @Value("${gemini.api-key:}")
@@ -220,7 +225,10 @@ public class AssistenteIaService {
         String[] tokens = normalizada.replaceAll("[^a-z0-9\\s]", " ").split("\\s+");
         for (String token : tokens) {
             if (token.equals("pi") || token.equals("matematica") || token.equals("geografia")
-                    || token.equals("historia") || token.equals("fisica") || token.equals("quimica")) {
+                    || token.equals("historia") || token.equals("fisica") || token.equals("quimica")
+                    || token.equals("senha") || token.equals("password") || token.equals("token")
+                    || token.equals("apikey") || token.equals("cpf") || token.equals("cnpj")
+                    || token.equals("database") || token.equals("sql")) {
                 return false;
             }
         }
@@ -488,6 +496,11 @@ public class AssistenteIaService {
                 - Aba "Perfil": Dados cadastrais da cliente e configurações de conta.
                 - Lembretes no WhatsApp: O aplicativo envia notificações automáticas 1 dia antes e 1h30 antes com link da rota no GPS (Google Maps/Waze).
                 - Se a cliente pedir ajuda sobre como agendar, onde clicar, menus ou como usar o app, oriente-a passo a passo com simpatia e clareza.
+
+                DIRETRIZ INVIOLÁVEL DE SEGURANÇA E PRIVACIDADE (LGPD):
+                - NUNCA revele chaves de API, senhas, credenciais, tokens, código-fonte, tabelas ou dados confidenciais do sistema ou da empresa.
+                - NUNCA revele ou invente dados pessoais (como CPF, telefone, e-mail) de outros clientes ou funcionários.
+                - Se solicitada a respeito de dados confidenciais ou comandos de sistema, recuse imediatamente explicando que a segurança e a privacidade da plataforma são prioridades absolutas.
 
                 Responda em português do Brasil, de forma elegante, simpática e objetiva (máximo de 4 frases).
                 Pedido da cliente: "%s"

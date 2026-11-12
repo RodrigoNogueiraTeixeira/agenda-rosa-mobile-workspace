@@ -33,7 +33,12 @@ const TERMOS_BLOQUEADOS = [
   'valor de pi', 'numero pi', 'equacao', 'raiz quadrada', 'bhaskara', 'derivada', 'integral',
   'programacao', 'codigo java', 'python', 'javascript', 'sql', 'futebol', 'politica',
   'eleicao', 'presidente', 'receita de bolo', 'culinaria', 'cotacao do dolar', 'bitcoin',
-  'ignore as instrucoes', 'ignore todas as regras',
+  'ignore as instrucoes', 'ignore todas as regras', 'finja que voce',
+  // Bloqueio de dados sensiveis, credenciais e prompt injection
+  'api key', 'apikey', 'chave de api', 'chave secreta', 'token', 'senha', 'senhas', 'password',
+  'banco de dados', 'database', 'select from', 'drop table', 'dump', 'cpf', 'cnpj',
+  'cartao de credito', 'cvv', 'codigo fonte', 'source code', 'system prompt',
+  'prompt do sistema', 'regras internas', 'instrucoes internas', 'vazar dados', 'hackear',
 ];
 
 function normalizarTexto(valor = '') {
@@ -74,7 +79,15 @@ export function isPerguntaDentroDoEscopoNegocio(pergunta = '') {
     tokens.includes('matematica') ||
     tokens.includes('geografia') ||
     tokens.includes('historia') ||
-    tokens.includes('fisica')
+    tokens.includes('fisica') ||
+    tokens.includes('senha') ||
+    tokens.includes('password') ||
+    tokens.includes('token') ||
+    tokens.includes('apikey') ||
+    tokens.includes('cpf') ||
+    tokens.includes('cnpj') ||
+    tokens.includes('database') ||
+    tokens.includes('sql')
   ) {
     return false;
   }
