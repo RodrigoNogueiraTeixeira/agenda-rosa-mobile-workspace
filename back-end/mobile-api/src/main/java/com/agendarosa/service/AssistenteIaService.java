@@ -96,7 +96,7 @@ public class AssistenteIaService {
     @Value("${gemini.api-key:}")
     private String geminiApiKey;
 
-    @Value("${gemini.model:gemini-2.5-flash}")
+    @Value("${gemini.model:gemini-3.8-flash}")
     private String geminiModel;
 
     private final EstabelecimentoService estabelecimentoService;
