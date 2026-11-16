@@ -16,4 +16,6 @@ public interface ProfissionalRepository extends JpaRepository<Profissional, Inte
     Optional<Profissional> findByIdAndAtivo(Integer id, Integer ativo);
 
     List<Profissional> findByEmpresaIdAndAtivo(Integer empresaId, Integer ativo);
+
+    List<Profissional> findByAtivoOrderByNomeAsc(Integer ativo);
 }

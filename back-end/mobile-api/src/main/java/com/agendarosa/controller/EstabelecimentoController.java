@@ -1,6 +1,8 @@
 package com.agendarosa.controller;
 
 import com.agendarosa.dto.EstabelecimentoCardResponseDTO;
+import com.agendarosa.dto.ProfissionalResponseDTO;
+import com.agendarosa.dto.ServicoDestaqueDTO;
 import com.agendarosa.service.EstabelecimentoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -68,6 +70,18 @@ public class EstabelecimentoController {
     }
 
     /**
+     * Retorna a lista de profissionais ativos (opcionalmente filtrados por estabelecimentoId).
+     * Exemplo: GET /api/v1/estabelecimentos/profissionais?estabelecimentoId=1
+     */
+    @GetMapping("/profissionais")
+    public ResponseEntity<List<ProfissionalResponseDTO>> listarProfissionais(
+            @RequestParam(required = false) Integer estabelecimentoId
+    ) {
+        List<ProfissionalResponseDTO> profissionais = estabelecimentoService.listarProfissionaisAtivos(estabelecimentoId);
+        return ResponseEntity.ok(profissionais);
+    }
+
+    /**
      * Retorna os detalhes de um estabelecimento específico por ID.
      * Exemplo: GET /api/v1/estabelecimentos/1
      */
@@ -75,5 +89,29 @@ public class EstabelecimentoController {
     public ResponseEntity<EstabelecimentoCardResponseDTO> buscarPorId(@PathVariable Integer id) {
         EstabelecimentoCardResponseDTO loja = estabelecimentoService.buscarPorId(id);
         return ResponseEntity.ok(loja);
+    }
+
+    /**
+     * Retorna a lista de profissionais ativos vinculados ao estabelecimento informado.
+     * Exemplo: GET /api/v1/estabelecimentos/1/profissionais
+     */
+    @GetMapping("/{id}/profissionais")
+    public ResponseEntity<List<ProfissionalResponseDTO>> listarProfissionaisPorEstabelecimento(
+            @PathVariable Integer id
+    ) {
+        List<ProfissionalResponseDTO> profissionais = estabelecimentoService.listarProfissionaisPorEstabelecimento(id);
+        return ResponseEntity.ok(profissionais);
+    }
+
+    /**
+     * Retorna a lista de serviços ativos vinculados ao estabelecimento informado.
+     * Exemplo: GET /api/v1/estabelecimentos/1/servicos
+     */
+    @GetMapping("/{id}/servicos")
+    public ResponseEntity<List<ServicoDestaqueDTO>> listarServicosPorEstabelecimento(
+            @PathVariable Integer id
+    ) {
+        List<ServicoDestaqueDTO> servicos = estabelecimentoService.listarServicosPorEstabelecimento(id);
+        return ResponseEntity.ok(servicos);
     }
 }

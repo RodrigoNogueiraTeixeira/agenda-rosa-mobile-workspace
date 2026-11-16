@@ -1,13 +1,17 @@
 package com.agendarosa.service;
 
 import com.agendarosa.dto.EstabelecimentoCardResponseDTO;
+import com.agendarosa.dto.ProfissionalResponseDTO;
 import com.agendarosa.dto.ServicoDestaqueDTO;
 import com.agendarosa.model.Estabelecimento;
 import com.agendarosa.model.EstabelecimentoTipo;
+import com.agendarosa.model.Profissional;
 import com.agendarosa.model.Servico;
 import com.agendarosa.repository.EstabelecimentoRepository;
 import com.agendarosa.repository.EstabelecimentoTipoRepository;
+import com.agendarosa.repository.ProfissionalRepository;
 import com.agendarosa.repository.ServicoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,13 +29,23 @@ public class EstabelecimentoService {
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final EstabelecimentoTipoRepository estabelecimentoTipoRepository;
     private final ServicoRepository servicoRepository;
+    private final ProfissionalRepository profissionalRepository;
 
     public EstabelecimentoService(EstabelecimentoRepository estabelecimentoRepository,
                                   EstabelecimentoTipoRepository estabelecimentoTipoRepository,
                                   ServicoRepository servicoRepository) {
+        this(estabelecimentoRepository, estabelecimentoTipoRepository, servicoRepository, null);
+    }
+
+    @Autowired
+    public EstabelecimentoService(EstabelecimentoRepository estabelecimentoRepository,
+                                  EstabelecimentoTipoRepository estabelecimentoTipoRepository,
+                                  ServicoRepository servicoRepository,
+                                  @Autowired(required = false) ProfissionalRepository profissionalRepository) {
         this.estabelecimentoRepository = estabelecimentoRepository;
         this.estabelecimentoTipoRepository = estabelecimentoTipoRepository;
         this.servicoRepository = servicoRepository;
+        this.profissionalRepository = profissionalRepository;
     }
 
     /**
@@ -174,6 +188,85 @@ public class EstabelecimentoService {
                 e.getLongitude(),
                 tipos,
                 servicosDestaque
+        );
+    }
+
+    /**
+     * Lista todos os serviços ativos de um estabelecimento específico por ID.
+     */
+    @Transactional(readOnly = true)
+    public List<ServicoDestaqueDTO> listarServicosPorEstabelecimento(Integer id) {
+        Estabelecimento e = estabelecimentoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Estabelecimento não encontrado com o ID: " + id));
+
+        return servicoRepository.findByEstabelecimentoIdAndStatus(e.getId(), "ativo")
+                .stream()
+                .map(s -> new ServicoDestaqueDTO(
+                        s.getId(),
+                        s.getNome(),
+                        s.getPreco(),
+                        s.getPrecoCentavos(),
+                        s.getDuracaoMinutos()
+                ))
+                .toList();
+    }
+
+    /**
+     * Lista os profissionais ativos vinculados ao estabelecimento informado.
+     */
+    @Transactional(readOnly = true)
+    public List<ProfissionalResponseDTO> listarProfissionaisPorEstabelecimento(Integer estabelecimentoId) {
+        Estabelecimento e = estabelecimentoRepository.findById(estabelecimentoId)
+                .orElseThrow(() -> new IllegalArgumentException("Estabelecimento não encontrado com o ID: " + estabelecimentoId));
+
+        if (profissionalRepository == null) {
+            return Collections.emptyList();
+        }
+
+        List<Profissional> profissionais = Collections.emptyList();
+
+        if (e.getEmpresaId() != null) {
+            profissionais = profissionalRepository.findByEmpresaIdAndAtivo(e.getEmpresaId(), 1);
+        }
+
+        if (profissionais.isEmpty()) {
+            profissionais = profissionalRepository.findByEmpresaIdAndAtivo(e.getId(), 1);
+        }
+
+        if (profissionais.isEmpty()) {
+            profissionais = profissionalRepository.findByAtivoOrderByNomeAsc(1);
+        }
+
+        return profissionais.stream()
+                .map(this::toProfissionalDTO)
+                .toList();
+    }
+
+    /**
+     * Lista os profissionais ativos (filtrando por estabelecimento se informado, ou todos os ativos).
+     */
+    @Transactional(readOnly = true)
+    public List<ProfissionalResponseDTO> listarProfissionaisAtivos(Integer estabelecimentoId) {
+        if (estabelecimentoId != null) {
+            return listarProfissionaisPorEstabelecimento(estabelecimentoId);
+        }
+        if (profissionalRepository == null) {
+            return Collections.emptyList();
+        }
+        return profissionalRepository.findByAtivoOrderByNomeAsc(1)
+                .stream()
+                .map(this::toProfissionalDTO)
+                .toList();
+    }
+
+    private ProfissionalResponseDTO toProfissionalDTO(Profissional p) {
+        return new ProfissionalResponseDTO(
+                p.getId(),
+                p.getEmpresaId(),
+                p.getNome(),
+                p.getEspecialidade(),
+                p.getTelefone(),
+                p.getEmail()
         );
     }
 

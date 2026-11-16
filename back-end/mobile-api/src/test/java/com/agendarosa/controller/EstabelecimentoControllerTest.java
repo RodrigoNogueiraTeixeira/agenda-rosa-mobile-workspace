@@ -1,6 +1,7 @@
 package com.agendarosa.controller;
 
 import com.agendarosa.dto.EstabelecimentoCardResponseDTO;
+import com.agendarosa.dto.ProfissionalResponseDTO;
 import com.agendarosa.dto.ServicoDestaqueDTO;
 import com.agendarosa.service.EstabelecimentoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,5 +103,23 @@ class EstabelecimentoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0]").value("Bela Vista"))
                 .andExpect(jsonPath("$[3]").value("Moema"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/estabelecimentos/{id}/profissionais deve retornar 200 OK com lista de profissionais")
+    void deveListarProfissionaisPorEstabelecimento() throws Exception {
+        ProfissionalResponseDTO prof = new ProfissionalResponseDTO(
+                1, 1, "Ana Paula", "Cabeleireira e Colorista", "11999999999", "ana@studio.com"
+        );
+
+        when(estabelecimentoService.listarProfissionaisPorEstabelecimento(1))
+                .thenReturn(List.of(prof));
+
+        mockMvc.perform(get("/api/v1/estabelecimentos/1/profissionais")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].nome").value("Ana Paula"))
+                .andExpect(jsonPath("$[0].especialidade").value("Cabeleireira e Colorista"));
     }
 }
