@@ -1,0 +1,547 @@
+import { StyleSheet, Platform, StatusBar } from 'react-native';
+import { theme } from '../../styles/theme';
+
+export const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 8 : 8,
+  },
+
+  // Barra Superior (Seta Voltar, Título "Agendamento", Botão Fechar)
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    backgroundColor: theme.colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: '#FCE7EE',
+  },
+  headerIconButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FAF5F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: theme.colors.text,
+  },
+
+  // Conteúdo Rolável
+  scrollContent: {
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+
+  // Rótulos de Seção
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+
+  // Card do Estabelecimento no Topo
+  storeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.lg,
+    borderWidth: 1,
+    borderColor: '#FCE7EE',
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    marginBottom: 18,
+  },
+  storeBoxLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  storeBoxName: {
+    fontSize: 14.5,
+    fontWeight: '600',
+    color: theme.colors.text,
+    flex: 1,
+  },
+  openBadge: {
+    backgroundColor: theme.colors.primaryLight,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  openBadgeText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+
+  // Card de Serviços Prestados
+  servicesCard: {
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.xl,
+    borderWidth: 1,
+    borderColor: '#F8BBD0',
+    padding: 16,
+    marginBottom: 18,
+  },
+  servicesHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  servicesTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  servicesTitle: {
+    fontSize: 14.5,
+    fontWeight: '700',
+    color: theme.colors.text,
+  },
+  servicesHint: {
+    fontSize: 11.5,
+    color: theme.colors.textSecondary,
+  },
+  serviceOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.white,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: theme.borderRadius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 13,
+    marginBottom: 10,
+  },
+  serviceOptionCardSelected: {
+    borderColor: theme.colors.primary,
+    backgroundColor: '#FFF9FB',
+  },
+  serviceOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+    paddingRight: 8,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: '#D1D5DB',
+    backgroundColor: theme.colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxSelected: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  serviceOptionName: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: theme.colors.text,
+    flex: 1,
+  },
+  serviceOptionMeta: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: theme.colors.text,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    borderTopColor: '#FCE7EE',
+    paddingTop: 12,
+    marginTop: 4,
+  },
+  totalLabel: {
+    fontSize: 12.5,
+    color: theme.colors.textSecondary,
+  },
+  totalValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+
+  // Campo Seletor (Profissional e Data)
+  fieldGroup: {
+    marginBottom: 16,
+  },
+  selectorButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.white,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+  },
+  selectorButtonText: {
+    fontSize: 13.5,
+    color: theme.colors.text,
+    flex: 1,
+  },
+  dateIconsGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  // Lista expansível de profissionais
+  dropdownList: {
+    marginTop: 6,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: '#F8BBD0',
+    overflow: 'hidden',
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#FAF5F7',
+  },
+  dropdownItemSelected: {
+    backgroundColor: theme.colors.primaryLight,
+  },
+  dropdownItemText: {
+    fontSize: 13.5,
+    color: theme.colors.text,
+  },
+  dropdownItemTextSelected: {
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+
+  // Horários Disponíveis
+  scheduleHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  freeSlotsText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.primary,
+  },
+  timeSlotsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  timeSlotPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: theme.colors.white,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    minWidth: 64,
+    alignItems: 'center',
+  },
+  timeSlotPillSelected: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  timeSlotText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.text,
+  },
+  timeSlotTextSelected: {
+    color: theme.colors.white,
+    fontWeight: '700',
+  },
+
+  // Campo de Observações
+  notesInput: {
+    backgroundColor: theme.colors.white,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 13.5,
+    color: theme.colors.text,
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+
+  // Seção de Localização e Mapa
+  locationSection: {
+    marginTop: 6,
+    marginBottom: 12,
+  },
+  locationHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    gap: 8,
+  },
+  locationInfoGroup: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    flex: 1,
+  },
+  locationTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.text,
+  },
+  locationSubtitle: {
+    fontSize: 11.5,
+    color: theme.colors.textSecondary,
+    marginTop: 1,
+  },
+  openMapsLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+  },
+  openMapsLinkText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+  mapContainer: {
+    height: 155,
+    borderRadius: theme.borderRadius.lg,
+    overflow: 'hidden',
+    backgroundColor: '#F3E5EC',
+    borderWidth: 1,
+    borderColor: '#FCE7EE',
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapBackgroundImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  mapGridOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(253, 240, 245, 0.25)',
+  },
+  mapPinCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: theme.colors.primary,
+    borderWidth: 3,
+    borderColor: theme.colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  mapPinDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: theme.colors.primary,
+    marginTop: 2,
+  },
+  mapDistanceBadge: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: theme.colors.white,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  mapDistanceText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: theme.colors.text,
+  },
+  mapModeToggle: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FCE7EE',
+  },
+  mapModeToggleText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+
+  // Barra Inferior Fixa (Total a Pagar + Botão Confirmar Agendamento)
+  bottomCheckoutBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.white,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#FCE7EE',
+    gap: 12,
+  },
+  checkoutTotalLabel: {
+    fontSize: 11.5,
+    color: theme.colors.textSecondary,
+  },
+  checkoutTotalValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+  confirmButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: theme.borderRadius.lg,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  confirmButtonText: {
+    color: theme.colors.white,
+    fontSize: 14.5,
+    fontWeight: '700',
+  },
+
+  // Modal do Calendário Interativo
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  calendarModalCard: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.xl,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#FCE7EE',
+  },
+  calendarHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  calendarMonthTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.colors.text,
+  },
+  calendarNavBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: theme.colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  weekDaysRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 8,
+  },
+  weekDayText: {
+    width: 38,
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '700',
+    color: theme.colors.textSecondary,
+  },
+  daysGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  dayCell: {
+    width: '14.28%',
+    aspectRatio: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 18,
+  },
+  dayCellSelected: {
+    backgroundColor: theme.colors.primary,
+  },
+  dayCellText: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: theme.colors.text,
+  },
+  dayCellTextSelected: {
+    color: theme.colors.white,
+    fontWeight: '700',
+  },
+  dayCellTextDisabled: {
+    color: '#D1D5DB',
+  },
+  closeModalButton: {
+    marginTop: 14,
+    paddingVertical: 11,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+  },
+  closeModalButtonText: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: theme.colors.text,
+  },
+});
