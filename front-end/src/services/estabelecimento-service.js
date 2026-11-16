@@ -1,7 +1,7 @@
 import { request } from './api';
 
 /**
- * Serviço para buscar estabelecimentos e filtros na API Spring Boot.
+ * Serviço para buscar estabelecimentos, filtros, serviços e profissionais na API Spring Boot.
  * Endpoints públicos: /api/v1/estabelecimentos
  */
 export const estabelecimentoService = {
@@ -48,6 +48,34 @@ export const estabelecimentoService = {
    */
   async listarTipos() {
     const dados = await request('/estabelecimentos/tipos', {
+      method: 'GET',
+    });
+    return Array.isArray(dados) ? dados : [];
+  },
+
+  /**
+   * Lista os serviços ativos de um estabelecimento específico.
+   * Endpoint: GET /api/v1/estabelecimentos/{id}/servicos
+   */
+  async listarServicosPorEstabelecimento(estabelecimentoId) {
+    const idSeguro = Number(estabelecimentoId);
+    if (!idSeguro) return [];
+
+    const dados = await request(`/estabelecimentos/${idSeguro}/servicos`, {
+      method: 'GET',
+    });
+    return Array.isArray(dados) ? dados : [];
+  },
+
+  /**
+   * Lista os profissionais ativos de um estabelecimento específico.
+   * Endpoint: GET /api/v1/estabelecimentos/{id}/profissionais
+   */
+  async listarProfissionaisPorEstabelecimento(estabelecimentoId) {
+    const idSeguro = Number(estabelecimentoId);
+    if (!idSeguro) return [];
+
+    const dados = await request(`/estabelecimentos/${idSeguro}/profissionais`, {
       method: 'GET',
     });
     return Array.isArray(dados) ? dados : [];

@@ -4,6 +4,7 @@ import Login from './src/pages/login';
 import EsqueciSenha from './src/pages/esqueci-senha';
 import Cadastro from './src/pages/cadastro';
 import VitrineLojas from './src/pages/vitrine-lojas';
+import Agendamento from './src/pages/agendamento';
 import { authService } from './src/services/auth-service';
 
 // COMPONENTE RAIZ DA APLICAÇÃO: Controla qual tela é exibida no momento e a sessão do usuário
@@ -12,11 +13,14 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState('home');
   // Estado que guarda os dados do usuário autenticado após o login/cadastro
   const [currentUser, setCurrentUser] = useState(null);
+  // Estado que guarda a loja escolhida quando o cliente clica em "Agendar"
+  const [lojaSelecionada, setLojaSelecionada] = useState(null);
 
   // FUNÇÃO: Encerra a sessão do usuário, limpa o token JWT e permanece na Home deslogado
   async function handleLogout() {
     await authService.logout();
     setCurrentUser(null);
+    setLojaSelecionada(null);
     setCurrentScreen('home');
   }
 
@@ -24,6 +28,12 @@ export default function App() {
   function handleLoginSuccess(user) {
     setCurrentUser(user);
     setCurrentScreen('home');
+  }
+
+  // FUNÇÃO: Abre a tela de Agendamento para a loja escolhida na Vitrine
+  function handleAbrirAgendamento(loja) {
+    setLojaSelecionada(loja);
+    setCurrentScreen('agendamento');
   }
 
   // RENDERIZAÇÃO CONDICIONAL DAS TELAS CONFORME O ESTADO `currentScreen`
@@ -61,6 +71,16 @@ export default function App() {
           onNavigateToLogin={() => setCurrentScreen('login')}
           onNavigateToCadastro={() => setCurrentScreen('cadastro')}
           onLogout={handleLogout}
+          onSelecionarLojaAgendamento={handleAbrirAgendamento}
+        />
+      )}
+
+      {/* TELA 5: Agendamento (Seleção de Serviços, Profissional, Data/Hora e Mapa) */}
+      {currentScreen === 'agendamento' && (
+        <Agendamento
+          loja={lojaSelecionada}
+          onVoltar={() => setCurrentScreen('home')}
+          onAgendamentoConcluido={() => setCurrentScreen('home')}
         />
       )}
     </>
