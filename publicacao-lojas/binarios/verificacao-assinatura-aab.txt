@@ -1,0 +1,60 @@
+﻿
+s        437 Tue Nov 17 09:36:36 GMT-03:00 2026 META-INF/MANIFEST.MF
+
+      >>> Signer
+      X.509, CN=Agenda Rosa Mobile, OU=Engenharia Mobile PI, O=Agenda Rosa Ltda, L=Goiania, ST=GO, C=BR
+      Signature algorithm: SHA384withRSA, 2048-bit RSA key
+      [certificate is valid from 17/11/2026 09:36 to 04/04/2054 09:36]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+         599 Tue Nov 17 09:36:36 GMT-03:00 2026 META-INF/AGENDARO.SF
+        1608 Tue Nov 17 09:36:36 GMT-03:00 2026 META-INF/AGENDARO.RSA
+sm       106 Tue Nov 17 09:36:34 GMT-03:00 2026 BundleConfig.pb
+
+      >>> Signer
+      X.509, CN=Agenda Rosa Mobile, OU=Engenharia Mobile PI, O=Agenda Rosa Ltda, L=Goiania, ST=GO, C=BR
+      Signature algorithm: SHA384withRSA, 2048-bit RSA key
+      [certificate is valid from 17/11/2026 09:36 to 04/04/2054 09:36]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm       594 Tue Nov 17 09:36:34 GMT-03:00 2026 base/manifest/AndroidManifest.xml
+
+      >>> Signer
+      X.509, CN=Agenda Rosa Mobile, OU=Engenharia Mobile PI, O=Agenda Rosa Ltda, L=Goiania, ST=GO, C=BR
+      Signature algorithm: SHA384withRSA, 2048-bit RSA key
+      [certificate is valid from 17/11/2026 09:36 to 04/04/2054 09:36]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        37 Tue Nov 17 09:36:34 GMT-03:00 2026 base/dex/classes.dex
+
+      >>> Signer
+      X.509, CN=Agenda Rosa Mobile, OU=Engenharia Mobile PI, O=Agenda Rosa Ltda, L=Goiania, ST=GO, C=BR
+      Signature algorithm: SHA384withRSA, 2048-bit RSA key
+      [certificate is valid from 17/11/2026 09:36 to 04/04/2054 09:36]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+sm        37 Tue Nov 17 09:36:34 GMT-03:00 2026 base/resources.pb
+
+      >>> Signer
+      X.509, CN=Agenda Rosa Mobile, OU=Engenharia Mobile PI, O=Agenda Rosa Ltda, L=Goiania, ST=GO, C=BR
+      Signature algorithm: SHA384withRSA, 2048-bit RSA key
+      [certificate is valid from 17/11/2026 09:36 to 04/04/2054 09:36]
+      [Invalid certificate chain: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target]
+
+
+  s = signature was verified 
+  m = entry is listed in manifest
+  k = at least one certificate was found in keystore
+
+- Signed by "CN=Agenda Rosa Mobile, OU=Engenharia Mobile PI, O=Agenda Rosa Ltda, L=Goiania, ST=GO, C=BR"
+    Digest algorithm: SHA-256
+    Signature algorithm: SHA256withRSA, 2048-bit RSA key
+
+jar verified.
+
+Warning: 
+This jar contains entries whose certificate chain is invalid. Reason: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+This jar contains entries whose signer certificate is self-signed.
+This jar contains signatures that do not include a timestamp. Without a timestamp, users may not be able to validate this jar after any of the signer certificates expire (as early as 2054-04-04).
+
+The signer certificate will expire on 2054-04-04.

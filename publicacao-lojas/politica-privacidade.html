@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidade e Proteção de Dados (LGPD) — Agenda Rosa Mobile</title>
+  <style>
+    :root {
+      --rosa-escuro: #B41D5C;
+      --rosa-principal: #E84C88;
+      --rosa-claro: #FCE4EC;
+      --creme: #FFF8FA;
+      --texto: #2D1422;
+      --suave: #6E4F5D;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--creme);
+      color: var(--texto);
+      line-height: 1.65;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: linear-gradient(135deg, var(--rosa-escuro), var(--rosa-principal));
+      color: #fff;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 8px 0; font-size: 28px; }
+    header p { margin: 0; opacity: 0.92; font-size: 15px; }
+    main {
+      max-width: 900px;
+      margin: 32px auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 36px;
+      box-shadow: 0 8px 28px rgba(180, 29, 92, 0.08);
+      border: 1px solid #F3D6E2;
+    }
+    h2 {
+      color: var(--rosa-escuro);
+      border-bottom: 2px solid var(--rosa-claro);
+      padding-bottom: 8px;
+      margin-top: 28px;
+      font-size: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #EBCAD7;
+      padding: 10px 12px;
+      text-align: left;
+    }
+    th {
+      background-color: var(--rosa-claro);
+      color: var(--rosa-escuro);
+    }
+    .badge {
+      display: inline-block;
+      background: var(--rosa-claro);
+      color: var(--rosa-escuro);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--suave);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌸 Política de Privacidade — Agenda Rosa Mobile</h1>
+    <p>Em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD), Google Play Data Safety e Apple App Store Privacy Guidelines</p>
+  </header>
+
+  <main>
+    <p><span class="badge">Versão 1.0.0</span> &nbsp; <strong>Última atualização:</strong> 17 de novembro de 2026 &nbsp;|&nbsp; <strong>Pacote Oficial:</strong> <code>com.agendarosa.mobile</code></p>
+
+    <h2>1. Identificação do Controlador</h2>
+    <p>
+      O aplicativo móvel <strong>Agenda Rosa</strong> (pacote <code>com.agendarosa.mobile</code> para Android e iOS) é uma plataforma digital voltada à busca de salões de beleza, clínicas de estética, consultoria virtual por Inteligência Artificial (Assistente Rosa IA), agendamento de horários e pagamentos digitais via Pix.
+    </p>
+
+    <h2>2. Dados Pessoais Coletados e Finalidades</h2>
+    <p>Coletamos estritamente os dados mínimos necessários para a execução dos serviços contratados pelo usuário (Princípio da Necessidade — Art. 6º, III da LGPD):</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Categoria de Dado</th>
+          <th>Dados Específicos</th>
+          <th>Finalidade de Uso no Aplicativo</th>
+          <th>Base Legal (LGPD)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Identificação e Contato</strong></td>
+          <td>Nome completo, E-mail, Telefone celular (WhatsApp), Cidade e Bairro</td>
+          <td>Criação de conta, autenticação segura via JWT, envio de código de recuperação de senha (via Brevo) e disparo de lembretes de agendamento no WhatsApp (1 dia antes e 1h30 antes).</td>
+          <td>Execução de Contrato (Art. 7º, V)</td>
+        </tr>
+        <tr>
+          <td><strong>Localização Geográfica</strong></td>
+          <td>Coordenadas GPS (Latitude e Longitude) aproximadas e precisas (apenas durante o uso do app)</td>
+          <td>Ordenação dos salões e clínicas mais próximos da cliente e geração de links diretos de rota no Google Maps / Waze.</td>
+          <td>Consentimento do Titular (Art. 7º, I)</td>
+        </tr>
+        <tr>
+          <td><strong>Transações e Pagamentos</strong></td>
+          <td>ID do agendamento, valor do serviço e status do Pix</td>
+          <td>Geração de QR Code Pix dinâmico, confirmação via Webhook e processamento de estorno automático em caso de cancelamento via API oficial do Mercado Pago. O app <strong>não armazena</strong> números de cartão de crédito ou senhas bancárias.</td>
+          <td>Execução de Contrato e Obrigação Legal (Art. 7º, II e V)</td>
+        </tr>
+        <tr>
+          <td><strong>Interações no App (Chat IA)</strong></td>
+          <td>Perguntas sobre procedimentos estéticos enviadas à Assistente Rosa IA</td>
+          <td>Recomendação personalizada de salões parceiros e dicas pré-atendimento processadas via Google Gemini API com Guardrail de segurança e LGPD.</td>
+          <td>Legítimo Interesse / Execução de Contrato</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Permissões Nativas do Dispositivo</h2>
+    <ul>
+      <li><strong>Localização (<code>ACCESS_FINE_LOCATION</code> / <code>ACCESS_COARSE_LOCATION</code> / <code>NSLocationWhenInUseUsageDescription</code>):</strong> Solicitada exclusivamente enquanto o aplicativo está aberto em primeiro plano para calcular a distância até os estabelecimentos parceiros. Não realizamos rastreamento em segundo plano (background location).</li>
+      <li><strong>Acesso à Internet (<code>INTERNET</code>):</strong> Necessário para comunicação criptografada com a API REST hospedada em nuvem.</li>
+    </ul>
+
+    <h2>4. Compartilhamento de Dados com Operadores Terceiros</h2>
+    <p>O Agenda Rosa <strong>não vende, aluga ou compartilha dados pessoais para fins publicitários ou de rastreamento entre aplicativos (No Tracking)</strong>. Os dados são processados apenas pelos seguintes operadores essenciais à infraestrutura técnica:</p>
+    <ul>
+      <li><strong>Mercado Pago (Instituição de Pagamento):</strong> Processamento de cobranças e reembolsos via Pix no Brasil.</li>
+      <li><strong>Brevo (Serviço de E-mail Transacional):</strong> Envio exclusivo de códigos de 6 dígitos para recuperação de senha.</li>
+      <li><strong>Google Cloud / Gemini API:</strong> Processamento em tempo real das dúvidas de beleza na Assistente Rosa IA, protegido por filtro que impede o envio de credenciais ou dados sensíveis.</li>
+      <li><strong>Neon PostgreSQL &amp; CloudAMQP (RabbitMQ):</strong> Persistência em banco de dados relacional e fila assíncrona de reservas com criptografia TLS.</li>
+    </ul>
+
+    <h2>5. Segurança da Informação e Criptografia</h2>
+    <ul>
+      <li>Todas as comunicações entre o aplicativo móvel e o servidor utilizam criptografia em trânsito via protocolo <strong>HTTPS (TLS 1.2 / 1.3)</strong>.</li>
+      <li>As senhas dos usuários são armazenadas exclusivamente sob hash criptográfico irreversível (algoritmo <strong>BCrypt</strong>).</li>
+      <li>A autenticação utiliza tokens stateless assinados digitalmente (<strong>JSON Web Token — HMAC-SHA256</strong>).</li>
+    </ul>
+
+    <h2>6. Retenção e Exclusão de Dados (Direitos do Titular)</h2>
+    <p>
+      Em cumprimento ao Art. 18 da LGPD e às diretrizes de exclusão de conta da Google Play Store e Apple App Store, o usuário pode solicitar a qualquer momento a visualização, correção, portabilidade ou <strong>exclusão definitiva de sua conta e de todos os seus dados pessoais</strong> diretamente na aba <em>Perfil &gt; Excluir Conta</em> do aplicativo ou pelo canal de suporte abaixo.
+    </p>
+
+    <h2>7. Público-Alvo e Crianças</h2>
+    <p>
+      O aplicativo Agenda Rosa é destinado ao agendamento comercial de serviços de beleza e estética por maiores de 18 anos (ou menores assistidos por seus responsáveis legais), possuindo classificação indicativa <strong>Livre (IARC / 4+)</strong> e não sendo direcionado ao público infantil.
+    </p>
+
+    <h2>8. Contato do Encarregado de Dados (DPO) e Suporte</h2>
+    <p>
+      <strong>Encarregado pelo Tratamento de Dados Pessoais (DPO):</strong> Equipe de Engenharia Agenda Rosa<br />
+      <strong>E-mail de Suporte e Privacidade:</strong> <a href="mailto:digo22nt@gmail.com">digo22nt@gmail.com</a><br />
+      <strong>URL Oficial de Suporte:</strong> <code>https://agenda-rosa-mobile-workspace.onrender.com/politica-privacidade.html</code>
+    </p>
+  </main>
+
+  <footer>
+    &copy; 2026 Agenda Rosa Mobile — Projeto Integrador (PI). Todos os direitos reservados.
+  </footer>
+</body>
+</html>

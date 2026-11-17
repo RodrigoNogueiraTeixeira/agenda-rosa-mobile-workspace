@@ -17,3 +17,13 @@ front-end/.expo/
 
 # Temporary / Exports
 figma-export/
+
+# Mobile Release Keys & Keystores (Seguranca - DevSecOps)
+*.jks
+*.keystore
+*.p12
+
+# Binarios de compilacao de release (Distribuidos via Releases ou CI/CD)
+*.aab
+*.ipa
+

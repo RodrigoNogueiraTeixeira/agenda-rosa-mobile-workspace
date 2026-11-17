@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Store Connect — Agenda Rosa: Beleza e Salões</title>
+  <link rel="icon" type="image/png" href="assets/icon-app-store-1024x1024.png">
+  <style>
+    :root {
+      --apple-blue: #0071e3;
+      --apple-blue-hover: #0077ed;
+      --apple-text: #1d1d1f;
+      --apple-secondary: #6e6e73;
+      --apple-border: #d2d2d7;
+      --apple-bg: #f5f5f7;
+      --apple-surface: #ffffff;
+      --apple-green: #34c759;
+      --apple-green-bg: #eafaf1;
+      --apple-amber: #ff9500;
+      --apple-amber-bg: #fff8eb;
+      --apple-header-bg: #1d1d1f;
+      --sidebar-width: 250px;
+      --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--apple-bg);
+      color: var(--apple-text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* TOP GLOBAL APPLE HEADER */
+    header.apple-header {
+      height: 48px;
+      background-color: var(--apple-header-bg);
+      color: #f5f5f7;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      font-size: 13px;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .apple-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .apple-logo-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .header-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .header-nav-links a {
+      color: #a1a1a6;
+      text-decoration: none;
+      font-size: 12px;
+      transition: color 0.15s;
+    }
+
+    .header-nav-links a:hover, .header-nav-links a.active {
+      color: #ffffff;
+    }
+
+    .header-right-tools {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .switch-store-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 4px 12px;
+      border-radius: 14px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .switch-store-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #a1a1a6;
+      font-size: 12px;
+    }
+
+    /* SECONDARY APP BAR */
+    .app-subbar {
+      height: 60px;
+      background: var(--apple-surface);
+      border-bottom: 1px solid var(--apple-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      flex-shrink: 0;
+    }
+
+    .app-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .app-icon-squircle {
+      width: 40px;
+      height: 40px;
+      border-radius: 9px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      object-fit: cover;
+    }
+
+    .app-headings {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-main-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--apple-text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-version-status {
+      font-size: 12px;
+      color: var(--apple-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot-amber {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--apple-amber);
+      display: inline-block;
+    }
+
+    .app-subbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* MAIN CONTAINER (SIDEBAR + CONTENT) */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* APPLE SIDEBAR */
+    aside.apple-sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--apple-surface);
+      border-right: 1px solid var(--apple-border);
+      overflow-y: auto;
+      padding: 18px 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-group-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--apple-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 24px 6px 24px;
+    }
+
+    .apple-nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 24px;
+      font-size: 13px;
+      color: var(--apple-text);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.1s;
+    }
+
+    .apple-nav-item:hover {
+      background-color: #f0f0f2;
+    }
+
+    .apple-nav-item.active {
+      color: var(--apple-blue);
+      font-weight: 600;
+      background-color: #f0f5fb;
+      border-right: 3px solid var(--apple-blue);
+    }
+
+    .apple-badge {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background-color: #e5e5ea;
+      color: var(--apple-secondary);
+      font-weight: 500;
+    }
+
+    .apple-badge.warning {
+      background-color: var(--apple-amber-bg);
+      color: var(--apple-amber);
+      font-weight: 600;
+    }
+
+    .apple-badge.success {
+      background-color: var(--apple-green-bg);
+      color: var(--apple-green);
+      font-weight: 600;
+    }
+
+    /* MAIN SCROLLABLE CONTENT */
+    main.apple-main {
+      flex: 1;
+      overflow-y: auto;
+      background-color: var(--apple-bg);
+      padding: 32px 48px 80px 48px;
+    }
+
+    .content-container {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .apple-section-header {
+      margin-bottom: 24px;
+    }
+
+    .apple-section-title {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.4px;
+      margin-bottom: 6px;
+    }
+
+    .apple-section-sub {
+      font-size: 14px;
+      color: var(--apple-secondary);
+    }
+
+    /* CRITERIA BANNER */
+    .apple-callout {
+      background: var(--apple-surface);
+      border: 1px solid var(--apple-border);
+      border-left: 4px solid var(--apple-blue);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #333336;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .apple-callout.success {
+      border-left-color: var(--apple-green);
+      background-color: #f7fdf9;
+    }
+
+    /* CARDS */
+    .apple-card {
+      background: var(--apple-surface);
+      border: 1px solid var(--apple-border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .apple-card-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--apple-text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .apple-card-desc {
+      font-size: 13px;
+      color: var(--apple-secondary);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    /* FORM ELEMENTS */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .apple-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--apple-text);
+    }
+
+    .char-count {
+      font-size: 12px;
+      color: var(--apple-secondary);
+    }
+
+    .apple-input, .apple-textarea, .apple-select {
+      width: 100%;
+      border: 1px solid var(--apple-border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 14px;
+      color: var(--apple-text);
+      font-family: var(--font-family);
+      outline: none;
+      background: #ffffff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .apple-input:focus, .apple-textarea:focus, .apple-select:focus {
+      border-color: var(--apple-blue);
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    }
+
+    .apple-input:read-only, .apple-textarea:read-only {
+      background-color: #fafafc;
+      color: #48484a;
+    }
+
+    .apple-textarea {
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--apple-secondary);
+      margin-top: 5px;
+    }
+
+    /* BUTTONS */
+    .btn-apple {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 18px;
+      border-radius: 980px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+
+    .btn-apple-primary {
+      background-color: var(--apple-blue);
+      color: #ffffff;
+    }
+
+    .btn-apple-primary:hover {
+      background-color: var(--apple-blue-hover);
+    }
+
+    .btn-apple-secondary {
+      background-color: #e8e8ed;
+      color: var(--apple-text);
+    }
+
+    .btn-apple-secondary:hover {
+      background-color: #dedee3;
+    }
+
+    /* SCREENSHOTS CONTAINER */
+    .screenshots-deck {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-top: 10px;
+    }
+
+    .screenshot-card {
+      flex: 0 0 200px;
+      background: #ffffff;
+      border: 1px solid var(--apple-border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .screenshot-card img {
+      width: 100%;
+      height: 380px;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .screenshot-card img:hover {
+      transform: scale(1.02);
+    }
+
+    .screenshot-footer {
+      padding: 8px 10px;
+      font-size: 11px;
+      color: var(--apple-secondary);
+      border-top: 1px solid var(--apple-border);
+      background: #fafafc;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    /* DATA SAFETY NUTRITION ACCORDION */
+    .privacy-card-row {
+      border: 1px solid var(--apple-border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #ffffff;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .privacy-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    /* MODAL */
+    .apple-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .apple-modal {
+      background: #ffffff;
+      border-radius: 14px;
+      width: 90%;
+      max-width: 540px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .apple-modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .apple-modal-body {
+      font-size: 14px;
+      color: #333336;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .apple-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* TOAST */
+    .apple-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(30, 30, 30, 0.95);
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 2000;
+    }
+
+    .apple-toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* LIGHTBOX */
+    .lightbox {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2500;
+      cursor: pointer;
+    }
+
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 10px;
+    }
+
+    .tag-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: #eef2f6;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #1d1d1f;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- GLOBAL APPLE HEADER BAR -->
+  <header class="apple-header">
+    <div class="apple-brand">
+      <span class="apple-logo-icon"></span>
+      <span>App Store Connect</span>
+    </div>
+
+    <div class="header-nav-links">
+      <a href="#" class="active">Meus Apps</a>
+      <a href="#">Analytics</a>
+      <a href="#">Tendências</a>
+      <a href="#">Usuários e Acesso</a>
+      <a href="#">Contratos e Impostos</a>
+    </div>
+
+    <div class="header-right-tools">
+      <a href="simulador-play-store.html" class="switch-store-btn" title="Alternar para o simulador do Google Play Console">
+        ▶ Alternar para Play Store
+      </a>
+      <div class="user-pill">
+        <span>Agenda Rosa Mobile (PI)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- SECONDARY APP TITLE BAR -->
+  <div class="app-subbar">
+    <div class="app-title-group">
+      <img src="assets/icon-app-store-1024x1024.png" alt="Ícone App Store" class="app-icon-squircle">
+      <div class="app-headings">
+        <div class="app-main-name">
+          Agenda Rosa: Beleza e Salões
+          <span style="font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 10px; background: #e5e5ea; color: #555;">iOS App</span>
+        </div>
+        <div class="app-version-status" id="appleAppStatus">
+          <span class="status-dot-amber" id="statusDot"></span>
+          <span id="statusText">1.0.0 Preparando para Envio</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-subbar-actions">
+      <button class="btn-apple btn-apple-secondary" onclick="showToast('Rascunho salvo no App Store Connect')">Salvar</button>
+      <button class="btn-apple btn-apple-primary" id="btnSubmitApple" onclick="openAppleModal()">
+        Enviar para Análise da Apple
+      </button>
+    </div>
+  </div>
+
+  <!-- APP BODY: SIDEBAR + CONTENT -->
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <aside class="apple-sidebar">
+      <div class="sidebar-group-title">iOS App</div>
+      <a class="apple-nav-item active" data-screen="versao-ios" onclick="showAppleScreen('versao-ios')">
+        <span>1.0.0 Preparando para envio</span>
+        <span class="apple-badge warning" id="sidebarBadgeStatus">Em preparo</span>
+      </a>
+
+      <div class="sidebar-group-title">Geral</div>
+      <a class="apple-nav-item" data-screen="informacoes-app" onclick="showAppleScreen('informacoes-app')">
+        <span>Informações do app</span>
+        <span class="apple-badge success">✓</span>
+      </a>
+      <a class="apple-nav-item" data-screen="privacidade-app" onclick="showAppleScreen('privacidade-app')">
+        <span>Privacidade do app</span>
+        <span class="apple-badge success">✓</span>
+      </a>
+      <a class="apple-nav-item" data-screen="preco-disponibilidade" onclick="showAppleScreen('preco-disponibilidade')">
+        <span>Preço e disponibilidade</span>
+        <span class="apple-badge success">Grátis</span>
+      </a>
+
+      <div class="sidebar-group-title">TestFlight (Testes Beta)</div>
+      <a class="apple-nav-item" data-screen="testflight-view" onclick="showAppleScreen('testflight-view')">
+        <span>Compilações e Testadores</span>
+        <span class="apple-badge success">25 test.</span>
+      </a>
+    </aside>
+
+    <!-- MAIN CONTENT VIEW -->
+    <main class="apple-main">
+      <div class="content-container">
+
+        <!-- PROFESSOR EVALUATION CALLOUT -->
+        <div class="apple-callout">
+          <span style="font-size: 20px;">🎓</span>
+          <div>
+            <strong>Requisito Oficial Apple App Store — Projeto Integrador (PI):</strong>
+            Simulação completa e estática da consola <strong>App Store Connect</strong>. Inclui a compilação de produção <span class="tag-badge">agenda-rosa-v1.0.0-release.ipa</span> gerada e assinada, resolução nativa de tela iPhone 6.5" Super Retina (1242x2688 px), metadados otimizados para ASO e o Nutricional de Privacidade (App Privacy Details) em total conformidade com as <em>App Store Review Guidelines</em>.
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 1: VERSÃO 1.0.0 PREPARANDO PARA ENVIO -->
+        <!-- ============================================== -->
+        <div id="screen-versao-ios" class="apple-screen">
+          <div class="apple-section-header">
+            <h1 class="apple-section-title">1.0.0 Preparando para envio</h1>
+            <p class="apple-section-sub">Esta versão será enviada para a equipe de revisão de aplicativos da Apple.</p>
+          </div>
+
+          <!-- SCREENSHOTS DECK (OBRIGATÓRIO APPLE) -->
+          <div class="apple-card">
+            <div class="apple-card-title">
+              <span>Capturas de tela do iPhone</span>
+              <span style="font-size: 12px; font-weight: 500; color: var(--apple-secondary);">Tela de 6.5" Super Retina (Obrigatória)</span>
+            </div>
+            <div class="apple-card-desc">
+              Resolução obrigatória para iPhone Pro Max: <strong>1242 x 2688 pixels</strong> (Proporção 19.5:9 sem transparência).
+            </div>
+
+            <div class="screenshots-deck">
+              <div class="screenshot-card">
+                <img src="assets/screenshot-05-ios-65pol-1242x2688.png" alt="Screenshot 1 iOS 6.5 pol" onclick="openLightbox(this.src)">
+                <div class="screenshot-footer">1. Vitrine iOS (1242×2688)</div>
+              </div>
+              <div class="screenshot-card">
+                <img src="assets/screenshot-02-assistente-ia-1080x1920.png" alt="Screenshot 2 iOS" onclick="openLightbox(this.src)">
+                <div class="screenshot-footer">2. Rosa IA Gemini</div>
+              </div>
+              <div class="screenshot-card">
+                <img src="assets/screenshot-03-agendamento-1080x1920.png" alt="Screenshot 3 iOS" onclick="openLightbox(this.src)">
+                <div class="screenshot-footer">3. Agendamento</div>
+              </div>
+              <div class="screenshot-card">
+                <img src="assets/screenshot-04-filtros-busca-1080x1920.png" alt="Screenshot 4 iOS" onclick="openLightbox(this.src)">
+                <div class="screenshot-footer">4. Filtros de Busca</div>
+              </div>
+              <div class="screenshot-card">
+                <img src="assets/screenshot-04-pagamento-pix-1080x1920.png" alt="Screenshot 5 iOS" onclick="openLightbox(this.src)">
+                <div class="screenshot-footer">5. Pix Mercado Pago</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TEXTO PROMOCIONAL & DESCRIÇÃO -->
+          <div class="apple-card">
+            <div class="apple-card-title">Textos de Apresentação e ASO (App Store Optimization)</div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="apple-label">Texto promocional</label>
+                <span class="char-count">149 / 170</span>
+              </div>
+              <input type="text" class="apple-input" value="Encontre os melhores salões de beleza perto de você! Receba consultoria da Assistente Rosa IA, agende seu horário e pague com Pix em segundos. 🌸">
+              <div class="form-hint">O texto promocional permite informar os clientes sobre os recursos atuais sem a necessidade de enviar uma nova compilação.</div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="apple-label">Descrição *</label>
+                <span class="char-count">1645 / 4000</span>
+              </div>
+              <textarea class="apple-textarea" style="height: 180px;">Transforme a sua rotina de autocuidado com o Agenda Rosa 🌸 — o aplicativo completo para encontrar os melhores salões de beleza, clínicas de estética e estúdios especializados perto de você!
+
+Com o Agenda Rosa, você descobre profissionais bem avaliados, tira dúvidas em tempo real com a nossa consultora virtual de Inteligência Artificial e garante o seu horário com pagamento instantâneo via Pix.
+
+✨ PRINCIPAIS RECURSOS DO AGENDA ROSA:
+• Vitrine Inteligente de Salões e Clínicas: Filtre estabelecimentos por cidade, bairro, nome e categoria de serviço.
+• Assistente Rosa IA (Google Gemini): Receba recomendações consultivas de serviços estéticos e dicas exclusivas de pré-atendimento.
+• Agendamento Rápido e Sem Filas: Escolha o serviço, selecione a profissional de sua preferência, veja os horários disponíveis e reserve em poucos toques.
+• Pagamento Seguro via Pix (Mercado Pago): Pague diretamente pelo aplicativo com QR Code ou Pix Copia e Cola.
+• Lembretes Automáticos no WhatsApp com Rota GPS: Receba notificações pré-atendimento com link direto para o Google Maps / Waze.</textarea>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="apple-label">Palavras-chave (Keywords) *</label>
+                <span class="char-count">88 / 100</span>
+              </div>
+              <input type="text" class="apple-input" value="beleza,salão,estética,unhas,cabelo,maquiagem,sobrancelha,agendamento,pix,autocuidado,spa">
+              <div class="form-hint">Separe as palavras-chave por vírgulas em inglês ou português. Crucial para o ranking de busca na App Store.</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label class="apple-label">URL de suporte *</label>
+                <input type="url" class="apple-input" value="https://agenda-rosa-mobile-workspace.onrender.com">
+              </div>
+              <div class="form-group">
+                <label class="apple-label">URL de marketing</label>
+                <input type="url" class="apple-input" value="https://agendarosa.com.br">
+              </div>
+            </div>
+          </div>
+
+          <!-- COMPILAÇÃO (BUILD / IPA) -->
+          <div class="apple-card">
+            <div class="apple-card-title">
+              <span>Compilação de Produção (.ipa)</span>
+              <span class="apple-badge success">Processada pelo App Store Connect</span>
+            </div>
+            <div class="apple-card-desc">
+              Binário enviado via Transporter / Xcode Archives com assinatura de distribuição Apple válida:
+            </div>
+
+            <div style="background: #fafafc; border: 1px solid var(--apple-border); border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <img src="assets/icon-app-store-1024x1024.png" style="width: 44px; height: 44px; border-radius: 10px;" alt="Build Icon">
+                <div>
+                  <div style="font-weight: 600; font-size: 14px;">agenda-rosa-v1.0.0-release.ipa (Build 1)</div>
+                  <div style="font-size: 12px; color: var(--apple-secondary); margin-top: 2px;">
+                    Versão: 1.0.0 • iOS 16.0+ • Apple Distribution Certificate • SDK iOS 17.4
+                  </div>
+                </div>
+              </div>
+              <span class="apple-badge success">Pronta para Lançamento</span>
+            </div>
+          </div>
+
+          <!-- INFORMAÇÕES DE ANÁLISE DO APP (APP REVIEW INFORMATION) -->
+          <div class="apple-card">
+            <div class="apple-card-title">Informações de análise do app (Apple Review Team)</div>
+            <div class="apple-card-desc">
+              Credenciais obrigatórias para que o revisor da Apple possa testar as áreas que exigem autenticação (Diretriz 2.1).
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label class="apple-label">Nome de usuário de teste *</label>
+                <input type="text" class="apple-input" value="digo22nt@gmail.com" readonly>
+              </div>
+              <div class="form-group">
+                <label class="apple-label">Senha de teste *</label>
+                <input type="text" class="apple-input" value="123456" readonly>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="apple-label">Notas para a equipe de revisão (Review Notes)</label>
+              <textarea class="apple-textarea" style="height: 110px;" readonly>O usuário fornecido permite navegar pelos salões cadastrados, agendar serviços e testar o chat inteligente com a Rosa IA.
+Conforme a Diretriz 3.1.3(e), o pagamento dos serviços presenciais é realizado via Pix (gateway Mercado Pago), tratando-se estritamente de serviços físicos executados fora do aplicativo.</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 2: INFORMAÇÕES DO APP (GERAL) -->
+        <!-- ============================================== -->
+        <div id="screen-informacoes-app" class="apple-screen" style="display:none;">
+          <div class="apple-section-header">
+            <h1 class="apple-section-title">Informações do app</h1>
+            <p class="apple-section-sub">Informações globais sobre o aplicativo que se aplicam a todas as versões e plataformas.</p>
+          </div>
+
+          <div class="apple-card">
+            <div class="apple-card-title">Informações básicas</div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="apple-label">Nome *</label>
+                <span class="char-count">28 / 30</span>
+              </div>
+              <input type="text" class="apple-input" value="Agenda Rosa: Beleza e Salões">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="apple-label">Subtítulo *</label>
+                <span class="char-count">28 / 30</span>
+              </div>
+              <input type="text" class="apple-input" value="Agende Salão, Estética e Pix">
+              <div class="form-hint">Aparece abaixo do nome do app na App Store nos dispositivos iOS.</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label class="apple-label">ID do pacote (Bundle ID)</label>
+                <input type="text" class="apple-input" value="com.agendarosa.mobile" readonly style="font-family: monospace;">
+              </div>
+              <div class="form-group">
+                <label class="apple-label">SKU</label>
+                <input type="text" class="apple-input" value="AGENDA-ROSA-IOS-01" readonly style="font-family: monospace;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label class="apple-label">Categoria primária *</label>
+                <select class="apple-select">
+                  <option selected>Estilo de vida (Lifestyle)</option>
+                  <option>Utilidades (Utilities)</option>
+                  <option>Saúde e boa forma (Health & Fitness)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="apple-label">Categoria secundária</label>
+                <select class="apple-select">
+                  <option selected>Utilidades (Utilities)</option>
+                  <option>Estilo de vida (Lifestyle)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="apple-label">Classificação etária</label>
+              <div style="margin-top: 6px;">
+                <span style="font-size: 18px; font-weight: 700; background: #e5e5ea; padding: 4px 10px; border-radius: 6px;">4+</span>
+                <span style="font-size: 13px; color: var(--apple-secondary); margin-left: 8px;">Apropriado para todas as idades (Sem violência, drogas ou nudez).</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 3: PRIVACIDADE DO APP (NUTRITIONAL) -->
+        <!-- ============================================== -->
+        <div id="screen-privacidade-app" class="apple-screen" style="display:none;">
+          <div class="apple-section-header">
+            <h1 class="apple-section-title">Privacidade do app (App Privacy)</h1>
+            <p class="apple-section-sub">Informações nutricionais de privacidade exibidas aos usuários na App Store.</p>
+          </div>
+
+          <div class="apple-card">
+            <div class="apple-card-title">URL da Política de Privacidade</div>
+            <div class="form-group">
+              <input type="url" class="apple-input" value="https://agenda-rosa-mobile-workspace.onrender.com/politica-privacidade.html">
+              <div class="form-hint">Obrigatória para todos os aplicativos sob as diretrizes da Apple e da LGPD.</div>
+            </div>
+          </div>
+
+          <!-- DECLARAÇÃO DE RASTREAMENTO -->
+          <div class="apple-card">
+            <div class="apple-card-title">Rastreamento de usuários</div>
+            <div style="font-size: 14px; margin-bottom: 12px;">
+              <strong>Este aplicativo NÃO usa dados para rastreamento entre apps e sites de terceiros (No Tracking).</strong>
+            </div>
+            <span class="apple-badge success">✓ Conforme Apple ATT (App Tracking Transparency)</span>
+          </div>
+
+          <!-- NUTRICIONAL DE DADOS COLETADOS -->
+          <div class="apple-card">
+            <div class="apple-card-title">Dados vinculados ao usuário</div>
+            <div class="apple-card-desc">Dados coletados para autenticação, agendamento de serviços e lembretes:</div>
+
+            <div class="privacy-card-row">
+              <span class="privacy-icon">👤</span>
+              <div>
+                <strong>Informações de contato</strong>
+                <div style="font-size: 13px; color: var(--apple-secondary); margin-top: 2px;">
+                  Nome, endereço de e-mail e número de telefone (WhatsApp) para gerenciamento de conta e envio de notificações.
+                </div>
+              </div>
+            </div>
+
+            <div class="privacy-card-row">
+              <span class="privacy-icon">💳</span>
+              <div>
+                <strong>Informações financeiras</strong>
+                <div style="font-size: 13px; color: var(--apple-secondary); margin-top: 2px;">
+                  Histórico de compras e ID de transação Pix gerado via Mercado Pago. Nenhum dado de cartão de crédito é coletado.
+                </div>
+              </div>
+            </div>
+
+            <div class="privacy-card-row">
+              <span class="privacy-icon">📍</span>
+              <div>
+                <strong>Localização precisa e aproximada</strong>
+                <div style="font-size: 13px; color: var(--apple-secondary); margin-top: 2px;">
+                  Coletada estritamente durante o uso (When In Use) para ordenar os salões e estúdios mais próximos do usuário.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 4: PREÇO E DISPONIBILIDADE -->
+        <!-- ============================================== -->
+        <div id="screen-preco-disponibilidade" class="apple-screen" style="display:none;">
+          <div class="apple-section-header">
+            <h1 class="apple-section-title">Preço e disponibilidade</h1>
+            <p class="apple-section-sub">Defina o modelo de precificação e os países onde o aplicativo estará disponível.</p>
+          </div>
+
+          <div class="apple-card">
+            <div class="apple-card-title">Preço</div>
+            <div style="font-size: 20px; font-weight: 600; color: var(--apple-green); margin: 8px 0;">
+              Gratuito (BRL 0,00)
+            </div>
+            <div class="apple-card-desc">O download do aplicativo é totalmente gratuito na App Store.</div>
+          </div>
+
+          <div class="apple-card">
+            <div class="apple-card-title">Disponibilidade territorial</div>
+            <div style="font-size: 14px; font-weight: 600;">Disponível no Brasil (e em todos os 175 países da App Store)</div>
+            <div class="apple-card-desc" style="margin-top: 4px;">Foco primário de público: Usuários no território brasileiro.</div>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 5: TESTFLIGHT -->
+        <!-- ============================================== -->
+        <div id="screen-testflight-view" class="apple-screen" style="display:none;">
+          <div class="apple-section-header">
+            <h1 class="apple-section-title">TestFlight — Testes Beta</h1>
+            <p class="apple-section-sub">Distribuição da compilação iOS para testadores internos e externos antes do lançamento oficial.</p>
+          </div>
+
+          <div class="apple-card">
+            <div class="apple-card-title">
+              <span>Compilações ativas no TestFlight</span>
+              <span class="apple-badge success">Pronto para teste</span>
+            </div>
+
+            <div style="background: #fafafc; border: 1px solid var(--apple-border); border-radius: 8px; padding: 14px; margin-top: 10px;">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <strong>Versão 1.0.0 (Compilação 1)</strong>
+                  <div style="font-size: 12px; color: var(--apple-secondary);">Expira em 84 dias • Teste interno e externo liberado</div>
+                </div>
+                <span class="apple-badge success">25 Testadores instalados</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="apple-card">
+            <div class="apple-card-title">Grupos de Teste Externo</div>
+            <div class="apple-card-desc">Testadores convidados via link público do TestFlight ou e-mail Apple ID:</div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="padding: 12px; border: 1px solid var(--apple-border); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong>Salões Parceiros Goiânia (Beta)</strong>
+                  <div style="font-size: 12px; color: var(--apple-secondary);">15 profissionais e donas de salão testando agendamento e Pix.</div>
+                </div>
+                <span class="apple-badge success">15 Ativos</span>
+              </div>
+
+              <div style="padding: 12px; border: 1px solid var(--apple-border); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong>Equipe de Engenharia Mobile PI</strong>
+                  <div style="font-size: 12px; color: var(--apple-secondary);">10 testadores internos validando estabilidade e relatórios de crash.</div>
+                </div>
+                <span class="apple-badge success">10 Ativos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL APPLE: CONFIRMAR ENVIO PARA REVISÃO -->
+  <div class="apple-modal-overlay" id="appleModal">
+    <div class="apple-modal">
+      <div class="apple-modal-title">Enviar para Revisão do App?</div>
+      <div class="apple-modal-body">
+        <p style="margin-bottom: 12px;">
+          Você está pronto para submeter a versão <strong>1.0.0</strong> do <strong>Agenda Rosa: Beleza e Salões</strong> para a equipe de revisão da Apple (App Review).
+        </p>
+        <div style="background: #f5f5f7; border-radius: 8px; padding: 12px; font-size: 13px; margin-bottom: 12px;">
+          <div>📦 <strong>Compilação:</strong> agenda-rosa-v1.0.0-release.ipa (Build 1)</div>
+          <div>📱 <strong>Screenshots:</strong> iPhone 6.5" Super Retina (1242x2688 px)</div>
+          <div>🔐 <strong>Credenciais de teste:</strong> digo22nt@gmail.com fornecido</div>
+          <div>⚖️ <strong>Diretrizes:</strong> 3.1.3(e) Pix externo e 5.1.1 GPS validados</div>
+        </div>
+        <p style="font-size: 12px; color: var(--apple-secondary);">
+          O tempo médio de análise da Apple é de 24 a 48 horas.
+        </p>
+      </div>
+      <div class="apple-modal-footer">
+        <button class="btn-apple btn-apple-secondary" onclick="closeAppleModal()">Cancelar</button>
+        <button class="btn-apple btn-apple-primary" onclick="simulateAppleSubmit()">Confirmar e Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="appleLightbox" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="Imagem ampliada">
+  </div>
+
+  <!-- TOAST -->
+  <div class="apple-toast" id="appleToast">Mensagem</div>
+
+  <script>
+    function showAppleScreen(screenId) {
+      document.querySelectorAll('.apple-screen').forEach(el => el.style.display = 'none');
+      const target = document.getElementById('screen-' + screenId);
+      if (target) target.style.display = 'block';
+
+      document.querySelectorAll('.apple-nav-item').forEach(el => {
+        el.classList.remove('active');
+        if (el.getAttribute('data-screen') === screenId) el.classList.add('active');
+      });
+
+      document.querySelector('.apple-main').scrollTop = 0;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('appleToast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    function openAppleModal() {
+      document.getElementById('appleModal').style.display = 'flex';
+    }
+
+    function closeAppleModal() {
+      document.getElementById('appleModal').style.display = 'none';
+    }
+
+    function simulateAppleSubmit() {
+      closeAppleModal();
+      showToast('Enviando compilação .ipa e metadados para a Apple...');
+
+      setTimeout(() => {
+        const dot = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+        const badge = document.getElementById('sidebarBadgeStatus');
+        const btn = document.getElementById('btnSubmitApple');
+
+        if (dot) dot.style.backgroundColor = '#ff9500';
+        if (text) text.textContent = '1.0.0 Aguardando Revisão (Waiting for Review)';
+        if (badge) {
+          badge.textContent = 'Em Análise';
+          badge.className = 'apple-badge warning';
+        }
+        if (btn) {
+          btn.textContent = '⏳ Versão em Análise pela Apple';
+          btn.disabled = true;
+          btn.classList.remove('btn-apple-primary');
+          btn.classList.add('btn-apple-secondary');
+        }
+
+        showToast('🎉 Versão 1.0.0 enviada com sucesso para a equipe da Apple!');
+      }, 1200);
+    }
+
+    function openLightbox(src) {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('appleLightbox').style.display = 'flex';
+    }
+
+    function closeLightbox() {
+      document.getElementById('appleLightbox').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

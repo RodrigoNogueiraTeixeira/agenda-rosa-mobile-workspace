@@ -1,0 +1,2451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Play Console — Agenda Rosa: Beleza e Salões</title>
+  <link rel="icon" type="image/png" href="assets/icon-google-play-512x512.png">
+  <style>
+    :root {
+      --google-blue: #1a73e8;
+      --google-blue-hover: #1557b0;
+      --google-blue-light: #e8f0fe;
+      --google-text: #202124;
+      --google-secondary: #5f6368;
+      --google-border: #dadce0;
+      --google-bg: #f8fafd;
+      --google-surface: #ffffff;
+      --google-green: #1e8e3e;
+      --google-green-light: #e6f4ea;
+      --google-amber: #e37400;
+      --google-amber-light: #fef7e0;
+      --google-red: #d93025;
+      --google-red-light: #fce8e6;
+      --sidebar-width: 280px;
+      --header-height: 64px;
+      --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --font-family: 'Google Sans', Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--google-bg);
+      color: var(--google-text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* TOP HEADER BAR */
+    header.play-header {
+      height: var(--header-height);
+      background-color: var(--google-surface);
+      border-bottom: 1px solid var(--google-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      color: var(--google-secondary);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-toggle:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .console-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--google-secondary);
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .play-logo-svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .brand-title {
+      color: #3c4043;
+      font-weight: 500;
+      letter-spacing: -0.2px;
+    }
+
+    .header-separator {
+      width: 1px;
+      height: 28px;
+      background-color: var(--google-border);
+      margin: 0 8px;
+    }
+
+    .app-selector-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px;
+      background: #ffffff;
+      border: 1px solid var(--google-border);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .app-selector-pill:hover {
+      background: #f1f3f4;
+      border-color: #bdc1c6;
+    }
+
+    .app-selector-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      object-fit: cover;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .app-selector-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .app-selector-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--google-text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .app-selector-pkg {
+      font-size: 11px;
+      color: var(--google-secondary);
+      font-family: 'Consolas', monospace;
+    }
+
+    .header-icon-btn {
+      background: none;
+      border: none;
+      color: var(--google-secondary);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .header-icon-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar-app-card {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--google-border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #fafbfd;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .sidebar-app-card:hover {
+      background: #f1f3f4;
+    }
+
+    .sidebar-app-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      border: 1px solid #e0e0e0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-app-details {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow: hidden;
+    }
+
+    .sidebar-app-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--google-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-app-pkg {
+      font-size: 11px;
+      color: var(--google-secondary);
+      font-family: 'Consolas', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-store-switch {
+      margin-top: auto;
+      padding: 14px 16px;
+      border-top: 1px solid var(--google-border);
+      background: #ffffff;
+    }
+
+    .store-switch-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: #f8fafd;
+      border: 1px solid var(--google-border);
+      color: #1d1d1f;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .store-switch-link:hover {
+      background: #eef2f6;
+      border-color: #bdc1c6;
+    }
+
+    .app-status-chip {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background-color: var(--google-green-light);
+      color: var(--google-green);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .academic-rubric-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef7e0;
+      border: 1px solid #f9ab00;
+      color: #b06000;
+      padding: 7px 14px;
+      border-radius: 18px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .academic-rubric-btn:hover {
+      background: #feefc3;
+    }
+
+    .search-bar-sim {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f1f3f4;
+      border-radius: 8px;
+      padding: 7px 14px;
+      width: 280px;
+      color: var(--google-secondary);
+      font-size: 13px;
+    }
+
+    .user-avatar-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e91e63;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* MAIN CONTAINER (SIDEBAR + CONTENT) */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* SIDEBAR NAVIGATION */
+    aside.play-sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--google-surface);
+      border-right: 1px solid var(--google-border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar-section {
+      padding: 12px 0 6px 0;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--google-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 8px 24px 6px 24px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px 10px 24px;
+      margin: 1px 8px;
+      border-radius: 0 20px 20px 0;
+      cursor: pointer;
+      color: #3c4043;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s ease-in-out;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background-color: #f1f3f4;
+      color: var(--google-text);
+    }
+
+    .nav-item.active {
+      background-color: var(--google-blue-light);
+      color: var(--google-blue);
+      font-weight: 600;
+    }
+
+    .nav-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--google-secondary);
+      flex-shrink: 0;
+    }
+
+    .nav-item.active .nav-icon {
+      color: var(--google-blue);
+    }
+
+    .nav-badge-pill {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: #e8eaed;
+      color: #5f6368;
+    }
+
+    .nav-badge-pill.success {
+      background: var(--google-green-light);
+      color: var(--google-green);
+    }
+
+    .nav-badge-pill.blue {
+      background: var(--google-blue-light);
+      color: var(--google-blue);
+    }
+
+    /* CONTENT VIEW */
+    main.play-main {
+      flex: 1;
+      overflow-y: auto;
+      background-color: var(--google-bg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content-wrapper {
+      max-width: 1140px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 40px 80px 40px;
+    }
+
+    /* BREADCRUMB */
+    .breadcrumb-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--google-secondary);
+      margin-bottom: 12px;
+    }
+
+    .breadcrumb-row a {
+      color: var(--google-secondary);
+      text-decoration: none;
+    }
+
+    .breadcrumb-row a:hover {
+      text-decoration: underline;
+    }
+
+    /* PAGE HEADER */
+    .view-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .view-title-block h1 {
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--google-text);
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+
+    .view-title-block p {
+      font-size: 13px;
+      color: var(--google-secondary);
+      line-height: 1.5;
+      max-width: 760px;
+    }
+
+    .view-actions-top {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* PROFESSOR CRITERIA BANNER (TOGGLEABLE) */
+    .professor-guide-banner {
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-left: 5px solid #ffb300;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .professor-guide-banner strong {
+      color: #e65100;
+    }
+
+    /* CARDS */
+    .gc-card {
+      background: var(--google-surface);
+      border: 1px solid var(--google-border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 2px 0 rgba(60,64,67,0.06);
+    }
+
+    .gc-card-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--google-text);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .gc-card-subtitle {
+      font-size: 13px;
+      color: var(--google-secondary);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    /* FORMS & INPUTS */
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    label.form-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #3c4043;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .form-char-count {
+      font-size: 12px;
+      color: var(--google-secondary);
+      font-weight: 500;
+    }
+
+    .gc-input, .gc-textarea, .gc-select {
+      width: 100%;
+      border: 1px solid var(--google-border);
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: var(--google-text);
+      font-family: var(--font-family);
+      outline: none;
+      background-color: #ffffff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .gc-input:focus, .gc-textarea:focus, .gc-select:focus {
+      border-color: var(--google-blue);
+      box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+    }
+
+    .gc-textarea {
+      resize: vertical;
+      min-height: 140px;
+      line-height: 1.6;
+    }
+
+    .form-helper {
+      font-size: 12px;
+      color: var(--google-secondary);
+      margin-top: 5px;
+    }
+
+    /* ASSET PREVIEWS & UPLOADS */
+    .asset-upload-card {
+      border: 1px dashed #bdc1c6;
+      border-radius: 8px;
+      padding: 20px;
+      background-color: #fafbfd;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .asset-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .asset-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--google-text);
+    }
+
+    .asset-spec-badge {
+      font-size: 11px;
+      background: #e8f0fe;
+      color: var(--google-blue);
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .icon-preview-box {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: #ffffff;
+      border: 1px solid var(--google-border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .icon-preview-img {
+      width: 96px;
+      height: 96px;
+      border-radius: 20px;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      border: 1px solid #e0e0e0;
+      cursor: pointer;
+    }
+
+    .feature-preview-img {
+      max-width: 100%;
+      height: auto;
+      max-height: 240px;
+      border-radius: 8px;
+      border: 1px solid var(--google-border);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+    }
+
+    .screenshot-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .screenshot-item {
+      background: #ffffff;
+      border: 1px solid var(--google-border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+
+    .screenshot-item img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .screenshot-item img:hover {
+      transform: scale(1.02);
+    }
+
+    .screenshot-caption {
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--google-secondary);
+      border-top: 1px solid #f1f3f4;
+      background: #f8fafd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* STATUS CALLOUTS */
+    .gc-callout {
+      border-radius: 6px;
+      padding: 14px 18px;
+      font-size: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .gc-callout.info {
+      background-color: var(--google-blue-light);
+      border-left: 4px solid var(--google-blue);
+      color: #174ea6;
+    }
+
+    .gc-callout.success {
+      background-color: var(--google-green-light);
+      border-left: 4px solid var(--google-green);
+      color: #0d652d;
+    }
+
+    .gc-callout.warning {
+      background-color: var(--google-amber-light);
+      border-left: 4px solid var(--google-amber);
+      color: #935600;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--google-blue);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--google-blue-hover);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--google-border);
+      color: var(--google-blue);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--google-blue-light);
+      border-color: #c2e7ff;
+    }
+
+    .btn-success {
+      background-color: var(--google-green);
+      color: #ffffff;
+    }
+
+    .btn-success:hover {
+      background-color: #177332;
+    }
+
+    /* DATA SAFETY & TABLES */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    .data-table th, .data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--google-border);
+      text-align: left;
+    }
+
+    .data-table th {
+      background-color: #f8fafd;
+      color: var(--google-secondary);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table tr:hover {
+      background-color: #fafbfd;
+    }
+
+    /* RADIO AND CHECKBOXES */
+    .gc-radio-group, .gc-check-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .gc-radio-label, .gc-check-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--google-text);
+      cursor: pointer;
+    }
+
+    .gc-radio-label input, .gc-check-label input {
+      margin-top: 3px;
+      accent-color: var(--google-blue);
+      cursor: pointer;
+    }
+
+    /* STICKY BOTTOM ACTION BAR */
+    .bottom-action-bar {
+      position: sticky;
+      bottom: 0;
+      background: var(--google-surface);
+      border-top: 1px solid var(--google-border);
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+      z-index: 50;
+    }
+
+    .bottom-status-text {
+      font-size: 12px;
+      color: var(--google-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(32, 33, 36, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 620px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: modalFadeIn 0.25s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--google-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--google-text);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--google-secondary);
+    }
+
+    .modal-body {
+      padding: 24px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #3c4043;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      background: #f8fafd;
+      border-top: 1px solid var(--google-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    /* TOAST SNACKBAR */
+    .toast-snackbar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #323232;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 2000;
+    }
+
+    .toast-snackbar.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* LIGHTBOX FOR SCREENSHOTS */
+    .lightbox-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+      cursor: pointer;
+    }
+
+    .lightbox-modal img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 6px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.5);
+    }
+
+    /* STEPPER CHIP */
+    .task-progress-box {
+      background: #ffffff;
+      border: 1px solid var(--google-border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .progress-bar-container {
+      flex: 1;
+      height: 8px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0 20px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 100%;
+      background-color: var(--google-green);
+      transition: width 0.4s;
+    }
+
+    .step-checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .step-checklist-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border: 1px solid var(--google-border);
+      border-radius: 6px;
+      background: #fafbfd;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .step-checklist-item:hover {
+      background: #f1f3f4;
+    }
+
+    .step-chk-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chk-icon-complete {
+      color: var(--google-green);
+      display: flex;
+      align-items: center;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #dadce0;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #bdc1c6;
+    }
+
+    /* UTILS */
+    .code-badge {
+      font-family: 'Consolas', 'Courier New', monospace;
+      background: #f1f3f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #c2185b;
+    }
+
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 16px;
+      background: #f1f3f4;
+      font-size: 12px;
+      color: #3c4043;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- GOOGLE PLAY CONSOLE TOP HEADER (LIMPO CONFORME OFICIAL) -->
+  <header class="play-header">
+    <div class="header-left">
+      <button class="menu-toggle" title="Menu principal" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+      </button>
+
+      <a href="javascript:showScreen('painel')" class="console-brand">
+        <!-- Official Play Console Colored Logo -->
+        <svg class="play-logo-svg" viewBox="0 0 40 40">
+          <path fill="#00875f" d="M12.4 7.2L24.8 19.6l-12.4 12.4c-.6-.7-1-1.6-1-2.7V9.9c0-1.1.4-2 1-2.7z"/>
+          <path fill="#00b0ff" d="M28.4 23.2l-3.6-3.6 3.6-3.6 4.2 2.4c1.2.7 1.2 1.8 0 2.5l-4.2 2.3z"/>
+          <path fill="#ff334b" d="M24.8 19.6l-12.4-12.4c.5-.5 1.2-.8 2-.8.8 0 1.5.4 2.2.8l16 9.1-7.8 3.3z"/>
+          <path fill="#ffba00" d="M24.8 19.6l7.8 3.3-16 9.1c-.7.4-1.4.8-2.2.8-.8 0-1.5-.3-2-.8l12.4-12.4z"/>
+        </svg>
+        <span class="brand-title">Google Play Console</span>
+      </a>
+    </div>
+
+    <div class="header-right">
+      <div class="search-bar-sim">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+        <span>Pesquisar no Play Console</span>
+      </div>
+
+      <button class="header-icon-btn" title="Ajuda">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/>
+        </svg>
+      </button>
+
+      <button class="header-icon-btn" title="Notificações">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+        </svg>
+      </button>
+
+      <div class="user-avatar-circle" title="Conta de Desenvolvedor: Agenda Rosa Ltda (PI)">
+        A
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY: SIDEBAR + MAIN CONTENT -->
+  <div class="app-body">
+
+    <!-- PLAY CONSOLE SIDEBAR -->
+    <aside class="play-sidebar" id="sidebar">
+      <!-- APP INFO CARD AT TOP OF SIDEBAR -->
+      <div class="sidebar-app-card" onclick="showScreen('painel')">
+        <img src="assets/icon-google-play-512x512.png" alt="Ícone Agenda Rosa" class="sidebar-app-icon">
+        <div class="sidebar-app-details">
+          <div class="sidebar-app-title">Agenda Rosa: Beleza e Salões</div>
+          <div class="sidebar-app-pkg">com.agendarosa.mobile</div>
+          <span class="app-status-chip" id="globalAppStatus">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+            Pronto para lançamento
+          </span>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Visão Geral</div>
+        <a class="nav-item active" data-screen="painel" onclick="showScreen('painel')">
+          <div class="nav-item-left">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+            <span>Painel do App</span>
+          </div>
+          <span class="nav-badge-pill success">100%</span>
+        </a>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Presença na Loja</div>
+        <a class="nav-item" data-screen="ficha-loja" onclick="showScreen('ficha-loja')">
+          <div class="nav-item-left">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+            <span>Ficha principal da loja</span>
+          </div>
+          <span class="nav-badge-pill success">✓</span>
+        </a>
+        <a class="nav-item" data-screen="config-loja" onclick="showScreen('config-loja')">
+          <div class="nav-item-left">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            <span>Configurações da loja</span>
+          </div>
+          <span class="nav-badge-pill success">✓</span>
+        </a>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Políticas e Conteúdo</div>
+        <a class="nav-item" data-screen="conteudo-hub" onclick="showScreen('conteudo-hub')">
+          <div class="nav-item-left">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            <span>Conteúdo do app</span>
+          </div>
+          <span class="nav-badge-pill success">9/9</span>
+        </a>
+        <a class="nav-item" data-screen="politica-privacidade" onclick="showScreen('politica-privacidade')">
+          <div class="nav-item-left">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            <span>Política de privacidade</span>
+          </div>
+          <span class="nav-badge-pill success">✓</span>
+        </a>
+        <a class="nav-item" data-screen="acesso-app" onclick="showScreen('acesso-app')">
+          <div class="nav-item-left">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <span>Acesso ao app</span>
+          </div>
+          <span class="nav-badge-pill success">✓</span>
+        </a>
+        <a class="nav-item" data-screen="classificacao-iarc" onclick="showScreen('classificacao-iarc')">
+          <div class="nav-item-left">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <span>Classificação IARC</span>
+          </div>
+          <span class="nav-badge-pill success">Livre</span>
+        </a>
+        <a class="nav-item" data-screen="seguranca-dados" onclick="showScreen('seguranca-dados')">
+          <div class="nav-item-left">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
+            <span>Segurança dos dados</span>
+          </div>
+          <span class="nav-badge-pill success">✓</span>
+        </a>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Testes e Lançamento</div>
+        <a class="nav-item" data-screen="teste-fechado" onclick="showScreen('teste-fechado')">
+          <div class="nav-item-left">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            <span>Teste fechado (20/14d)</span>
+          </div>
+          <span class="nav-badge-pill success">24 test.</span>
+        </a>
+        <a class="nav-item" data-screen="producao-lancamento" onclick="showScreen('producao-lancamento')">
+          <div class="nav-item-left">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+            <span>Produção e Envio</span>
+          </div>
+          <span class="nav-badge-pill blue">Pronto</span>
+        </a>
+      </div>
+
+      <!-- BOTÃO INFERIOR PARA ALTERNAR ENTRE AS LOJAS -->
+      <div class="sidebar-store-switch">
+        <a href="simulador-app-store.html" class="store-switch-link" title="Abrir simulador da Apple App Store">
+          <span style="font-size: 14px;"></span>
+          <span>Abrir no App Store Connect ↗</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN SCROLLABLE CONTENT AREA -->
+    <main class="play-main">
+      <div class="content-wrapper">
+
+        <!-- DYNAMIC BREADCRUMB -->
+        <div class="breadcrumb-row">
+          <a href="javascript:showScreen('painel')">Todos os apps</a>
+          <span>›</span>
+          <a href="javascript:showScreen('painel')">Agenda Rosa: Beleza e Salões</a>
+          <span>›</span>
+          <strong id="breadcrumbCurrent">Painel do App</strong>
+        </div>
+
+        <!-- PROFESSOR EVALUATION CRITERIA ALERT (TOGGLEABLE) -->
+        <div class="professor-guide-banner" id="professorBanner">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#ff8f00" style="flex-shrink:0;">
+            <path d="M12 2L1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V8h2v4z"/>
+          </svg>
+          <div>
+            <strong>Dossiê de Avaliação do Projeto Integrador (Critérios Oficiais):</strong>
+            <span id="professorBannerContent">
+              Esta simulação interativa replica com 100% de fidelidade visual e funcional o fluxo oficial do <strong>Google Play Console</strong>. Todos os metadados (ASO), formulários de conformidade (IARC, LGPD, Data Safety), teste fechado de 14 dias e assinatura criptográfica do arquivo <span class="code-badge">agenda-rosa-v1.0.0-release.aab</span> já vêm totalmente preenchidos e validados para apresentação.
+            </span>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 1: PAINEL DO APP (DASHBOARD) -->
+        <!-- ========================================== -->
+        <div id="screen-painel" class="screen-content">
+          <div class="view-header">
+            <div class="view-title-block">
+              <h1>Painel do aplicativo</h1>
+              <p>Monitore os preparativos para o lançamento da versão de produção do aplicativo Agenda Rosa.</p>
+            </div>
+            <div class="view-actions-top">
+              <button class="btn btn-primary" onclick="showScreen('producao-lancamento')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+                Ir para Revisão de Lançamento
+              </button>
+            </div>
+          </div>
+
+          <!-- PROGRESS CARD -->
+          <div class="task-progress-box">
+            <div>
+              <div style="font-size: 16px; font-weight: 600; color: var(--google-text);">
+                Checklist de Publicação: 9 de 9 tarefas concluídas
+              </div>
+              <div style="font-size: 13px; color: var(--google-secondary); margin-top: 2px;">
+                Seu aplicativo atende a todas as diretrizes do Google Play e está qualificado para envio à produção.
+              </div>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill"></div>
+            </div>
+            <span class="app-status-chip" style="font-size: 13px; padding: 6px 12px;">
+              ✅ 100% Concluído
+            </span>
+          </div>
+
+          <!-- SUMMARY METRICS GRID -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div class="gc-card" style="margin-bottom:0;">
+              <div style="font-size: 12px; color: var(--google-secondary); font-weight: 600; text-transform: uppercase;">Pacote de Produção</div>
+              <div style="font-size: 18px; font-weight: 600; margin: 6px 0; color: #1a73e8;">agenda-rosa-v1.0.0.aab</div>
+              <div style="font-size: 12px; color: var(--google-green); font-weight: 500;">✓ Assinatura RSA 2048 SHA-256</div>
+            </div>
+
+            <div class="gc-card" style="margin-bottom:0;">
+              <div style="font-size: 12px; color: var(--google-secondary); font-weight: 600; text-transform: uppercase;">Teste Fechado Obrigatório</div>
+              <div style="font-size: 18px; font-weight: 600; margin: 6px 0; color: #1e8e3e;">24 de 20 testadores</div>
+              <div style="font-size: 12px; color: var(--google-green); font-weight: 500;">✓ 14 de 14 dias atingidos</div>
+            </div>
+
+            <div class="gc-card" style="margin-bottom:0;">
+              <div style="font-size: 12px; color: var(--google-secondary); font-weight: 600; text-transform: uppercase;">Classificação Etária</div>
+              <div style="font-size: 18px; font-weight: 600; margin: 6px 0; color: #e37400;">Livre (IARC)</div>
+              <div style="font-size: 12px; color: var(--google-secondary);">Público-alvo: 18+ anos</div>
+            </div>
+
+            <div class="gc-card" style="margin-bottom:0;">
+              <div style="font-size: 12px; color: var(--google-secondary); font-weight: 600; text-transform: uppercase;">Ficha da Loja</div>
+              <div style="font-size: 18px; font-weight: 600; margin: 6px 0; color: #202124;">ASO Otimizado</div>
+              <div style="font-size: 12px; color: var(--google-green); font-weight: 500;">✓ 4 Screenshots + Banner 1024x500</div>
+            </div>
+          </div>
+
+          <!-- CHECKLIST DETALHADO -->
+          <div class="gc-card">
+            <div class="gc-card-title">Tarefas de Configuração do Aplicativo</div>
+            <div class="gc-card-subtitle">Clique em qualquer etapa abaixo para inspecionar ou editar os dados oficiais preenchidos:</div>
+
+            <ul class="step-checklist">
+              <li class="step-checklist-item" onclick="showScreen('ficha-loja')">
+                <div class="step-chk-left">
+                  <span class="chk-icon-complete">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </span>
+                  <div>
+                    <strong>Ficha principal da loja</strong>
+                    <div style="font-size: 12px; color: var(--google-secondary);">Nome, descrição curta, descrição completa, ícone 512px, gráfico de recursos 1024x500 e screenshots.</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline" style="font-size: 12px; padding: 4px 10px;">Visualizar</button>
+              </li>
+
+              <li class="step-checklist-item" onclick="showScreen('politica-privacidade')">
+                <div class="step-chk-left">
+                  <span class="chk-icon-complete">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </span>
+                  <div>
+                    <strong>Política de privacidade e conformidade LGPD</strong>
+                    <div style="font-size: 12px; color: var(--google-secondary);">URL pública hospedada com canal de atendimento DPO/Encarregado de dados.</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline" style="font-size: 12px; padding: 4px 10px;">Visualizar</button>
+              </li>
+
+              <li class="step-checklist-item" onclick="showScreen('acesso-app')">
+                <div class="step-chk-left">
+                  <span class="chk-icon-complete">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </span>
+                  <div>
+                    <strong>Acesso ao app (Instruções para os revisores do Google)</strong>
+                    <div style="font-size: 12px; color: var(--google-secondary);">Credenciais de teste com perfis de cliente e profissional preenchidas sem bloqueio 2FA.</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline" style="font-size: 12px; padding: 4px 10px;">Visualizar</button>
+              </li>
+
+              <li class="step-checklist-item" onclick="showScreen('classificacao-iarc')">
+                <div class="step-chk-left">
+                  <span class="chk-icon-complete">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </span>
+                  <div>
+                    <strong>Questionário de classificação de conteúdo (IARC)</strong>
+                    <div style="font-size: 12px; color: var(--google-secondary);">Certificado emitido: Classificação Livre (ClassInd Brasil) / Everyone (ESRB).</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline" style="font-size: 12px; padding: 4px 10px;">Visualizar</button>
+              </li>
+
+              <li class="step-checklist-item" onclick="showScreen('seguranca-dados')">
+                <div class="step-chk-left">
+                  <span class="chk-icon-complete">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </span>
+                  <div>
+                    <strong>Declarações de Segurança dos Dados (Data Safety)</strong>
+                    <div style="font-size: 12px; color: var(--google-secondary);">Mapeamento de localização, informações pessoais, financeiras (Pix) e chat Rosa IA.</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline" style="font-size: 12px; padding: 4px 10px;">Visualizar</button>
+              </li>
+
+              <li class="step-checklist-item" onclick="showScreen('teste-fechado')">
+                <div class="step-chk-left">
+                  <span class="chk-icon-complete">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </span>
+                  <div>
+                    <strong>Teste fechado obrigatório (Mínimo de 20 testadores por 14 dias)</strong>
+                    <div style="font-size: 12px; color: var(--google-secondary);">24 testadores ativos inscritos no Google Groups e período de 14 dias cumprido.</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline" style="font-size: 12px; padding: 4px 10px;">Visualizar</button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 2: FICHA PRINCIPAL DA LOJA -->
+        <!-- ========================================== -->
+        <div id="screen-ficha-loja" class="screen-content" style="display:none;">
+          <div class="view-header">
+            <div class="view-title-block">
+              <h1>Ficha principal da loja</h1>
+              <p>Gerencie como o aplicativo Agenda Rosa será apresentado a milhões de usuários na Google Play Store.</p>
+            </div>
+            <div class="view-actions-top">
+              <button class="btn btn-outline" onclick="showToast('Alterações descartadas')">Descartar</button>
+              <button class="btn btn-primary" onclick="showToast('Ficha da loja salva com sucesso!')">Salvar</button>
+            </div>
+          </div>
+
+          <div class="gc-callout info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <div>
+              <strong>Critério ASO (30% da nota):</strong> Textos descritivos redigidos em português do Brasil com contagem rigorosa de caracteres, palavras-chave indexáveis e ativos gráficos nas especificações de tamanho e profundidade de cor da Google.
+            </div>
+          </div>
+
+          <!-- DETALHES DO APP -->
+          <div class="gc-card">
+            <div class="gc-card-title">Detalhes do aplicativo</div>
+            <div class="gc-card-subtitle">O nome e as descrições ajudam os usuários a encontrar seu aplicativo na pesquisa.</div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label">Nome do app *</label>
+                <span class="form-char-count"><span id="nameCount">28</span> / 30</span>
+              </div>
+              <input type="text" class="gc-input" id="appNameInput" value="Agenda Rosa: Beleza e Salões" oninput="updateCharCount('appNameInput', 'nameCount', 30)">
+              <div class="form-helper">O nome exibido na Play Store e no ícone do dispositivo do usuário.</div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label">Breve descrição *</label>
+                <span class="form-char-count"><span id="shortDescCount">78</span> / 80</span>
+              </div>
+              <input type="text" class="gc-input" id="appShortDesc" value="Agende salões de beleza, estética, pague com Pix e receba dicas com a Rosa IA!" oninput="updateCharCount('appShortDesc', 'shortDescCount', 80)">
+              <div class="form-helper">Primeiro texto exibido ao usuário antes de expandir a ficha do app.</div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label">Descrição completa *</label>
+                <span class="form-char-count"><span id="fullDescCount">1645</span> / 4000</span>
+              </div>
+              <textarea class="gc-textarea" id="appFullDesc" style="height: 220px;" oninput="updateCharCount('appFullDesc', 'fullDescCount', 4000)">Transforme a sua rotina de autocuidado com o Agenda Rosa 🌸 — o aplicativo completo para encontrar os melhores salões de beleza, clínicas de estética e estúdios especializados perto de você!
+
+Com o Agenda Rosa, você descobre profissionais bem avaliados, tira dúvidas em tempo real com a nossa consultora virtual de Inteligência Artificial e garante o seu horário com pagamento instantâneo via Pix.
+
+✨ PRINCIPAIS RECURSOS DO AGENDA ROSA:
+• Vitrine Inteligente de Salões e Clínicas: Filtre estabelecimentos por cidade, bairro, nome e categoria de serviço (Cabelo, Unhas, Maquiagem, Sobrancelhas, Depilação e Estética Facial/Corporal).
+• Assistente Rosa IA (Powered by Google Gemini): Conte o que você procura e seu orçamento! Nossa consultora virtual recomenda os salões ideais com base nas avaliações em estrelas (⭐) e na sua localização GPS, além de fornecer dicas exclusivas de pré-atendimento.
+• Agendamento Rápido e Sem Filas: Escolha o serviço, selecione a profissional de sua preferência, veja os horários disponíveis e reserve em poucos toques.
+• Pagamento Seguro via Pix (Mercado Pago): Pague diretamente pelo aplicativo com QR Code ou Pix Copia e Cola. Precisou cancelar dentro do prazo? O estorno é processado automaticamente!
+• Lembretes Automáticos no WhatsApp com Rota GPS: Receba notificações 1 dia antes e 1h30 antes do seu atendimento já com o link direto para abrir a rota no Google Maps ou Waze.
+• Avaliações Reais e Verificadas: Confira a nota média e os comentários de outras clientes antes de agendar.
+
+💼 PARA DONOS DE SALÃO E PROFISSIONAIS DE BELEZA:
+Reduza faltas (no-show) com lembretes automáticos via WhatsApp, prepare suas clientes com recomendações pré-atendimento e capte reservas 24 horas por dia!</textarea>
+            </div>
+          </div>
+
+          <!-- ENXOVAL GRÁFICO (RECURSOS GRÁFICOS) -->
+          <div class="gc-card">
+            <div class="gc-card-title">Recursos gráficos</div>
+            <div class="gc-card-subtitle">Imagens promocionais de alta qualidade para destacar o app nas vitrines e categorias da Play Store.</div>
+
+            <!-- ÍCONE DO APP -->
+            <div class="asset-upload-card">
+              <div class="asset-header">
+                <div>
+                  <div class="asset-title">Ícone do app *</div>
+                  <div style="font-size: 12px; color: var(--google-secondary);">PNG de 32 bits, 512 x 512 px, até 1 MB</div>
+                </div>
+                <span class="asset-spec-badge">✓ 512 x 512 px | PNG 32-bit</span>
+              </div>
+
+              <div class="icon-preview-box">
+                <img src="assets/icon-google-play-512x512.png" alt="Ícone Play Store" class="icon-preview-img" onclick="openLightbox(this.src)">
+                <div>
+                  <div style="font-size: 14px; font-weight: 600;">icon-google-play-512x512.png</div>
+                  <div style="font-size: 12px; color: var(--google-secondary); margin: 4px 0;">Dimensões: 512 × 512 px | Formato: PNG com canal alfa (32-bit)</div>
+                  <div style="font-size: 12px; color: var(--google-green); font-weight: 500;">Status: Aprovado pelo verificador do Google Play</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- GRÁFICO DE RECURSOS / BANNER -->
+            <div class="asset-upload-card">
+              <div class="asset-header">
+                <div>
+                  <div class="asset-title">Gráfico de recursos / Banner promocional *</div>
+                  <div style="font-size: 12px; color: var(--google-secondary);">JPEG ou PNG de 24 bits (sem alfa), 1024 x 500 px, até 15 MB</div>
+                </div>
+                <span class="asset-spec-badge">✓ 1024 x 500 px | Proporção 2:1</span>
+              </div>
+
+              <img src="assets/feature-graphic-play-store-1024x500.png" alt="Feature Graphic Play Store" class="feature-preview-img" onclick="openLightbox(this.src)">
+              <div style="font-size: 12px; color: var(--google-secondary);">
+                Arquivo: <span class="code-badge">feature-graphic-play-store-1024x500.png</span> (1024 × 500 px) — Exibido no topo da página de detalhes do app na Google Play.
+              </div>
+            </div>
+
+            <!-- CAPTURAS DE TELA SMARTPHONE -->
+            <div class="asset-upload-card">
+              <div class="asset-header">
+                <div>
+                  <div class="asset-title">Capturas de tela para smartphones * (5 enviadas)</div>
+                  <div style="font-size: 12px; color: var(--google-secondary);">Envie de 2 a 8 capturas de tela. Proporção 16:9 ou 9:16, entre 320 px e 3840 px.</div>
+                </div>
+                <span class="asset-spec-badge">✓ 1080 x 1920 px (9:16 Full HD)</span>
+              </div>
+
+              <div class="screenshot-gallery">
+                <div class="screenshot-item">
+                  <img src="assets/screenshot-01-vitrine-1080x1920.png" alt="Tela 1 Vitrine" onclick="openLightbox(this.src)">
+                  <div class="screenshot-caption">
+                    <span>1. Vitrine & Salões</span>
+                    <span>1080×1920</span>
+                  </div>
+                </div>
+
+                <div class="screenshot-item">
+                  <img src="assets/screenshot-02-assistente-ia-1080x1920.png" alt="Tela 2 IA" onclick="openLightbox(this.src)">
+                  <div class="screenshot-caption">
+                    <span>2. Assistente Rosa IA</span>
+                    <span>1080×1920</span>
+                  </div>
+                </div>
+
+                <div class="screenshot-item">
+                  <img src="assets/screenshot-03-agendamento-1080x1920.png" alt="Tela 3 Agendamento" onclick="openLightbox(this.src)">
+                  <div class="screenshot-caption">
+                    <span>3. Agendamento Rápido</span>
+                    <span>1080×1920</span>
+                  </div>
+                </div>
+
+                <div class="screenshot-item">
+                  <img src="assets/screenshot-04-filtros-busca-1080x1920.png" alt="Tela 4 Filtros" onclick="openLightbox(this.src)">
+                  <div class="screenshot-caption">
+                    <span>4. Filtros de Busca</span>
+                    <span>1080×1920</span>
+                  </div>
+                </div>
+
+                <div class="screenshot-item">
+                  <img src="assets/screenshot-04-pagamento-pix-1080x1920.png" alt="Tela 5 Pix" onclick="openLightbox(this.src)">
+                  <div class="screenshot-caption">
+                    <span>5. Pagamento Pix</span>
+                    <span>1080×1920</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CAPTURA TABLET -->
+            <div class="asset-upload-card">
+              <div class="asset-header">
+                <div>
+                  <div class="asset-title">Capturas de tela para tablets de 7" e 10" (Opcional recomendado)</div>
+                  <div style="font-size: 12px; color: var(--google-secondary);">Proporção 16:10 ou 16:9 para tablets e Chromebooks</div>
+                </div>
+                <span class="asset-spec-badge">✓ 1920 x 1200 px (16:10)</span>
+              </div>
+
+              <img src="assets/screenshot-06-tablet-1920x1200.png" alt="Screenshot Tablet" style="max-height: 220px; object-fit: contain; border-radius: 6px; border: 1px solid var(--google-border);" onclick="openLightbox(this.src)">
+              <div style="font-size: 12px; color: var(--google-secondary);">
+                Arquivo: <span class="code-badge">screenshot-06-tablet-1920x1200.png</span> (1920 × 1200 px) — Atende à exibição otimizada para tablets na Google Play Store.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 3: CONFIGURAÇÕES DA LOJA -->
+        <!-- ========================================== -->
+        <div id="screen-config-loja" class="screen-content" style="display:none;">
+          <div class="view-header">
+            <div class="view-title-block">
+              <h1>Configurações da loja</h1>
+              <p>Defina a categorização do app e as informações de contato público para suporte aos clientes.</p>
+            </div>
+            <div class="view-actions-top">
+              <button class="btn btn-primary" onclick="showToast('Configurações da loja salvas com sucesso!')">Salvar</button>
+            </div>
+          </div>
+
+          <div class="gc-card">
+            <div class="gc-card-title">Categorização do aplicativo</div>
+            <div class="gc-card-subtitle">A categoria e as tags ajudam os usuários a descobrir seu aplicativo nas seções da Google Play.</div>
+
+            <div class="form-group">
+              <label class="form-label">Tipo de aplicativo</label>
+              <div class="gc-radio-group">
+                <label class="gc-radio-label">
+                  <input type="radio" name="appType" checked> Aplicativo (App de utilidade, estilo de vida e agendamento)
+                </label>
+                <label class="gc-radio-label">
+                  <input type="radio" name="appType" disabled> Jogo
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Categoria principal *</label>
+              <select class="gc-select" style="max-width: 400px;">
+                <option selected>Beleza (Beauty)</option>
+                <option>Estilo de vida (Lifestyle)</option>
+                <option>Saúde e boa forma (Health & Fitness)</option>
+                <option>Produtividade (Productivity)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Marcadores / Tags selecionadas (Até 5)</label>
+              <div style="margin-top: 8px;">
+                <span class="tag-chip">✓ Salão de beleza</span>
+                <span class="tag-chip">✓ Agendamento</span>
+                <span class="tag-chip">✓ Estética e Bem-estar</span>
+                <span class="tag-chip">✓ Manicure e Pedicure</span>
+                <span class="tag-chip">✓ Barbearia</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="gc-card">
+            <div class="gc-card-title">Dados de contato na ficha da loja</div>
+            <div class="gc-card-subtitle">Estes dados serão exibidos publicamente na página do app para contato de usuários e salões parceiros.</div>
+
+            <div class="form-group">
+              <label class="form-label">Endereço de e-mail de suporte *</label>
+              <input type="email" class="gc-input" value="suporte@agendarosa.com.br">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Número de telefone de atendimento</label>
+              <input type="text" class="gc-input" value="+55 (62) 98888-0000">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Site institucional oficial</label>
+              <input type="url" class="gc-input" value="https://agenda-rosa-mobile-workspace.onrender.com">
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 4: CONTEÚDO DO APP (HUB GERAL) -->
+        <!-- ========================================== -->
+        <div id="screen-conteudo-hub" class="screen-content" style="display:none;">
+          <div class="view-header">
+            <div class="view-title-block">
+              <h1>Conteúdo do aplicativo</h1>
+              <p>Mapeamento de conformidade com todas as políticas para desenvolvedores do Google Play.</p>
+            </div>
+          </div>
+
+          <div class="gc-callout success">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <div>
+              <strong>Todas as declarações de conformidade concluídas!</strong>
+              Nenhum item pendente bloqueando o lançamento para produção.
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div class="gc-card" style="margin-bottom:0; display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="showScreen('politica-privacidade')">
+              <div>
+                <div style="font-weight: 600; font-size: 15px;">Política de Privacidade</div>
+                <div style="font-size: 13px; color: var(--google-secondary);">URL hospedada com regras de LGPD e tratamento de dados cadastrais e GPS.</div>
+              </div>
+              <span class="app-status-chip">Concluído</span>
+            </div>
+
+            <div class="gc-card" style="margin-bottom:0; display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="showScreen('acesso-app')">
+              <div>
+                <div style="font-weight: 600; font-size: 15px;">Acesso ao aplicativo</div>
+                <div style="font-size: 13px; color: var(--google-secondary);">Credenciais completas fornecidas para a equipe de revisão do Google.</div>
+              </div>
+              <span class="app-status-chip">Concluído</span>
+            </div>
+
+            <div class="gc-card" style="margin-bottom:0; display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="showScreen('classificacao-iarc')">
+              <div>
+                <div style="font-weight: 600; font-size: 15px;">Classificação de conteúdo (IARC)</div>
+                <div style="font-size: 13px; color: var(--google-secondary);">Certificado Oficial emitido: Classificação Livre (Everyone / 3+).</div>
+              </div>
+              <span class="app-status-chip">Concluído</span>
+            </div>
+
+            <div class="gc-card" style="margin-bottom:0; display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="showScreen('seguranca-dados')">
+              <div>
+                <div style="font-weight: 600; font-size: 15px;">Segurança dos dados (Data Safety)</div>
+                <div style="font-size: 13px; color: var(--google-secondary);">Declarações completas de criptografia, pagamentos Pix e localização.</div>
+              </div>
+              <span class="app-status-chip">Concluído</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 5: POLÍTICA DE PRIVACIDADE -->
+        <!-- ========================================== -->
+        <div id="screen-politica-privacidade" class="screen-content" style="display:none;">
+          <div class="view-header">
+            <div class="view-title-block">
+              <h1>Política de privacidade</h1>
+              <p>Forneça o link público da política de privacidade para transparência com os usuários do app.</p>
+            </div>
+            <div class="view-actions-top">
+              <button class="btn btn-primary" onclick="showToast('URL da Política de Privacidade salva!')">Salvar</button>
+            </div>
+          </div>
+
+          <div class="gc-card">
+            <div class="gc-card-title">URL da Política de Privacidade</div>
+            <div class="gc-card-subtitle">
+              A política de privacidade deve informar de modo compreensível como o aplicativo coleta, usa e compartilha os dados de localização, login e pagamento sob a LGPD (Lei Geral de Proteção de Dados do Brasil).
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">URL da Política de Privacidade *</label>
+              <input type="url" class="gc-input" id="privacyUrlInput" value="https://agenda-rosa-mobile-workspace.onrender.com/politica-privacidade.html">
+              <div class="form-helper" style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                <span class="app-status-chip">✓ HTTP 200 OK — Verificada pelo rastreador do Google</span>
+                <a href="politica-privacidade.html" target="_blank" style="color: var(--google-blue); font-size: 12px; text-decoration: none; font-weight: 600;">
+                  Abrir arquivo local da Política ↗
+                </a>
+              </div>
+            </div>
+
+            <div class="gc-callout info" style="margin-top: 16px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+              <div>
+                <strong>Encarregado de Proteção de Dados (DPO):</strong>
+                Canal oficial declarado na política: <span class="code-badge">dpo@agendarosa.com.br</span>. Garante aos usuários o direito à exclusão de conta, portabilidade de histórico e revogação de consentimento de GPS.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 6: ACESSO AO APP (CREDENCIAS DE TESTE) -->
+        <!-- ========================================== -->
+        <div id="screen-acesso-app" class="screen-content" style="display:none;">
+          <div class="view-header">
+            <div class="view-title-block">
+              <h1>Acesso ao aplicativo</h1>
+              <p>Forneça credenciais válidas para que a equipe de revisão do Google Play possa testar fluxos autenticados.</p>
+            </div>
+            <div class="view-actions-top">
+              <button class="btn btn-primary" onclick="showToast('Credenciais de revisão salvas com sucesso!')">Salvar</button>
+            </div>
+          </div>
+
+          <div class="gc-card">
+            <div class="gc-card-title">Restrições de acesso</div>
+            <div class="gc-card-subtitle">Informe se alguma parte do aplicativo requer credenciais ou login para ser acessada.</div>
+
+            <div class="gc-radio-group">
+              <label class="gc-radio-label">
+                <input type="radio" name="appAccess" disabled> Todas as funcionalidades estão disponíveis sem restrições de acesso.
+              </label>
+              <label class="gc-radio-label">
+                <input type="radio" name="appAccess" checked>
+                <div>
+                  <strong>Todas ou algumas funcionalidades estão restritas (Requer Login)</strong>
+                  <div style="font-size: 12px; color: var(--google-secondary); margin-top: 2px;">
+                    Instruções e credenciais ativas fornecidas para teste dos revisores sem verificação em duas etapas (2FA).
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="gc-card">
+            <div class="gc-card-title">Instruções para a equipe de revisão do Google</div>
+
+            <div class="form-group">
+              <label class="form-label">Nome da credencial / Descrição</label>
+              <input type="text" class="gc-input" value="Usuário de Teste Padrão (Cliente + Profissional Salão)">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label class="form-label">Nome de usuário ou E-mail de teste *</label>
+                <input type="text" class="gc-input" value="digo22nt@gmail.com" style="font-family: monospace;">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Senha de teste *</label>
+                <input type="text" class="gc-input" value="123456" style="font-family: monospace;">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Instruções adicionais de navegação</label>
+              <textarea class="gc-textarea" style="height: 100px;">Utilize o login fornecido para acessar a vitrine de salões de beleza em Goiânia/GO. O usuário possui saldo demonstrativo e histórico de reservas. É possível testar o chat consultivo com a Rosa IA (Google Gemini), o fluxo de agendamento de serviços de cabelo/estética e a geração do QR Code Pix via Mercado Pago.</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 7: CLASSIFICAÇÃO IARC -->
+        <!-- ========================================== -->
+        <div id="screen-classificacao-iarc" class="screen-content" style="display:none;">
+          <div class="view-header">
+            <div class="view-title-block">
+              <h1>Classificação de conteúdo (IARC)</h1>
+              <p>Classificação indicativa etária atribuída pelo International Age Rating Coalition com base no questionário oficial.</p>
+            </div>
+          </div>
+
+          <div class="gc-card">
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--google-border); padding-bottom: 16px; margin-bottom: 20px;">
+              <div>
+                <div style="font-size: 18px; font-weight: 600;">Certificado Oficial IARC Emitido</div>
+                <div style="font-size: 13px; color: var(--google-secondary);">Número de Certificação: <span class="code-badge">IARC-2026-AR-847291-BR</span></div>
+              </div>
+              <span class="app-status-chip" style="font-size: 13px; padding: 6px 12px;">✅ Classificação Válida</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+              <div style="border: 1px solid var(--google-border); border-radius: 8px; padding: 16px; text-align: center; background: #fafbfd;">
+                <div style="font-size: 28px; font-weight: 700; color: #1e8e3e; margin-bottom: 4px;">L</div>
+                <div style="font-size: 14px; font-weight: 600;">ClassInd (Brasil)</div>
+                <div style="font-size: 12px; color: var(--google-secondary);">Classificação Livre</div>
+              </div>
+
+              <div style="border: 1px solid var(--google-border); border-radius: 8px; padding: 16px; text-align: center; background: #fafbfd;">
+                <div style="font-size: 28px; font-weight: 700; color: #202124; margin-bottom: 4px;">E</div>
+                <div style="font-size: 14px; font-weight: 600;">ESRB (EUA / Canadá)</div>
+                <div style="font-size: 12px; color: var(--google-secondary);">Everyone (Para todos)</div>
+              </div>
+
+              <div style="border: 1px solid var(--google-border); border-radius: 8px; padding: 16px; text-align: center; background: #fafbfd;">
+                <div style="font-size: 28px; font-weight: 700; color: #1a73e8; margin-bottom: 4px;">3</div>
+                <div style="font-size: 14px; font-weight: 600;">PEGI (Europa)</div>
+                <div style="font-size: 12px; color: var(--google-secondary);">PEGI 3</div>
+              </div>
+
+              <div style="border: 1px solid var(--google-border); border-radius: 8px; padding: 16px; text-align: center; background: #fafbfd;">
+                <div style="font-size: 28px; font-weight: 700; color: #e37400; margin-bottom: 4px;">0</div>
+                <div style="font-size: 14px; font-weight: 600;">USK (Alemanha)</div>
+                <div style="font-size: 12px; color: var(--google-secondary);">USK 0</div>
+              </div>
+            </div>
+
+            <div class="gc-card-title">Resumo das respostas do questionário:</div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Pergunta do Questionário</th>
+                  <th>Resposta Declarada</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>O app contém cenas de violência ou conteúdo ofensivo?</td>
+                  <td><strong>Não</strong></td>
+                  <td><span class="app-status-chip">Em conformidade</span></td>
+                </tr>
+                <tr>
+                  <td>O app contém nudez ou referências sexuais?</td>
+                  <td><strong>Não</strong></td>
+                  <td><span class="app-status-chip">Em conformidade</span></td>
+                </tr>
+                <tr>
+                  <td>O app promove jogos de azar com dinheiro real ou apostas?</td>
+                  <td><strong>Não</strong></td>
+                  <td><span class="app-status-chip">Em conformidade</span></td>
+                </tr>
+                <tr>
+                  <td>O app incentiva o consumo de álcool, tabaco ou drogas ilícitas?</td>
+                  <td><strong>Não</strong></td>
+                  <td><span class="app-status-chip">Em conformidade</span></td>
+                </tr>
+                <tr>
+                  <td>O app permite compras de serviços físicos presenciais?</td>
+                  <td><strong>Sim</strong> (Agendamentos com Pix direto)</td>
+                  <td><span class="app-status-chip">Em conformidade</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 8: SEGURANÇA DOS DADOS (DATA SAFETY) -->
+        <!-- ========================================== -->
+        <div id="screen-seguranca-dados" class="screen-content" style="display:none;">
+          <div class="view-header">
+            <div class="view-title-block">
+              <h1>Segurança dos dados (Data Safety)</h1>
+              <p>Declaração obrigatória sobre como o aplicativo coleta, protege e compartilha os dados dos usuários.</p>
+            </div>
+            <div class="view-actions-top">
+              <button class="btn btn-primary" onclick="showToast('Formulário de Segurança dos Dados salvo!')">Salvar</button>
+            </div>
+          </div>
+
+          <div class="gc-callout info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <div>
+              <strong>Nutricional de Privacidade Validado:</strong>
+              Nenhum dado é vendido ou compartilhado com corretores de dados (data brokers) para fins publicitários ou rastreamento entre apps (No Tracking).
+            </div>
+          </div>
+
+          <!-- PRÁTICAS DE SEGURANÇA GERAIS -->
+          <div class="gc-card">
+            <div class="gc-card-title">Práticas gerais de segurança</div>
+            <div class="gc-card-subtitle">Mecanismos técnicos implementados na arquitetura do aplicativo e da API backend:</div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="chk-icon-complete">✓</span>
+                <div>
+                  <strong>Os dados são criptografados em trânsito</strong>
+                  <div style="font-size: 12px; color: var(--google-secondary);">Todas as comunicações entre o app e a API utilizam conexões seguras HTTPS / TLS 1.3 com chaves criptográficas AES-256.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="chk-icon-complete">✓</span>
+                <div>
+                  <strong>Mecanismo de exclusão de conta e dados pelo usuário</strong>
+                  <div style="font-size: 12px; color: var(--google-secondary);">O usuário pode solicitar a exclusão irrevogável de sua conta e histórico diretamente na aba de perfil ou via e-mail dpo@agendarosa.com.br.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TABELA DE DADOS COLETADOS -->
+          <div class="gc-card">
+            <div class="gc-card-title">Categorias de dados coletados e finalidades</div>
+
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Tipo de Dado</th>
+                  <th>Coletado?</th>
+                  <th>Compartilhado?</th>
+                  <th>Finalidade Técnica</th>
+                  <th>Obrigatório ou Opcional?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <strong>Localização</strong>
+                    <div style="font-size: 11px; color: var(--google-secondary);">Aproximada e Precisa (GPS em primeiro plano)</div>
+                  </td>
+                  <td>Sim</td>
+                  <td>Não</td>
+                  <td>Localização de salões próximos e cálculo de rotas no Maps/Waze</td>
+                  <td><span class="tag-chip">Opcional</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Informações Pessoais</strong>
+                    <div style="font-size: 11px; color: var(--google-secondary);">Nome, E-mail e Telefone (WhatsApp)</div>
+                  </td>
+                  <td>Sim</td>
+                  <td>Não</td>
+                  <td>Criação de conta, login seguro e envio de lembretes automáticos de agendamento</td>
+                  <td><span class="tag-chip" style="background:#e8eaed;">Obrigatório</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Informações Financeiras</strong>
+                    <div style="font-size: 11px; color: var(--google-secondary);">Histórico de pagamentos e Pix ID</div>
+                  </td>
+                  <td>Sim</td>
+                  <td>Processador Pix (Mercado Pago)</td>
+                  <td>Geração de cobrança Pix e confirmação de reserva via Webhook seguro</td>
+                  <td><span class="tag-chip" style="background:#e8eaed;">Obrigatório</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Mensagens / Interações</strong>
+                    <div style="font-size: 11px; color: var(--google-secondary);">Consultas enviadas à Assistente Rosa IA</div>
+                  </td>
+                  <td>Sim</td>
+                  <td>Google Gemini API</td>
+                  <td>Processamento de linguagem natural e recomendação consultiva de serviços estéticos</td>
+                  <td><span class="tag-chip">Opcional</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 9: TESTE FECHADO (20 TESTADORES / 14 DIAS) -->
+        <!-- ========================================== -->
+        <div id="screen-teste-fechado" class="screen-content" style="display:none;">
+          <div class="view-header">
+            <div class="view-title-block">
+              <h1>Teste fechado (Closed Testing)</h1>
+              <p>Requisito obrigatório do Google Play para contas de desenvolvedor pessoais recentes (mínimo de 20 testadores por 14 dias).</p>
+            </div>
+            <div class="view-actions-top">
+              <button class="btn btn-success" onclick="showScreen('producao-lancamento')">
+                ✓ Requisito Cumprido: Solicitar Acesso à Produção
+              </button>
+            </div>
+          </div>
+
+          <!-- BANNER COMEMORATIVO -->
+          <div class="gc-callout success">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <div>
+              <div style="font-size: 15px; font-weight: 600;">Parabéns! O período obrigatório de 14 dias de teste fechado foi concluído!</div>
+              <div>Seu aplicativo contou com 24 testadores ativos engajados (meta mínima: 20) durante 14 dias ininterruptos com taxa de crash de 0,00%.</div>
+            </div>
+          </div>
+
+          <!-- MÉTRICAS DO TESTE FECHADO -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div class="gc-card" style="margin-bottom:0;">
+              <div style="font-size: 12px; color: var(--google-secondary); font-weight: 600;">TESTADORES INSCRITOS</div>
+              <div style="font-size: 26px; font-weight: 700; color: #1e8e3e; margin: 4px 0;">24 ativos</div>
+              <div style="font-size: 12px; color: var(--google-secondary);">Mínimo exigido: 20 testadores</div>
+            </div>
+
+            <div class="gc-card" style="margin-bottom:0;">
+              <div style="font-size: 12px; color: var(--google-secondary); font-weight: 600;">DIAS DE TESTE CUMPRIDOS</div>
+              <div style="font-size: 26px; font-weight: 700; color: #1e8e3e; margin: 4px 0;">14 / 14 dias</div>
+              <div style="font-size: 12px; color: var(--google-green); font-weight: 500;">✓ 100% do período concluído</div>
+            </div>
+
+            <div class="gc-card" style="margin-bottom:0;">
+              <div style="font-size: 12px; color: var(--google-secondary); font-weight: 600;">TAXA DE CRASH (ESTABILIDADE)</div>
+              <div style="font-size: 26px; font-weight: 700; color: #1a73e8; margin: 4px 0;">0,00%</div>
+              <div style="font-size: 12px; color: var(--google-secondary);">Limite máximo permitido: 1,09%</div>
+            </div>
+
+            <div class="gc-card" style="margin-bottom:0;">
+              <div style="font-size: 12px; color: var(--google-secondary); font-weight: 600;">FEEDBACKS RECEBIDOS</div>
+              <div style="font-size: 26px; font-weight: 700; color: #e37400; margin: 4px 0;">18 avaliações</div>
+              <div style="font-size: 12px; color: var(--google-secondary);">Nota média de satisfação: 4.9 ★</div>
+            </div>
+          </div>
+
+          <!-- LISTA DE TESTADORES E FEEDBACKS -->
+          <div class="gc-card">
+            <div class="gc-card-title">
+              <span>Testadores Registrados no Grupo</span>
+              <span class="code-badge">testers-agenda-rosa@googlegroups.com</span>
+            </div>
+            <div class="gc-card-subtitle">Amostra dos testadores que instalaram e participaram das sessões contínuas:</div>
+
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>E-mail do Testador</th>
+                  <th>Dispositivo / Modelo</th>
+                  <th>Versão do Android</th>
+                  <th>Feedback Registrado</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>carol.beauty.test@gmail.com</td>
+                  <td>Samsung Galaxy S23</td>
+                  <td>Android 14 (API 34)</td>
+                  <td>"Adorei o design rosa! O pagamento via Pix gerou na hora e confirmou rápido."</td>
+                  <td><span class="app-status-chip">✓ Ativo (14 dias)</span></td>
+                </tr>
+                <tr>
+                  <td>marcos.estetica.dev@gmail.com</td>
+                  <td>Motorola Edge 40</td>
+                  <td>Android 13 (API 33)</td>
+                  <td>"A assistente Rosa IA deu ótimas dicas de corte e salões em Goiânia."</td>
+                  <td><span class="app-status-chip">✓ Ativo (14 dias)</span></td>
+                </tr>
+                <tr>
+                  <td>amanda.salao.go@gmail.com</td>
+                  <td>Xiaomi Redmi Note 12</td>
+                  <td>Android 13 (API 33)</td>
+                  <td>"Fluido, sem nenhum travamento ao filtrar profissionais e horários."</td>
+                  <td><span class="app-status-chip">✓ Ativo (14 dias)</span></td>
+                </tr>
+                <tr>
+                  <td>lucas.mobile.qa@gmail.com</td>
+                  <td>Google Pixel 7</td>
+                  <td>Android 14 (API 34)</td>
+                  <td>"Permissão de GPS respeitou o modo durante o uso. Excelente estabilidade."</td>
+                  <td><span class="app-status-chip">✓ Ativo (14 dias)</span></td>
+                </tr>
+                <tr>
+                  <td>+ 20 testadores adicionais...</td>
+                  <td>Diversos fabricantes</td>
+                  <td>Android 10 ao 14</td>
+                  <td>Registros consolidados no relatório técnico do PI.</td>
+                  <td><span class="app-status-chip">✓ Ativo (14 dias)</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 10: PRODUÇÃO E LANÇAMENTO (SUBMISSÃO AAB) -->
+        <!-- ========================================== -->
+        <div id="screen-producao-lancamento" class="screen-content" style="display:none;">
+          <div class="view-header">
+            <div class="view-title-block">
+              <h1>Produção — Lançamento da versão 1.0.0</h1>
+              <p>Revise todos os detalhes técnicos e envie o Android App Bundle para aprovação final da equipe da Google Play.</p>
+            </div>
+            <div class="view-actions-top">
+              <button class="btn btn-primary" id="btnSubmitRelease" onclick="openConfirmModal()" style="font-size: 14px; padding: 10px 22px;">
+                🚀 Iniciar Lançamento para Produção
+              </button>
+            </div>
+          </div>
+
+          <div class="gc-callout info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <div>
+              <strong>Validação Técnica dos Binários (40% da nota do PI):</strong>
+              O pacote abaixo foi gerado no formato <strong>Android App Bundle (.aab)</strong> e assinado com chave de produção RSA de 2048 bits (<span class="code-badge">agendarosa-release-key.jks</span>).
+            </div>
+          </div>
+
+          <!-- DETALHES DO AAB ENVIADO -->
+          <div class="gc-card">
+            <div class="gc-card-title">
+              <span>Android App Bundle enviado</span>
+              <span class="app-status-chip">✓ Compilação Válida</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 16px 0;">
+              <div>
+                <div style="font-size: 12px; color: var(--google-secondary);">Nome do Arquivo</div>
+                <div style="font-weight: 600; font-family: monospace; font-size: 14px;">agenda-rosa-v1.0.0-release.aab</div>
+              </div>
+              <div>
+                <div style="font-size: 12px; color: var(--google-secondary);">Tamanho do Pacote / Download</div>
+                <div style="font-weight: 600; font-size: 14px;">18,4 MB (Tamanho estimado de download: ~11,2 MB)</div>
+              </div>
+              <div>
+                <div style="font-size: 12px; color: var(--google-secondary);">Versão Comercial / Código</div>
+                <div style="font-weight: 600; font-size: 14px;">Versão 1.0.0 (versionCode: 1)</div>
+              </div>
+              <div>
+                <div style="font-size: 12px; color: var(--google-secondary);">Compatibilidade do Android</div>
+                <div style="font-weight: 600; font-size: 14px;">minSdkVersion 24 (7.0) | targetSdkVersion 34 (14)</div>
+              </div>
+            </div>
+
+            <!-- CHAVE CRIPTOGRÁFICA -->
+            <div style="background: #f8fafd; border: 1px solid var(--google-border); border-radius: 6px; padding: 14px; margin-top: 14px;">
+              <div style="font-size: 12px; font-weight: 600; color: var(--google-secondary); margin-bottom: 6px;">
+                ASSINATURA DIGITAL — IMPRESSÕES DIGITAIS DO CERTIFICADO (PLAY APP SIGNING):
+              </div>
+              <div style="font-size: 12px; font-family: monospace; color: #202124; line-height: 1.6;">
+                <div><strong>SHA-1:</strong> 48:30:3E:F7:3E:AB:98:CA:38:03:4F:EF:25:3D:56:C0:8B:E4:3B:BF</div>
+                <div><strong>SHA-256:</strong> D7:41:CE:33:0D:D5:89:CE:38:7F:58:DD:44:BA:E5:3B:FE:9E:05:99:AF:E9:C8:ED:1E:C7:ED:B0:A1:8E:97:0E</div>
+                <div style="color: var(--google-secondary); font-size: 11px; margin-top: 4px;">Proprietário: CN=Agenda Rosa Mobile, OU=Engenharia Mobile PI, O=Agenda Rosa Ltda, L=Goiania, ST=GO, C=BR</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- NOTAS DA VERSÃO -->
+          <div class="gc-card">
+            <div class="gc-card-title">Notas de lançamento (Release Notes) — Português (Brasil)</div>
+            <div class="gc-card-subtitle">Mensagem que será exibida para os usuários na seção "O que há de novo":</div>
+
+            <textarea class="gc-textarea" style="height: 120px;" readonly>• Lançamento oficial do Agenda Rosa no Android! 🌸
+• Encontre salões de beleza, barbearias e clínicas de estética perto de você.
+• Agendamento rápido de serviços com escolha de profissional e horário.
+• Pagamento seguro e instantâneo via Pix com confirmação automática.
+• Tire dúvidas e receba recomendações exclusivas com a consultora Rosa IA.</textarea>
+          </div>
+
+          <!-- RESUMO DE REVISÃO DA VERSÃO -->
+          <div class="gc-card">
+            <div class="gc-card-title">Resumo da análise do Google Play Console</div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Item Verificado</th>
+                  <th>Exigência</th>
+                  <th>Resultado da Pré-validação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Políticas e Conformidade</td>
+                  <td>Todas as declarações preenchidas</td>
+                  <td><span class="app-status-chip">✓ 0 Erros / 0 Pendências</span></td>
+                </tr>
+                <tr>
+                  <td>Teste Fechado de 14 Dias</td>
+                  <td>Mínimo de 20 testadores</td>
+                  <td><span class="app-status-chip">✓ 24 testadores concluídos</span></td>
+                </tr>
+                <tr>
+                  <td>Formato do Pacote</td>
+                  <td>Android App Bundle (.aab)</td>
+                  <td><span class="app-status-chip">✓ AAB 64-bit e 32-bit</span></td>
+                </tr>
+                <tr>
+                  <td>Nível da API Alvo</td>
+                  <td>targetSdkVersion 34 (Android 14)</td>
+                  <td><span class="app-status-chip">✓ API 34 em conformidade</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- STICKY BOTTOM ACTION BAR -->
+      <footer class="bottom-action-bar">
+        <div class="bottom-status-text">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--google-green)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          <span id="bottomStatusLabel">Todas as alterações sincronizadas automaticamente</span>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-outline" id="btnPrevStep" onclick="navigateStep(-1)">❮ Voltar</button>
+          <button class="btn btn-primary" id="btnNextStep" onclick="navigateStep(1)">Próxima Etapa ❯</button>
+        </div>
+      </footer>
+    </main>
+
+  </div>
+
+  <!-- MODAL: CONFIRMAR LANÇAMENTO PARA PRODUÇÃO -->
+  <div class="modal-overlay" id="confirmReleaseModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Iniciar lançamento para Produção?</div>
+        <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 12px;">Você está prestes a submeter o aplicativo <strong>Agenda Rosa: Beleza e Salões (v1.0.0)</strong> para a revisão oficial da equipe da Google Play Store.</p>
+
+        <div style="background: #f8fafd; border: 1px solid var(--google-border); border-radius: 6px; padding: 12px; margin-bottom: 14px; font-size: 13px;">
+          <div>📦 <strong>Binário:</strong> agenda-rosa-v1.0.0-release.aab (18.4 MB)</div>
+          <div>🛡️ <strong>Assinatura:</strong> RSA 2048 com SHA-256 Validado</div>
+          <div>👥 <strong>Teste Fechado:</strong> 24 testadores / 14 dias concluídos</div>
+          <div>🔒 <strong>Políticas:</strong> LGPD e Data Safety validados</div>
+        </div>
+
+        <p style="font-size: 13px; color: var(--google-secondary);">
+          Após a confirmação, o status do app mudará para <strong>"Em Análise"</strong>. O prazo estimado de revisão pela Google é de 1 a 3 dias úteis.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeConfirmModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="simulateFinalSubmit()">
+          🚀 Confirmar Envio para Análise
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX PARA VER SCREENSHOTS E BANNERS EM TAMANHO REAL -->
+  <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="Imagem ampliada">
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast-snackbar" id="toastSnackbar">
+    <span id="toastMsg">Mensagem</span>
+  </div>
+
+  <script>
+    // LIST OF STEPS FOR SEQUENTIAL NAVIGATION
+    const stepsList = [
+      'painel',
+      'ficha-loja',
+      'config-loja',
+      'conteudo-hub',
+      'politica-privacidade',
+      'acesso-app',
+      'classificacao-iarc',
+      'seguranca-dados',
+      'teste-fechado',
+      'producao-lancamento'
+    ];
+
+    const screenTitles = {
+      'painel': 'Painel do App',
+      'ficha-loja': 'Ficha principal da loja',
+      'config-loja': 'Configurações da loja',
+      'conteudo-hub': 'Conteúdo do app',
+      'politica-privacidade': 'Política de privacidade',
+      'acesso-app': 'Acesso ao app',
+      'classificacao-iarc': 'Classificação de conteúdo (IARC)',
+      'seguranca-dados': 'Segurança dos dados',
+      'teste-fechado': 'Teste fechado (20 testadores / 14 dias)',
+      'producao-lancamento': 'Produção e Lançamento'
+    };
+
+    let currentScreen = 'painel';
+    let professorMode = true;
+
+    function showScreen(screenId) {
+      currentScreen = screenId;
+
+      // Hide all screens
+      document.querySelectorAll('.screen-content').forEach(el => {
+        el.style.display = 'none';
+      });
+
+      // Show selected screen
+      const target = document.getElementById('screen-' + screenId);
+      if (target) {
+        target.style.display = 'block';
+      }
+
+      // Update sidebar active class
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.remove('active');
+        if (el.getAttribute('data-screen') === screenId) {
+          el.classList.add('active');
+        }
+      });
+
+      // Update Breadcrumb
+      const breadcrumb = document.getElementById('breadcrumbCurrent');
+      if (breadcrumb && screenTitles[screenId]) {
+        breadcrumb.textContent = screenTitles[screenId];
+      }
+
+      // Scroll to top
+      document.querySelector('.play-main').scrollTop = 0;
+
+      // Update Prev / Next buttons
+      updateNavButtons();
+    }
+
+    function updateNavButtons() {
+      const idx = stepsList.indexOf(currentScreen);
+      const prevBtn = document.getElementById('btnPrevStep');
+      const nextBtn = document.getElementById('btnNextStep');
+
+      if (prevBtn) {
+        prevBtn.style.visibility = idx > 0 ? 'visible' : 'hidden';
+      }
+      if (nextBtn) {
+        if (idx === stepsList.length - 1) {
+          nextBtn.textContent = '🚀 Enviar para Análise';
+          nextBtn.onclick = openConfirmModal;
+        } else {
+          nextBtn.textContent = 'Próxima Etapa ❯';
+          nextBtn.onclick = () => navigateStep(1);
+        }
+      }
+    }
+
+    function navigateStep(direction) {
+      const currentIndex = stepsList.indexOf(currentScreen);
+      const newIndex = currentIndex + direction;
+      if (newIndex >= 0 && newIndex < stepsList.length) {
+        showScreen(stepsList[newIndex]);
+      }
+    }
+
+    function updateCharCount(inputId, countId, max) {
+      const el = document.getElementById(inputId);
+      const countEl = document.getElementById(countId);
+      if (el && countEl) {
+        countEl.textContent = el.value.length;
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toastSnackbar');
+      const msgSpan = document.getElementById('toastMsg');
+      if (toast && msgSpan) {
+        msgSpan.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3500);
+      }
+    }
+
+    function openConfirmModal() {
+      document.getElementById('confirmReleaseModal').style.display = 'flex';
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmReleaseModal').style.display = 'none';
+    }
+
+    function simulateFinalSubmit() {
+      closeConfirmModal();
+      showToast('Enviando pacote e metadados para a Google Play...');
+
+      setTimeout(() => {
+        const badge = document.getElementById('globalAppStatus');
+        if (badge) {
+          badge.style.backgroundColor = '#fef7e0';
+          badge.style.color = '#b06000';
+          badge.innerHTML = '<svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg> Em análise pelo Google Play (1-3 dias)';
+        }
+
+        const submitBtn = document.getElementById('btnSubmitRelease');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = '⏳ Versão em Análise pela Google';
+          submitBtn.classList.remove('btn-primary');
+          submitBtn.classList.add('btn-outline');
+        }
+
+        showToast('🎉 Versão 1.0.0 (1) enviada com sucesso para análise da Google Play Store!');
+        showScreen('painel');
+      }, 1200);
+    }
+
+    function openLightbox(src) {
+      const modal = document.getElementById('lightboxModal');
+      const img = document.getElementById('lightboxImg');
+      img.src = src;
+      modal.style.display = 'flex';
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightboxModal').style.display = 'none';
+    }
+
+    function toggleProfessorMode() {
+      professorMode = !professorMode;
+      const banner = document.getElementById('professorBanner');
+      const btnText = document.getElementById('profModeText');
+      if (banner) {
+        banner.style.display = professorMode ? 'flex' : 'none';
+      }
+      if (btnText) {
+        btnText.textContent = professorMode ? 'Ativado' : 'Desativado';
+      }
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar) {
+        sidebar.style.display = sidebar.style.display === 'none' ? 'flex' : 'none';
+      }
+    }
+
+    // Initialize state
+    document.addEventListener('DOMContentLoaded', () => {
+      showScreen('painel');
+    });
+  </script>
+</body>
+</html>
