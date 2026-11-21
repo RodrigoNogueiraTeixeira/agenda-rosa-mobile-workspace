@@ -127,4 +127,33 @@ describe('Tela VitrineLojas (Home)', () => {
     await fireEvent.press(screen.getByText('Agendar'));
     expect(onSelecionarLojaAgendamento).toHaveBeenCalledWith(LOJAS_MOCK[0]);
   });
+
+  it('exibe os agendamentos na aba Agendamentos e abre o pop-up de avaliação ao concluir ou avaliar um atendimento (SCRUM-26)', async () => {
+    estabelecimentoService.buscarEstabelecimentos.mockResolvedValueOnce(LOJAS_MOCK);
+
+    await render(
+      <VitrineLojas
+        currentUser={{ nome: 'Maria Silva', email: 'maria@agendarosa.com' }}
+      />
+    );
+
+    // Troca para a aba inferior "Agendamentos"
+    await fireEvent.press(screen.getByText('Agendamentos'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Meus Agendamentos')).toBeTruthy();
+    });
+
+    // Verifica que o card concluído tem o botão "Avaliar atendimento" e o confirmado tem "Concluir atendimento"
+    expect(screen.getByText('Avaliar atendimento')).toBeTruthy();
+    expect(screen.getByText('Concluir atendimento')).toBeTruthy();
+
+    // Clica em "Concluir atendimento" no segundo card -> deve abrir automaticamente o Pop-up de Avaliação
+    await fireEvent.press(screen.getByText('Concluir atendimento'));
+
+    expect(screen.getByText('Avalie sua experiência')).toBeTruthy();
+    expect(
+      screen.getByText('Como foi seu atendimento de Corte Moderno e Escova?')
+    ).toBeTruthy();
+  });
 });
