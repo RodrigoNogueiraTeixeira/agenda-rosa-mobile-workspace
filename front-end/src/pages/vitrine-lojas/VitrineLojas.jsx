@@ -15,6 +15,7 @@ import { theme } from '../../styles/theme';
 import { styles } from './styles';
 import { estabelecimentoService } from '../../services/estabelecimento-service';
 import MeusAgendamentos from '../meus-agendamentos';
+import PerfilCliente from '../perfil-cliente';
 
 // Lista padrão de categorias exibidas nas pílulas de filtro
 const CATEGORIAS_PADRAO = [
@@ -680,19 +681,14 @@ export default function VitrineLojas({
         <MeusAgendamentos onIrParaVitrine={() => setAbaAtiva('inicio')} />
       )}
 
-      {/* Conteúdo da Aba Perfil */}
+      {/* Conteúdo da Aba Perfil: Tela de Perfil do Cliente (SCRUM-35) */}
       {abaAtiva === 'perfil' && (
-        <View style={[styles.scrollContent, { flex: 1, justifyContent: 'center' }]}>
-          <View style={styles.feedbackBox}>
-            <Feather name="user" size={32} color={theme.colors.primary} />
-            <Text style={styles.feedbackTitle}>
-              {`Perfil de ${currentUser?.nome || 'Cliente'}`}
-            </Text>
-            <Text style={styles.feedbackSubtitle}>
-              {`E-mail: ${currentUser?.email || ''}`}
-            </Text>
-          </View>
-        </View>
+        <PerfilCliente
+          currentUser={currentUser}
+          onIrParaAgendamentos={() => setAbaAtiva('agendamentos')}
+          onIrParaVitrine={() => setAbaAtiva('inicio')}
+          onLogout={onLogout}
+        />
       )}
 
       {/* Barra de Navegação Inferior */}

@@ -91,6 +91,30 @@ export const authService = {
   },
 
   /**
+   * Atualiza os dados cadastrais do cliente autenticado e persiste na sessão.
+   */
+  async atualizarPerfilMe({ nome, email, telefone, cidade, bairro }) {
+    const telefoneLimpo = somenteNumeros(telefone || '');
+    const payload = {
+      nome: String(nome || '').trim(),
+      email: String(email || '').trim().toLowerCase(),
+      telefone: telefoneLimpo || '',
+      cidade: String(cidade || '').trim(),
+      bairro: String(bairro || '').trim(),
+    };
+
+    try {
+      const resposta = await request('/clientes/me', {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      return { ...payload, ...(resposta || {}) };
+    } catch {
+      return payload;
+    }
+  },
+
+  /**
    * Encerra a sessão do usuário.
    */
   async logout() {
