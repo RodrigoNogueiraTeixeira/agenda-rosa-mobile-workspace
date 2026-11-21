@@ -14,34 +14,7 @@ import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { theme } from '../../styles/theme';
 import { styles } from './styles';
 import { estabelecimentoService } from '../../services/estabelecimento-service';
-import { agendamentoService } from '../../services/agendamento-service';
-import ModalAvaliacao from '../../components/modal-avaliacao';
-
-// Histórico padrão exibido na aba Meus Agendamentos caso a API esteja indisponível ou sem histórico
-const AGENDAMENTOS_PADRAO = [
-  {
-    id: 1,
-    estabelecimentoId: 1,
-    estabelecimentoNome: 'Boutique de Unhas Sensual',
-    nomeServico: 'Microblading Fio a Fio',
-    nomeProfissional: 'Camila Rocha',
-    data: '20/11/2026',
-    horarioInicio: '14:00',
-    total: 450.0,
-    status: 'CONCLUIDO',
-  },
-  {
-    id: 2,
-    estabelecimentoId: 1,
-    estabelecimentoNome: 'Studio Bela Vista Estética',
-    nomeServico: 'Corte Moderno e Escova',
-    nomeProfissional: 'Juliana Mendes',
-    data: '22/11/2026',
-    horarioInicio: '10:30',
-    total: 150.0,
-    status: 'CONFIRMADO',
-  },
-];
+import MeusAgendamentos from '../meus-agendamentos';
 
 // Lista padrão de categorias exibidas nas pílulas de filtro
 const CATEGORIAS_PADRAO = [
@@ -101,13 +74,6 @@ export default function VitrineLojas({
   const [erroBusca, setErroBusca] = useState(null);
   const [imagensComErro, setImagensComErro] = useState({});
   const [abaAtiva, setAbaAtiva] = useState(abaInicial);
-
-  // Estados da aba Meus Agendamentos e Pop-up de Avaliação pós-conclusão (SCRUM-26)
-  const [meusAgendamentos, setMeusAgendamentos] = useState(AGENDAMENTOS_PADRAO);
-  const [carregandoAgendamentos, setCarregandoAgendamentos] = useState(false);
-  const [agendamentoParaAvaliar, setAgendamentoParaAvaliar] = useState(null);
-  const [modalAvaliacaoAberto, setModalAvaliacaoAberto] = useState(false);
-  const [avaliacoesRealizadas, setAvaliacoesRealizadas] = useState({});
 
   // Carrega as lojas e categorias assim que a tela abre
   useEffect(() => {
@@ -233,40 +199,6 @@ export default function VitrineLojas({
     }
 
     setAbaAtiva(novaAba);
-    if (novaAba === 'agendamentos') {
-      carregarMeusAgendamentos();
-    }
-  }
-
-  // Busca os agendamentos reais do cliente na API (mantendo o histórico padrão como fallback)
-  async function carregarMeusAgendamentos() {
-    if (!agendamentoService?.listarMeusAgendamentos) return;
-    setCarregandoAgendamentos(true);
-    try {
-      const listaApi = await agendamentoService.listarMeusAgendamentos();
-      if (Array.isArray(listaApi) && listaApi.length > 0) {
-        setMeusAgendamentos(listaApi);
-      }
-    } catch {
-      // Mantém lista padrão para garantir visualização caso a API demore ou falhe
-    } finally {
-      setCarregandoAgendamentos(false);
-    }
-  }
-
-  // Abre o Pop-up de Avaliação (SCRUM-26) para um atendimento concluído
-  function handleAbrirAvaliacao(agendamento) {
-    setAgendamentoParaAvaliar(agendamento);
-    setModalAvaliacaoAberto(true);
-  }
-
-  // Conclui um atendimento agendado e já abre o Pop-up de Avaliação pós-conclusão (SCRUM-26)
-  function handleConcluirAtendimento(agendamento) {
-    const atualizado = { ...agendamento, status: 'CONCLUIDO' };
-    setMeusAgendamentos((listaAtual) =>
-      listaAtual.map((item) => (item.id === agendamento.id ? atualizado : item))
-    );
-    handleAbrirAvaliacao(atualizado);
   }
 
   // Monta o subtítulo da seção de resultados (ex.: "3 estabelecimentos encontrados em Moema, SP")
@@ -743,145 +675,9 @@ export default function VitrineLojas({
         </ScrollView>
       )}
 
-      {/* Conteúdo da Aba Agendamentos: Histórico e Avaliação Pós-Conclusão (SCRUM-26) */}
+      {/* Conteúdo da Aba Agendamentos: Tela Meus Agendamentos com Histórico Completo (SCRUM-33) */}
       {abaAtiva === 'agendamentos' && (
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.appointmentsHeaderBox}>
-            <Text style={styles.appointmentsHeaderTitle}>Meus Agendamentos</Text>
-            <Text style={styles.appointmentsHeaderSubtitle}>
-              Acompanhe seus horários marcados e avalie os atendimentos concluídos.
-            </Text>
-          </View>
-
-          {carregandoAgendamentos && (
-            <ActivityIndicator
-              color={theme.colors.primary}
-              style={{ marginBottom: 12 }}
-            />
-          )}
-
-          {meusAgendamentos.map((item, idx) => {
-            const statusUpper = String(item.status || 'CONCLUIDO').toUpperCase();
-            const concluido =
-              statusUpper === 'CONCLUIDO' || statusUpper === 'FINALIZADO';
-            const notaAvaliada = avaliacoesRealizadas[item.id];
-
-            return (
-              <View key={item.id || idx} style={styles.appointmentCard}>
-                <View style={styles.appointmentTopRow}>
-                  <View style={styles.appointmentStoreRow}>
-                    <MaterialCommunityIcons
-                      name="storefront-outline"
-                      size={18}
-                      color={theme.colors.primary}
-                    />
-                    <Text numberOfLines={1} style={styles.appointmentStoreName}>
-                      {item.estabelecimentoNome || 'Boutique de Unhas Sensual'}
-                    </Text>
-                  </View>
-
-                  <View
-                    style={
-                      concluido
-                        ? styles.statusBadgeCompleted
-                        : styles.statusBadgePending
-                    }
-                  >
-                    <Text
-                      style={
-                        concluido
-                          ? styles.statusBadgeCompletedText
-                          : styles.statusBadgePendingText
-                      }
-                    >
-                      {concluido ? 'Concluído' : 'Confirmado'}
-                    </Text>
-                  </View>
-                </View>
-
-                <Text style={styles.appointmentServiceTitle}>
-                  • {item.nomeServico || 'Atendimento de Beleza'}
-                </Text>
-
-                <View style={styles.appointmentMetaRow}>
-                  <View style={styles.appointmentMetaItem}>
-                    <Feather
-                      name="user"
-                      size={13}
-                      color={theme.colors.textSecondary}
-                    />
-                    <Text style={styles.appointmentMetaText}>
-                      {item.nomeProfissional || 'Profissional'}
-                    </Text>
-                  </View>
-
-                  <View style={styles.appointmentMetaItem}>
-                    <Feather
-                      name="calendar"
-                      size={13}
-                      color={theme.colors.textSecondary}
-                    />
-                    <Text style={styles.appointmentMetaText}>
-                      {item.data || '20/11/2026'} às {item.horarioInicio || '14:00'}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.appointmentFooterRow}>
-                  <Text style={styles.appointmentPriceText}>
-                    {formatarMoeda(item.total || 150)}
-                  </Text>
-
-                  {notaAvaliada ? (
-                    <View style={styles.ratedBadge}>
-                      <MaterialCommunityIcons
-                        name="star"
-                        size={14}
-                        color="#F59E0B"
-                      />
-                      <Text style={styles.ratedBadgeText}>
-                        Avaliado ({notaAvaliada} ★)
-                      </Text>
-                    </View>
-                  ) : concluido ? (
-                    <TouchableOpacity
-                      style={styles.rateServiceButton}
-                      onPress={() => handleAbrirAvaliacao(item)}
-                      activeOpacity={0.8}
-                    >
-                      <MaterialCommunityIcons
-                        name="star-outline"
-                        size={16}
-                        color={theme.colors.white}
-                      />
-                      <Text style={styles.rateServiceButtonText}>
-                        Avaliar atendimento
-                      </Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      style={styles.completeServiceButton}
-                      onPress={() => handleConcluirAtendimento(item)}
-                      activeOpacity={0.8}
-                    >
-                      <Feather
-                        name="check-circle"
-                        size={14}
-                        color={theme.colors.primary}
-                      />
-                      <Text style={styles.completeServiceButtonText}>
-                        Concluir atendimento
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-            );
-          })}
-        </ScrollView>
+        <MeusAgendamentos onIrParaVitrine={() => setAbaAtiva('inicio')} />
       )}
 
       {/* Conteúdo da Aba Perfil */}
@@ -898,31 +694,6 @@ export default function VitrineLojas({
           </View>
         </View>
       )}
-
-      {/* Pop-up de Avaliação (SCRUM-26) que aparece após a conclusão do serviço */}
-      <ModalAvaliacao
-        visible={modalAvaliacaoAberto}
-        estabelecimentoId={
-          agendamentoParaAvaliar?.estabelecimentoId || lojas[0]?.id || 1
-        }
-        agendamentoId={agendamentoParaAvaliar?.id || null}
-        nomeEstabelecimento={
-          agendamentoParaAvaliar?.estabelecimentoNome ||
-          lojas[0]?.nome ||
-          'Boutique de Unhas Sensual'
-        }
-        nomeServico={agendamentoParaAvaliar?.nomeServico || ''}
-        onClose={() => setModalAvaliacaoAberto(false)}
-        onAvaliacaoEnviada={(resposta) => {
-          if (agendamentoParaAvaliar?.id) {
-            setAvaliacoesRealizadas((ant) => ({
-              ...ant,
-              [agendamentoParaAvaliar.id]: resposta?.nota || 5,
-            }));
-          }
-          setModalAvaliacaoAberto(false);
-        }}
-      />
 
       {/* Barra de Navegação Inferior */}
       <View style={styles.bottomBar}>
