@@ -17,6 +17,7 @@ import { theme } from '../../styles/theme';
 import { styles } from './styles';
 import { estabelecimentoService } from '../../services/estabelecimento-service';
 import { agendamentoService } from '../../services/agendamento-service';
+import ModalCheckoutPix from '../../components/modal-checkout-pix';
 
 // Horários livres padrão exibidos na seleção
 const HORARIOS_PADRAO = ['09:00', '10:30', '11:30', '14:00', '16:30'];
@@ -183,9 +184,12 @@ export default function Agendamento({
   });
   const [modoSatelite, setModoSatelite] = useState(false);
 
-  // Estados de Carregamento
+  // Estados de Carregamento e Checkout Pix do Mercado Pago (SCRUM-32)
   const [carregandoDados, setCarregandoDados] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [checkoutPixVisivel, setCheckoutPixVisivel] = useState(false);
+  const [agendamentoIdCriado, setAgendamentoIdCriado] = useState(1);
+  const [respostasAgendamento, setRespostasAgendamento] = useState(null);
 
   // Carrega serviços completos, profissionais do estabelecimento e coordenadas pelo CEP (se necessário)
   useEffect(() => {
@@ -399,14 +403,28 @@ export default function Agendamento({
       });
 
       const nomesServicos = servicosMarcados.map((s) => s.nome).join(', ');
+      const primeiroAgendamentoId =
+        (Array.isArray(respostas) && respostas[0]?.id) || 1;
+
+      setAgendamentoIdCriado(primeiroAgendamentoId);
+      setRespostasAgendamento(respostas);
+
+      // Abre a tela/modal de Checkout Pix do Mercado Pago na etapa final do agendamento (SCRUM-32)
+      setCheckoutPixVisivel(true);
 
       Alert.alert(
         'Agendamento Confirmado!',
-        `Seu agendamento em ${loja?.nome || ' Agenda Rosa'} para ${nomesServicos} no dia ${formatarDataBR(dataSelecionada)} às ${horarioSelecionado} foi registrado com sucesso!`,
+        `Seu agendamento em ${loja?.nome || 'Agenda Rosa'} para ${nomesServicos} no dia ${formatarDataBR(dataSelecionada)} às ${horarioSelecionado} foi registrado com sucesso! Prossiga para o Checkout Pix do Mercado Pago.`,
         [
           {
+            text: 'Ir para Checkout Pix',
+            onPress: () => setCheckoutPixVisivel(true),
+          },
+          {
             text: 'Concluir',
+            style: 'cancel',
             onPress: () => {
+              setCheckoutPixVisivel(false);
               if (onAgendamentoConcluido) {
                 onAgendamentoConcluido(respostas);
               } else if (onVoltar) {
@@ -917,6 +935,37 @@ export default function Agendamento({
           </View>
         </View>
       </Modal>
+
+      {/* Tela/Modal de Checkout Pix do Mercado Pago (SCRUM-32) */}
+      <ModalCheckoutPix
+        visible={checkoutPixVisivel}
+        agendamentoId={agendamentoIdCriado}
+        nomeEstabelecimento={loja?.nome || 'Boutique de Unhas Sensual'}
+        resumoServicos={
+          servicosMarcados.map((s) => s.nome).join(', ') ||
+          'Atendimento de Beleza'
+        }
+        nomeProfissional={profissionalSelecionado?.nome || 'Profissional'}
+        dataFormatada={formatarDataBR(dataSelecionada)}
+        horario={horarioSelecionado}
+        valorTotal={totalPagar}
+        onClose={() => {
+          setCheckoutPixVisivel(false);
+          if (onAgendamentoConcluido) {
+            onAgendamentoConcluido(respostasAgendamento);
+          } else if (onVoltar) {
+            onVoltar();
+          }
+        }}
+        onPagamentoConcluido={() => {
+          setCheckoutPixVisivel(false);
+          if (onAgendamentoConcluido) {
+            onAgendamentoConcluido(respostasAgendamento);
+          } else if (onVoltar) {
+            onVoltar();
+          }
+        }}
+      />
     </SafeAreaView>
   );
 }
