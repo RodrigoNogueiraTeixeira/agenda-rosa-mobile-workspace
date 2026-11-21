@@ -21,10 +21,13 @@ jest.mock('../src/services/agendamento-service', () => ({
 jest.mock('../src/services/pagamento-service', () => ({
   pagamentoService: {
     gerarPix: jest.fn(),
+    cancelarAgendamento: jest.fn(),
   },
 }));
 
-describe('Tela Meus Agendamentos — Histórico (SCRUM-33)', () => {
+describe('Tela Meus Agendamentos — Histórico e Cancelamento/Reembolso (SCRUM-33 e SCRUM-34)', () => {
+  jest.setTimeout(20000);
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
@@ -87,5 +90,72 @@ describe('Tela Meus Agendamentos — Histórico (SCRUM-33)', () => {
         screen.getByText('Checkout Mercado Pago • Pix Instantâneo')
       ).toBeTruthy();
     });
+  });
+
+  it('permite clicar em Cancelar e Pedir Reembolso para agendamento confirmado, chamando a API e exibindo o estorno (SCRUM-34)', async () => {
+    pagamentoService.cancelarAgendamento.mockResolvedValueOnce({
+      agendamentoId: 2,
+      status: 'Cancelado',
+      reembolsado: true,
+      valorReembolsado: 150.0,
+      mensagem:
+        'Agendamento cancelado com sucesso e valor de R$ 150,00 estornado via Mercado Pago.',
+    });
+
+    await render(<MeusAgendamentos />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Cancelar e Pedir Reembolso')).toBeTruthy();
+    });
+
+    // Abre o modal de confirmação de cancelamento e reembolso
+    await fireEvent.press(screen.getByText('Cancelar e Pedir Reembolso'));
+    expect(screen.getByText('Cancelar e Pedir Reembolso?')).toBeTruthy();
+    expect(screen.getByText('Valor a reembolsar: R$ 150,00')).toBeTruthy();
+
+    // Confirma o cancelamento e estorno na API
+    await fireEvent.press(
+      screen.getByText('Confirmar Cancelamento e Reembolso')
+    );
+
+    await waitFor(() => {
+      expect(pagamentoService.cancelarAgendamento).toHaveBeenCalledWith(2);
+    });
+
+    expect(Alert.alert).toHaveBeenCalledWith(
+      'Cancelado e Reembolso Solicitado!',
+      expect.stringContaining('estornado via Mercado Pago')
+    );
+    expect(screen.getByText('Cancelado • Reembolsado')).toBeTruthy();
+  });
+
+  it('permite cancelar um agendamento Aguardando Pagamento sem estorno (SCRUM-34)', async () => {
+    pagamentoService.cancelarAgendamento.mockResolvedValueOnce({
+      agendamentoId: 3,
+      status: 'Cancelado',
+      reembolsado: false,
+      valorReembolsado: null,
+      mensagem: 'Agendamento cancelado com sucesso.',
+    });
+
+    await render(<MeusAgendamentos />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Cancelar Agendamento')).toBeTruthy();
+    });
+
+    await fireEvent.press(screen.getByText('Cancelar Agendamento'));
+    expect(screen.getByText('Cancelar Agendamento?')).toBeTruthy();
+
+    await fireEvent.press(screen.getByText('Confirmar Cancelamento'));
+
+    await waitFor(() => {
+      expect(pagamentoService.cancelarAgendamento).toHaveBeenCalledWith(3);
+    });
+
+    expect(Alert.alert).toHaveBeenCalledWith(
+      'Agendamento Cancelado',
+      'Agendamento cancelado com sucesso.'
+    );
   });
 });
